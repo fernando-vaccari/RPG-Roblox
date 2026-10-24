@@ -1,0 +1,58 @@
+local catalog=require('../src/shared/Config/ContentConfig')
+local P=require('../src/shared/Core/Progression')
+local Party=require('../src/shared/Core/Party')
+local count=0
+local function test(name,fn) fn();count+=1;print('PASSOU: '..name) end
+test('progressão inicial: sem classe/rank, registro, arma, bandidos e entrega única',function()
+    local s=P.new();assert(s.Class=='' and s.Rank=='' and s.Equipment=='')
+    assert(P.register(s));assert(not P.register(s));assert(not P.claimQuest(s,catalog,'FirstSteps'))
+    assert(P.choose(s,catalog,'Katana'));assert(not P.choose(s,catalog,'Staff'))
+    P.event(s,catalog,'Bandit',3);assert(P.claimQuest(s,catalog,'FirstSteps'))
+    assert(s.Class=='Espadachim' and s.Gold==280 and s.XP==120)
+    assert(not P.claimQuest(s,catalog,'FirstSteps'));assert(s.Gold==280)
+end)
+test('compra autoritativa: loja correta, saldo, limite e duplicação',function()
+    local s=P.new();assert(not P.buy(s,catalog,'Katana','ShopWeapons'))
+    assert(not P.buy(s,catalog,'Potion','ShopWeapons'));assert(s.Gold==100)
+    assert(P.buy(s,catalog,'Potion','ShopPotions'));assert(s.Gold==70 and s.Inventory.Potion==1)
+    s.Gold=1000;assert(P.buy(s,catalog,'Katana','ShopWeapons'));assert(not P.buy(s,catalog,'Katana','ShopWeapons'))
+    s.Inventory.Potion=99;assert(not P.buy(s,catalog,'Potion','ShopPotions'))
+end)
+test('saque individual não duplica e raridade não inventa recompensa',function()
+    local a,b=P.new(),P.new();assert(P.chest(a,catalog,'c1','Rare'));assert(not P.chest(a,catalog,'c1','Rare'))
+    assert(P.chest(b,catalog,'c1','Rare'));assert(a.Gold==190 and b.Gold==190)
+    assert(not P.chest(a,catalog,'c2','Admin'))
+end)
+test('missões só avançam no alvo correto; contagem/recompensas limitadas',function()
+    local s=P.new();P.register(s);assert(P.accept(s,catalog,'Wolves'))
+    P.event(s,catalog,'Bandit',1);assert(s.Quests.Wolves.Count==0)
+    P.event(s,catalog,'Wolf',10);assert(s.Quests.Wolves.Count==5)
+    P.event(s,catalog,'Wolf',100000);assert(s.Quests.Wolves.Count==5)
+    assert(P.claimQuest(s,catalog,'Wolves'));assert(not P.claimQuest(s,catalog,'Wolves'))
+end)
+test('dados persistidos inválidos não contaminam perfil',function()
+    local raw={Gold=-1,XP=0/0,Rank='S',Inventory={Potion=999999,Katana=1,Fake=1},Equipment='Fake',Class='Admin',Spawn='Fake',Quests={FirstSteps={Count=math.huge,Claimed=false}}}
+    local s=P.sanitize(raw,catalog)
+    assert(s.Gold==100 and s.XP==0 and s.Rank=='' and s.Class=='' and s.Equipment=='')
+    assert(not s.Inventory.Potion and not s.Inventory.Fake and s.Inventory.Katana==1 and s.Spawn=='Valoria')
+    local restored=P.sanitize(s,catalog);assert(restored.Gold==s.Gold)
+end)
+test('grupo máximo quatro, confirmação e elegibilidade de todos',function()
+    local p=Party.new(1)
+    assert(Party.join(p,2));assert(Party.join(p,3));assert(Party.join(p,4));assert(not Party.join(p,5))
+    assert(not Party.ready(p,function()return true end));assert(not Party.confirm(p,6))
+    for id=1,4 do assert(Party.confirm(p,id)) end
+    assert(Party.ready(p,function()return true end));assert(not Party.ready(p,function(id)return id~=3 end))
+    assert(Party.remove(p,1));assert(p.Leader==2 and #p.Members==3 and not Party.ready(p,function()return true end))
+    p.State='Teleporting';assert(not Party.join(p,7) and not Party.remove(p,2) and not Party.confirm(p,2))
+end)
+test('todos catálogos de cidades, lojas, inimigos e missões resolvem referências',function()
+    for _,list in catalog.CityBuildings do
+        for _,kind in list do
+            assert(catalog.Labels[kind]);local role=catalog.Roles[kind] or 'Citizen';assert(catalog.Dialogue[role])
+        end
+    end
+    for _,list in catalog.Shops do for _,id in list do assert(catalog.Items[id] and catalog.Items[id].Price>0) end end
+    for _,q in catalog.Quests do assert(q.Required>0 and q.Gold>=0) end
+end)
+print(count..' testes de gameplay passaram; engine, DataStore e teleporte NÃO TESTADOS.')
