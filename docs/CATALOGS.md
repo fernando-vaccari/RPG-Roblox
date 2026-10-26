@@ -2,6 +2,65 @@
 
 Gerados das configurações do projeto. Implementação não equivale a homologação Roblox.
 
+## Eldravyn: Rise of Shadows — mundo
+
+Região | Tipo | X | Z | Edifícios
+--- | --- | --- | --- | ---
+Valoria • Cidade da Aurora | Cidade | 0 | 1000 | 26
+Arkheim • Bastião Real | Cidade | 0 | -850 | 26
+Eldoria • Cidade das Raízes | Cidade | 1150 | -150 | 26
+Durakh • Cidade das Caravanas | Cidade | -1150 | -150 | 26
+Asterion • Coroa Celeste | Cidade | 1150 | 1200 | 26
+Bosque de Sylvarin | Floresta | 1100 | -1100 | —
+Floresta de Nocthar | Floresta | -1000 | 1000 | —
+Véspera • Floresta do Eclipse | Floresta | -1080 | -1170 | —
+
+## Expedições
+
+Dungeon | Andar | Ambiente | Encontro
+--- | --- | --- | ---
+Abismo de Malgorth | 1 — Porta do Juramento | Crypt | Skeleton, Demon
+Abismo de Malgorth | 2 — Arquivo dos Exilados | Library | Demon, DarkWolf
+Abismo de Malgorth | 3 — Jardim da Cinza | Garden | DarkWolf, Shadow
+Abismo de Malgorth | 4 — Forja dos Grilhões | Forge | Shadow, Skeleton
+Abismo de Malgorth | 5 — Vigília do Cavaleiro | Arena | Knight
+Abismo de Malgorth | 6 — Ponte dos Lamentos | Bridge | Demon, DarkWolf, Shadow
+Abismo de Malgorth | 7 — Catacumbas do Selo | Crypt | DarkWolf, Shadow, Skeleton
+Abismo de Malgorth | 8 — Biblioteca Proibida | Library | Shadow, Skeleton, Demon
+Abismo de Malgorth | 9 — Átrio da Ruptura | Garden | Skeleton, Demon, DarkWolf
+Abismo de Malgorth | 10 — Coroa de Malgorth | Arena | Malgorth
+Santuário do Reino Caído | 1 — Escadaria da Aurora | Crypt | Shadow, Demon
+Santuário do Reino Caído | 2 — Cripta dos Nomes | Library | Demon, DarkWolf
+Santuário do Reino Caído | 3 — Estufa do Eclipse | Garden | DarkWolf, Skeleton
+Santuário do Reino Caído | 4 — Oficina dos Autômatos | Forge | Skeleton, Shadow
+Santuário do Reino Caído | 5 — Tribunal de Pedra | Arena | Knight
+Santuário do Reino Caído | 6 — Travessia das Estrelas | Bridge | Demon, DarkWolf, Skeleton
+Santuário do Reino Caído | 7 — Ossuário Real | Crypt | DarkWolf, Skeleton, Shadow
+Santuário do Reino Caído | 8 — Arquivo da Tempestade | Library | Skeleton, Shadow, Demon
+Santuário do Reino Caído | 9 — Raízes do Palácio | Garden | Shadow, Demon, DarkWolf
+Santuário do Reino Caído | 10 — Cavaleiro da Vigília | Arena | Knight
+Santuário do Reino Caído | 11 — Ponte da Lua Morta | Arena | DarkWolf, Skeleton, Shadow, Demon
+Santuário do Reino Caído | 12 — Sepulcro das Coroas | Bridge | Skeleton, Shadow, Demon, DarkWolf
+Santuário do Reino Caído | 13 — Biblioteca do Vazio | Crypt | Shadow, Demon, DarkWolf, Skeleton
+Santuário do Reino Caído | 14 — Jardim da Última Chuva | Library | Demon, DarkWolf, Skeleton, Shadow
+Santuário do Reino Caído | 15 — Arauto do Eclipse | Arena | Knight
+Santuário do Reino Caído | 16 — Passagem dos Desterrados | Forge | Skeleton, Shadow, Demon, DarkWolf
+Santuário do Reino Caído | 17 — Cripta do Primeiro Rei | Arena | Shadow, Demon, DarkWolf, Skeleton
+Santuário do Reino Caído | 18 — Memória do Reino | Bridge | Demon, DarkWolf, Skeleton, Shadow
+Santuário do Reino Caído | 19 — Trono Vazio | Crypt | DarkWolf, Skeleton, Shadow, Demon
+Santuário do Reino Caído | 20 — Regente do Reino Caído | Arena | FallenRegent
+
+## Ranks da guilda
+
+Rank | XP acumulada | Missões concluídas
+--- | --- | ---
+F | 0 | 0
+E | 500 | 4
+D | 2500 | 10
+C | 8000 | 18
+B | 25000 | 25
+A | 80000 | 32
+S | 170000 | 40
 ## Raças
 
 ID | Nome | Probabilidade | Evolução | Habilidade
@@ -82,8 +141,14 @@ WindCut | Corte do Vento | Espadachim | 1 | 10 | 8 | 4 s | Steel | Hit
 
 ID | Nome | Categoria | Evento | Quantidade | Pré-requisitos
 --- | --- | --- | --- | --- | ---
+ArkheimDefense | Muralha do Juramento | Adventure | Defense:Arkheim | 1 |
+AsterionCrown | A Coroa Celeste | Adventure | Visit:Asterion | 1 |
+DepthsClear | Dez Juramentos | Adventure | Dungeon:MalgorthDepths | 1 |
+DurakhCaravan | Aço das Caravanas | Adventure | Talk:Durakh:Merchant | 1 |
+EldoriaRoots | Raízes e Memórias | Adventure | Visit:Eldoria | 1 |
 FirstSteps | Primeiros Passos | Main | Bandit | 3 |
 Herb | Erva Rara | Side | Herb | 1 |
+LakeMemory | A Canção da Cascata | Adventure | LakeDiscovery | 1 |
 Mage | Conselho Arcano | Side | Mage | 1 |
 Main02 | O Chamado de Arkheim | Main | Visit:Arkheim | 1 | FirstSteps
 Main03 | O Capitão e o Selo | Main | Talk:Arkheim:Guard | 1 | Main02
@@ -100,6 +165,7 @@ Main13 | As Ruínas do Juramento | Main | Ruins | 1 | Main12
 Main14 | O Cavaleiro do Abismo | Main | Knight | 1 | Main13
 Main15 | Lorde Malgorth | Main | Malgorth | 1 | Main14
 Ruins | Memórias da Ruína | Side | Ruins | 1 |
+SanctumClear | O Reino Caído | Adventure | Dungeon:FallenSanctum | 1 |
 Side01 | Patrulha Real | Side | Visit:Arkheim | 1 |
 Side02 | Ferro de Durakh | Side | Visit:Durakh | 1 |
 Side03 | Caminho Arcano | Side | Visit:Eldoria | 1 |
@@ -116,6 +182,9 @@ Side13 | Coleta Verde | Side | Herb | 1 |
 Side14 | Palavras de Sabedoria | Side | Mage | 1 |
 Side15 | O Cavaleiro Caído | Side | Knight | 1 |
 Supplies | Entrega a Durakh | Side | Supplies | 1 |
+ValoriaDefense | Sinos de Valoria | Adventure | Defense:Valoria | 1 |
+VesperaHerald | O Arauto sob as Raízes | Adventure | VesperaBoss | 1 |
+VesperaTrail | O Caminho do Eclipse | Adventure | Visit:Vespera | 1 |
 Wolves | Lobos de Sylvarin | Side | Wolf | 5 |
 
 ## Desafios raciais
@@ -145,7 +214,7 @@ Valquíria | Visit:Eldoria ×1; SylvarinBoss ×1; Knight ×1
 - Dungeon: Guardião da Dungeon. O Abismo exige aventureiros registrados. Grupos de até quatro devem confirmar presença junto a mim.
 - Equipment: Mestre de Armas. Escolha seu primeiro equipamento gratuitamente. Após Primeiros Passos, a guilda reconhecerá sua classe.
 - Guard: Guarda. Mantenha a estrada. Bandidos se escondem na floresta a sudoeste.
-- Guild: Maelis, Mestre da Guilda. A jornada começa com um compromisso. Registre-se no Rank F, escolha sua arma no campo de treino e elimine três bandidos em Nocthar. Volte a mim para receber sua classe.
+- Guild: Maelis, Mestre da Guilda. Sou Maelis. A sede da guilda fica fora das muralhas de Valoria. Registre-se no Rank F, pratique os aparos e proteja as caravanas de Nocthar.
 - Healer: Sacerdotisa. Descanse um instante. Posso curar suas feridas sem custo.
 - Inn: Hospedeiro. Uma cama quente e uma lareira acesa. Posso registrar seu retorno nesta cidade.
 - Lore: Bibliotecário. Malgorth foi selado sob um castelo. As ruínas guardam vestígios de um juramento quebrado.

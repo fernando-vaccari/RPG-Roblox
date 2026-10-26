@@ -1,5 +1,8 @@
 # Plano e critérios atuais
 
+> Estado atual: Eldravyn 0.6.0. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
+
+
 Pedido integral: docs/REQUIREMENTS.pt-BR.txt. A continuação implementou código das fases 2–11 nesta tarefa, reutilizando a fase 1. **Implementado não significa homologado no Roblox.**
 
 | Fase | Código entregue | Evidência e pendência |

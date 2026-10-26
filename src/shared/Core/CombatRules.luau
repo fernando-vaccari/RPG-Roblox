@@ -10,10 +10,10 @@ end
 function R.stats(profile,c)
  local level=R.level(profile.XP,c);local base=c.Classes[profile.Class] or {Health=100,Mana=80,Stamina=100,Damage=1,Defense=0,Speed=16}
  local race=c.RaceModifiers and profile.Identity and c.RaceModifiers[profile.Identity.Race] or {Health=0,Mana=0,Stamina=0}
- return {Level=level,Health=base.Health+race.Health+(level-1)*5+(if profile.Inventory.Armor then 40 else 0),Mana=base.Mana+race.Mana+(level-1)*3,Stamina=base.Stamina+race.Stamina+(level-1),Damage=base.Damage*(1+(level-1)*0.025),Defense=base.Defense+math.floor((level-1)/4),Speed=base.Speed}
+ return {Level=level,Health=base.Health+race.Health+(level-1)*5+(if profile.Armor=='Armor' and (profile.Inventory.Armor or 0)>0 then 40 else 0),Mana=base.Mana+race.Mana+(level-1)*3,Stamina=base.Stamina+race.Stamina+(level-1),Damage=base.Damage*(1+(level-1)*0.025),Defense=base.Defense+math.floor((level-1)/4),Speed=base.Speed}
 end
 function R.new(stats)
- return {Mana=stats.Mana,Stamina=stats.Stamina,Cooldowns={},Combo=0,LastPrimary=-100,RecoverUntil=0,DodgeUntil=0,GuardUntil=0,Blocking=false,Sprinting=false}
+ return {Mana=stats.Mana,Stamina=stats.Stamina,Posture=0,BrokenUntil=0,Cooldowns={},Combo=0,LastPrimary=-100,RecoverUntil=0,DodgeUntil=0,GuardUntil=0,Blocking=false,Sprinting=false}
 end
 function R.step(s,stats,dt)
  dt=math.clamp(dt,0,0.5)

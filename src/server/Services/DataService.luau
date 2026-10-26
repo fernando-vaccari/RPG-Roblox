@@ -7,14 +7,21 @@ local Catalog=require(Shared.Config.ContentConfig)
 local Rules=require(Shared.Core.Progression)
 local Identity=require(Shared.Core.IdentityRules)
 local IdentityConfig=require(Shared.Config.IdentityConfig)
+local Adventure=require(Shared.Core.AdventureRules)
+local AdventureConfig=require(Shared.Config.AdventureConfig)
+local Expeditions=require(Shared.Core.DungeonRules)
+local DungeonConfig=require(Shared.Config.DungeonConfig)
 Identity.validate(IdentityConfig)
 local function prepare(raw)
     assert(raw==nil or type(raw)=='table','Perfil inválido; defaults não serão gravados')
     local state=Rules.sanitize(raw,Catalog)
     Identity.restore(state,type(raw)=='table' and raw.Identity or nil,IdentityConfig)
+    Adventure.restore(state,type(raw)=='table' and raw.Adventure or nil,AdventureConfig)
+    Expeditions.restore(state,type(raw)=='table' and raw.Expedition or nil,DungeonConfig)
     return state
 end
-local Data={Sessions={},Persistent=Config.EnableDataStore}
+local studioPreview=game:GetService('RunService'):IsStudio() and workspace:GetAttribute('StudioSessionPreview')==true
+local Data={Sessions={},Persistent=Config.EnableDataStore and not studioPreview}
 local store=if Data.Persistent then DSS:GetDataStore('MedievalRPG_v1') else nil
 local function clone(t) return Http:JSONDecode(Http:JSONEncode(t)) end
 function Data.load(player,reuseToken)
@@ -107,6 +114,15 @@ function Data.changeIdentity(player,mutation)
     slot.State=prepare(result.Data);slot.Frozen=false;slot.LeaseUntil=result.Session.Expires
     Data.flushDeath(player)
     return true,message
+end
+-- Reuses the same atomic profile transaction for expedition tickets/rewards.
+-- Volatile mode is explicit and never used for paid grants or racial rolls.
+function Data.transaction(player,mutation)
+    if store then return Data.changeIdentity(player,mutation) end
+    local state=Data.get(player);if not state then return false,'Perfil indisponível.' end
+    local snapshot=clone(state);local ok,message=mutation(snapshot)
+    if ok then Data.Sessions[player].State=prepare(snapshot) end
+    return ok,message
 end
 function Data.receipt(player,receiptId,productId)
     local slot=Data.Sessions[player]

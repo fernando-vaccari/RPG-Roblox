@@ -12,12 +12,20 @@
       "$className": "ServerStorage",
       "MedievalWorldgen": {
         "$path": "src/worldgen"
+      },
+      "MedievalPlaceKind": {
+        "$className": "StringValue",
+        "$properties": {
+          "Value": "World"
+        }
       }
     },
     "Workspace": {
       "$className": "Workspace",
       "$properties": {
-        "StreamingEnabled": true
+        "StreamingEnabled": true,
+        "StreamingMinRadius": 64,
+        "StreamingTargetRadius": 256
       }
     },
     "ServerScriptService": {

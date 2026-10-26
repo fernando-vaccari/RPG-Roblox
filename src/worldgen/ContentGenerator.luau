@@ -4,13 +4,21 @@ local Shared=game.ReplicatedStorage.MedievalRPG
 local Catalog=require(Shared.Config.ContentConfig)
 local Rig=require(Shared.RigFactory)
 local C={}
+local Landmarks=require(script.Parent.LandmarkGenerator)
 local function color(t) return Color3.fromRGB(t[1],t[2],t[3]) end
 function C.npc(parent,id,position,role,city)
     local dialogue=Catalog.Dialogue[role] or Catalog.Dialogue.Citizen
     local paint=if city=='Eldoria' then Color3.fromRGB(94,73,148) elseif city=='Durakh' then Color3.fromRGB(86,81,72) else Color3.fromRGB(91,119,130)
     local model,_,root=Rig.create(parent,dialogue.Name,position,paint,false,role)
     model.Name=id; model:SetAttribute('NpcId',id); model:SetAttribute('Role',role); model:SetAttribute('City',city)
-    G.prompt(root,'Conversar',dialogue.Name)
+    if role=='Citizen' and Catalog.ResidentStories[city] then
+        local hash=0;for i=1,#id do hash+=string.byte(id,i) end
+        local name=Catalog.ResidentNames[hash%#Catalog.ResidentNames+1]
+        model:SetAttribute('DisplayTitle',name..' • morador de '..city)
+        model:SetAttribute('LocalDialogue',Catalog.ResidentStories[city][hash%#Catalog.ResidentStories[city]+1])
+        model:FindFirstChildOfClass('Humanoid').DisplayName=name
+    end
+    G.prompt(root,'Conversar',model:GetAttribute('DisplayTitle') or dialogue.Name)
     return model
 end
 function C.chest(parent,id,pos,rarity,locked)
@@ -26,7 +34,7 @@ function C.tree(parent,t)
     local cf=CFrame.new(t.X,t.H,t.Z); local s=t.Scale
     local m=G.model(parent,'Tree_'..t.Variant)
     G.part(m,'Trunk',Vector3.new(2*s,18*s,2*s),cf*CFrame.new(0,9*s,0),G.Palette.Wood,Enum.Material.Wood)
-    local dark=t.Forest=='Nocthar'
+    local dark=t.Forest=='Nocthar' or t.Forest=='Vespera'
     for i=1,3 do
         local canopy=color(if dark then {49,65+i*7,66} else {68+i*12,125+i*12,76})
         local size=if t.Variant==0 then Vector3.new(16-i*3,10,16-i*3)*s else Vector3.new(16-i,9,13+i)*s
@@ -82,6 +90,9 @@ function C.cities(root,c,plan,checkpoint)
         if city.Id=='Durakh' then handoff.Transparency=0; G.prompt(handoff,'Entregar','Suprimentos') end
         G.marker(root.CinematicMarkers,city.Id..'_Shot',Vector3.new(city.X,city.H+60,city.Z+120),{
             ShotName=city.Id..'_Plaza',RegionName=city.Name,CameraPosition=Vector3.new(city.X,city.H+60,city.Z+120),LookAtPosition=Vector3.new(city.X,city.H+10,city.Z),Duration=8,Category='City'})
+        Landmarks.city(parent,city,c,C)
+        Landmarks.defenses(root,c,C,parent,city)
+        if city.Id=='Valoria' then Landmarks.camp(root,c,C,parent) end
         checkpoint()
     end
 end
@@ -149,7 +160,7 @@ function C.forests(root,c,plan,checkpoint)
         end
         G.marker(root.CinematicMarkers,land.Id..'_Shot',Vector3.new(land.X,land.H+25,land.Z+65),{
             ShotName=land.Id,RegionName=land.Id,CameraPosition=Vector3.new(land.X,land.H+25,land.Z+65),LookAtPosition=Vector3.new(land.X,land.H+8,land.Z),Duration=7,Category='Forest'})
-        C.enemyMarker(root.EnemySpawns,land.Id..'_Boss',Vector3.new(land.X+45,land.H,land.Z),if land.Id=='Sylvarin' then 'SylvarinBoss' else 'NoctharBoss')
+        C.enemyMarker(root.EnemySpawns,land.Id..'_Boss',Vector3.new(land.X+45,land.H,land.Z),if land.Id=='Sylvarin' then 'SylvarinBoss' elseif land.Id=='Vespera' then 'VesperaBoss' else 'NoctharBoss')
         checkpoint()
     end
     for _,s in plan.EnemySpawns do C.enemyMarker(root.EnemySpawns,s.Id,Vector3.new(s.X,s.H,s.Z),s.Kind) end
@@ -168,7 +179,20 @@ function C.entrance(root,c,terrain)
     G.part(m,'Lintel',Vector3.new(48,7,10),cf*CFrame.new(0,30,0),G.Palette.Stone,Enum.Material.Slate)
     for i=1,5 do G.part(m,'Stairs',Vector3.new(30,i,4),cf*CFrame.new(0,i/2,28-i*4),G.Palette.Stone,Enum.Material.Cobblestone) end
     G.sign(m,'ABISMO DE MALGORTH',cf*CFrame.new(0,23,6),26)
-    C.npc(root.NPCs,'DungeonGuardian',pos+Vector3.new(0,1,15),'Dungeon','Malgorth')
+    C.npc(root.NPCs,'DungeonGuardian',pos+Vector3.new(0,1,15),'Dungeon','Malgorth'):SetAttribute('DungeonId','MalgorthDepths')
+    local second=c.SecondDungeonEntrance
+    if second then
+        local p=Vector3.new(second.X,terrain.height(c,second.X,second.Z),second.Z)
+        local shrine=G.model(m,'FallenSanctumGate')
+        G.part(shrine,'ShrineFloor',Vector3.new(50,2,38),CFrame.new(p),G.Palette.Stone,Enum.Material.Cobblestone)
+        for _,side in {-1,1} do
+            G.part(shrine,'Pillar',Vector3.new(6,28,6),CFrame.new(p+Vector3.new(side*17,14,0)),G.Palette.Stone,Enum.Material.Marble)
+            G.crystal(shrine,CFrame.new(p+Vector3.new(side*17,31,0)),Color3.fromRGB(136,159,223),1.5)
+        end
+        G.part(shrine,'Pediment',Vector3.new(42,4,8),CFrame.new(p+Vector3.new(0,28,0)),G.Palette.Stone,Enum.Material.Marble)
+        G.sign(shrine,'REINO CAÍDO • 20 ANDARES',CFrame.new(p+Vector3.new(0,22,-4)),28)
+        C.npc(root.NPCs,'SanctumGuardian',p+Vector3.new(0,1,-12),'Dungeon','Vespera'):SetAttribute('DungeonId','FallenSanctum')
+    end
     G.marker(root.CinematicMarkers,'DungeonShot',pos+Vector3.new(0,48,100),{ShotName='DungeonGate',RegionName='Malgorth',CameraPosition=pos+Vector3.new(0,48,100),LookAtPosition=pos+Vector3.new(0,20,0),Duration=8,Category='Dungeon'})
 end
 return C

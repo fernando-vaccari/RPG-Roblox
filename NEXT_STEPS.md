@@ -1,12 +1,12 @@
-# Continuação exata após qualidade 0.5.0
+# Continuação exata — Eldravyn 0.6.0
 
-1. Ler docs/IMPROVEMENTS.md, PROGRESS, TEST_RESULTS e os catálogos. Preservar todos os IDs, dois Places e DataStore MedievalRPG_v1; não recomeçar o projeto.
-2. Base atual passou em compilação/regras/mock. Continuar por preocupações concretas: recuperação prolongada de storage, concorrência realista de save/teleporte/recibos, cenários multi-alvo/lag/streaming e polimento das habilidades que compartilham arquétipos. Não repetir suítes sem mudança ou motivo.
-3. Os projéteis selecionados são lineares e varrem colisões no servidor; Campo de Chamas pulsa. Não voltar a chamá-los todos de acerto instantâneo. Cancelamento por morte/classe e limites são parte da segurança, não devem ser removidos para aumentar espetáculo.
-4. Cenário novo é gerado pelo mesmo comando de editor; o mapa antigo não foi alterado. Interiores/torres superiores, passagens e estética ainda exigem inspeção física futura. Nunca limpar Terrain para contornar preflight.
-5. VIP/pacotes iniciais aguardam benefícios/preços; fusões aguardam combinações/resultados/resolvedor. Não inventar decisões. Produtos existentes continuam IDs 0. Tester faz relatórios e só funciona com opt-in em Studio sem persistência; nunca ativar concessões/admin em produção.
-6. Áudios originais aguardam upload autorizado. Nenhum ID deve ser inventado. Preferências visuais são locais, não mudam regras ou densidade do mundo.
-7. Quando o usuário decidir testar manualmente, usar docs/STUDIO_TEST_MATRIX.md incluindo os casos de qualidade/projétil/saída congelada. Não exigir Studio como condição para continuar programação agora.
-8. Depois de código: python3 scripts/check.py; depois python3 scripts/package.py. Catálogos são gerados pelo check. Registrar resultados/limitações e atualizar docs/IMPROVEMENTS.md.
+1. Leia PROGRESSO.md, COMO_JOGAR_NO_STUDIO.md, TESTES_STUDIO.md e docs/ELDRAVYN.md. Não recomece o projeto. Dois Places, ProjectId `ProjectMedievalRPG`, DataStore `MedievalRPG_v1`, raças e IDs legados foram preservados.
+2. Prioridade seguinte: executar a matriz curta no Roblox Studio, a partir dos dois `.rbxlx` e do comando `PrepareStudio()`. Salvar cada cenário após geração; o build Rojo contém código e não Terrain pré-gravado. A nuvem Linux não executou o Studio.
+3. Começar por spawn/criação, portas/caminhos, tutorial/parry e duas dungeons solo; depois dois/quatro clientes e mobile. Registrar Output e passos para reproduzir antes de alterar os sistemas já cobertos.
+4. Prévia usa atributo `StudioSessionPreview=true`, reconhecido exclusivamente no Studio: não salva nem sorteia raça temporária. `PrepareStudio({Persistent=true})` habilita o teste real com APIs em Experience dedicada. Publicado continua exigindo DataStore e IDs oficiais de ambos os Places.
+5. Expedições: 10/20 andares estáticos gerados no editor, encontros ativados por andar, uma tentativa por servidor reservado, espera de até 90 s pelo grupo. Melhor andar/recompensa confirmados no portal; nova tentativa começa no andar 1. Sete salas legadas permanecem. Não trocar tickets persistentes por confiança em TeleportData.
+6. Não ativar produtos, inventar IDs ou combinações de fusão. Pacote iniciante ~300/troca de classe ~100 são propostas desativadas; 150/79/149 existentes também continuam IDs 0. Sons próprios aguardam upload autorizado; poses procedurais não equivalem a animação profissional homologada.
+7. Se continuar apenas na nuvem, priorizar novos erros reproduzíveis de API, concorrência e fluxo, sem alegar validação visual/financeira. Benchmarks de 11.888 Parts/135 NPCs/300 árvores são contagem simulada, não promessa de FPS.
+8. Depois de mudanças reais: `python3 scripts/check.py`, revisar logs, atualizar PROGRESSO/TEST_RESULTS, `python3 scripts/package.py`; copiar pacote e hashes para delivery. A entrega GitHub nesta branch já foi autorizada; não alterar main ou publicar no Roblox sem instrução específica.
 
-Não publicar, enviar ao GitHub ou ativar compras sem autorização. Não criar worktrees salvo solicitação explícita. Esta tarefa não declara o jogo 100% funcional/homologado.
+Não usar links /workspace ou sandbox para download: falharam para este usuário. A entrega funcional anterior foi via URL raw do GitHub da branch `codex/rpg-quality-delivery-20261024`.

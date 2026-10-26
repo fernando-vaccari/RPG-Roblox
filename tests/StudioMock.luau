@@ -35,6 +35,7 @@ function Mock.new(enums,classes)
     cm.__add=function(a,b)return make(a.Position+b,a.R)end
     cm.__index=function(t,k)
         if k=='PointToWorldSpace' then return function(a,p)return a.Position+rotate(a.R,p)end end
+        if k=='PointToObjectSpace' then return function(a,p)local v=p-a.Position;local r=a.R;return V.new(r[1]*v.X+r[4]*v.Y+r[7]*v.Z,r[2]*v.X+r[5]*v.Y+r[8]*v.Z,r[3]*v.X+r[6]*v.Y+r[9]*v.Z)end end
         if k=='LookVector' then return rotate(t.R,V.new(0,0,-1))end
     end
     CF.identity=CF.new();env.CFrame=CF
@@ -89,6 +90,7 @@ function Mock.new(enums,classes)
     function methods:Destroy()for _,c in self:GetChildren()do c:Destroy()end;self.Parent=nil end
     function methods:SetNetworkOwner(_)assert(not self.Anchored,'SetNetworkOwner em Part ancorado')end
     function methods:GetService(n)return self:WaitForChild(n)end
+    function methods:BindToClose(fn)env.OnClose=fn end
     function methods:IsRunning()return false end
     function methods:IsStudio()return env.Studio~=false end
     function methods:ReadVoxels()return {{{enums.Material.Air}}},{{{if env.TerrainOccupied then 1 else 0}}}end
@@ -103,7 +105,19 @@ function Mock.new(enums,classes)
         end
     end
     function methods:GetPartBoundsInBox()return if env.OccupiedParts then {self} else {} end
-    function methods:TakeDamage(amount)self.Health=math.max(0,self.Health-amount)end
+    function methods:TakeDamage(amount)
+        local before=self.Health;self.Health=math.max(0,self.Health-amount)
+        self.HealthChanged:Fire(self.Health)
+        if before>0 and self.Health==0 then self.Died:Fire() end
+    end
+    function methods:EquipTool(tool)tool.Parent=self.Parent end
+    function methods:FireClient(player,payload)env.LastClient={Player=player,Data=payload} end
+    function methods:FireAllClients(payload)env.LastEffect=payload end
+    function methods:SetTeleportData(data)self._attrs.TeleportData=data end
+    function methods:TeleportAsync(place,list,options)
+        if env.TeleportFail then error('Teleport failure fixture') end
+        env.LastTeleport={Place=place,Players=list,Options=options}
+    end
     function methods:MoveTo(position)self._attrs.MoveTarget=position end
     function methods:Raycast(origin,direction)
         if env.SweepTarget then
@@ -163,13 +177,15 @@ function Mock.new(enums,classes)
         t.Parent=parent;return t
     end
     env.game=engine('DataModel','game')
-    for _,pair in {{'Workspace','Workspace'},{'ReplicatedStorage','ReplicatedStorage'},{'ServerStorage','ServerStorage'},{'ServerScriptService','ServerScriptService'},{'RunService','RunService'},{'HttpService','HttpService'},{'Players','Players'},{'DataStoreService','DataStoreService'},{'Lighting','Lighting'},{'TweenService','TweenService'},{'Debris','Debris'},{'MarketplaceService','MarketplaceService'},{'PathfindingService','PathfindingService'}}do engine(pair[1],pair[2],env.game)end
+    for _,pair in {{'Workspace','Workspace'},{'ReplicatedStorage','ReplicatedStorage'},{'ServerStorage','ServerStorage'},{'ServerScriptService','ServerScriptService'},{'RunService','RunService'},{'HttpService','HttpService'},{'Players','Players'},{'DataStoreService','DataStoreService'},{'Lighting','Lighting'},{'TweenService','TweenService'},{'Debris','Debris'},{'MarketplaceService','MarketplaceService'},{'PathfindingService','PathfindingService'},{'UserInputService','UserInputService'},{'TeleportService','TeleportService'},{'ProximityPromptService','ProximityPromptService'}}do engine(pair[1],pair[2],env.game)end
     env.workspace=env.game.Workspace;engine('Terrain','Terrain',env.workspace)
-    env.createPlayer=function(id)local p=engine('Player','Player'..id,env.game.Players);p.UserId=id;p.DisplayName='Player'..id;engine('PlayerGui','PlayerGui',p);return p end
+    env.createPlayer=function(id)local p=engine('Player','Player'..id,env.game.Players);p.UserId=id;p.DisplayName='Player'..id;engine('PlayerGui','PlayerGui',p);engine('Backpack','Backpack',p);return p end
     env.Color3={fromRGB=function(r,g,b)return {R=r/255,G=g/255,B=b/255}end,new=function(r,g,b)return {R=r,G=g,B=b}end}
     env.Vector2={new=function(x,y)return V.new(x,y,0)end}
-    env.UDim2={fromScale=function(...)return {...}end,fromOffset=function(...)return {...}end,new=function(...)return {...}end}
-    env.UDim={new=function(...)return {...}end}
+    local function dim(scale,offset)return {Scale=scale or 0,Offset=offset or 0} end
+    local function dim2(xs,xo,ys,yo)return {X=dim(xs,xo),Y=dim(ys,yo)}end
+    env.UDim2={fromScale=function(x,y)return dim2(x,0,y,0)end,fromOffset=function(x,y)return dim2(0,x,0,y)end,new=dim2}
+    env.UDim={new=dim}
     env.TweenInfo={new=function(...)return {...}end}
     env.Region3={new=function(a,b)return {Min=a,Max=b,ExpandToGrid=function(self)return self end}end}
     env.OverlapParams={new=function()return {}end};env.RaycastParams=env.OverlapParams

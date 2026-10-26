@@ -29,7 +29,7 @@ for file in (ROOT/'src').rglob('*.luau'):
     for enum,item in re.findall(r'Enum\.(\w+)\.(\w+)',file.read_text()):
         assert enum in enums and item in enums[enum], f'{file}: invalid Enum.{enum}.{item}'
 # Limit serialized reflection to classes/enums actually needed by generators.
-needed=set(['DataModel','Workspace','ReplicatedStorage','ServerStorage','ServerScriptService','RunService','Terrain','HttpService','Players','DataStoreService','Player','Lighting','TweenService','Debris','PlayerGui','MarketplaceService','PathfindingService'])
+needed=set(['DataModel','Workspace','ReplicatedStorage','ServerStorage','ServerScriptService','RunService','Terrain','HttpService','Players','DataStoreService','Player','Lighting','TweenService','Debris','PlayerGui','MarketplaceService','PathfindingService','UserInputService','TeleportService','ProximityPromptService','Backpack','StringValue'])
 for file in (ROOT/'src').rglob('*.luau'):
     needed.update(re.findall(r"Instance\.new\(['\"](\w+)['\"]\)",file.read_text()))
 needed.update(['Part','Model','Folder','ModuleScript','SurfaceGui','TextLabel','PointLight'])

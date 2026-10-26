@@ -1,10 +1,11 @@
 -- Todo asset geométrico é próprio. Sem meshes, roupas ou animações de terceiros.
 local Catalog = {
     CityBuildings = {
-        Valoria = {"GuildHall","Tavern","Blacksmith","WeaponShop","MagicShop","PotionShop","Market","TrainingHall","Temple","Barn","Windmill","Stable","GuardTower","SmallHouse","MediumHouse","SmallHouse","LargeHouse"},
+        Valoria = {"Tavern","Blacksmith","WeaponShop","MagicShop","PotionShop","Market","TrainingHall","Temple","Barn","Windmill","Stable","GuardTower","SmallHouse","MediumHouse","SmallHouse","LargeHouse"},
         Arkheim = {"Castle","Barracks","TrainingHall","Blacksmith","ArmorShop","WeaponShop","Tavern","MagicShop","Library","WatchTower","Stable","Market","LargeHouse","MediumHouse","LargeHouse","SmallHouse"},
         Eldoria = {"ArcaneTower","MagicSchool","Library","MagicShop","StaffShop","PotionShop","Market","Tavern","Temple","AlchemyLab","TrainingHall","SmallHouse","MediumHouse","LargeHouse"},
         Durakh = {"Forge","SmithGuild","WeaponShop","ArmorShop","MaterialShop","Tavern","Mine","Market","Workshop","Barracks","SmallHouse","MediumHouse","LargeHouse"},
+        Asterion = {"Castle","ArcaneTower","Temple","Library","MagicSchool","Tavern","Blacksmith","WeaponShop","ArmorShop","MagicShop","PotionShop","Market","TrainingHall","WatchTower","LargeHouse","MediumHouse"},
     },
     Labels = {
         GuildHall="Guilda dos Aventureiros",Tavern="Hospedaria",Blacksmith="Ferreiro",WeaponShop="Armas",MagicShop="Magias",
@@ -124,4 +125,39 @@ local objectives={Bandit='Derrote bandidos em Nocthar para proteger as caravanas
 for _,q in Catalog.Quests do
  q.Description=objectives[q.Target] or (if string.sub(q.Target,1,6)=='Visit:' then 'Explore '..string.sub(q.Target,7)..' e reconheça a região.' else 'Converse com a guarda de Arkheim para receber as ordens do capitão.')
 end
+-- Additive city districts; original lot/quest IDs stay stable except the relocated guild.
+table.insert(Catalog.CityBuildings.Valoria,1,'GuildHall') -- same legacy lot ID, relocated outside the walls by the planner
+for _,list in Catalog.CityBuildings do
+    while #list<26 do table.insert(list,({'SmallHouse','MediumHouse','LargeHouse','Market','Workshop'})[(#list%5)+1]) end
+end
+Catalog.InventorySlots=20
+Catalog.RankRequirements={F={XP=0,Quests=0},E={XP=500,Quests=4},D={XP=2500,Quests=10},C={XP=8000,Quests=18},B={XP=25000,Quests=25},A={XP=80000,Quests=32},S={XP=170000,Quests=40}}
+Catalog.CityDialogue.Asterion={Guard='A Coroa Celeste vigia as rotas do sul. Em Véspera, as raízes escondem o Santuário do Reino Caído.',Mage='Vinte provas separam o juramento do Regente. Aprenda a ler seus ataques antes de enfrentar o eclipse.'}
+Catalog.ResidentNames={'Ari','Liora','Tarin','Neris','Rowan','Sera','Darian','Mira'}
+Catalog.ResidentStories={
+ Valoria={'Siga a estrada ao sul para encontrar Maelis. A guilda foi construída além da muralha para acolher viajantes.','Os sinos da fronteira norte anunciam invasores. Fora das muralhas há um estandarte que precisa de defesa.','O parceiro de treino da guilda anuncia o golpe antes de atacar. Aprender a aparar pode salvar sua vida.'},
+ Arkheim={'O capitão teme o despertar de Malgorth. O portão do Abismo fica ao norte do bastião.','Após cada andar limpo, reúna seus companheiros no portal; assim a guilda registra o avanço.','Bandidos se escondem em Nocthar. Aceite a missão antes de partir para receber a recompensa.'},
+ Eldoria={'Entre a torre e Asterion, a cascata alimenta o Lago das Memórias. Procure o marco na margem oeste.','O bosque de Sylvarin guarda ervas e um juramento antigo. Investigue os altares, não apenas os baús.','Os arcanistas vendem cajados com Gold. Ninguém precisa de Robux para aprender as primeiras magias.'},
+ Durakh={'Na praça recebemos os suprimentos da guilda. Aceite a entrega antes de procurar o marco.','Véspera fica ao norte da forja. Lobos sombrios e demônios tornaram a trilha perigosa.','Um mercador compra seus materiais. Guarde a arma antes de vendê-la e confira o espaço da mochila.'},
+ Asterion={'O Regente abandonou seu trono há séculos. Vinte andares guardam o caminho até sua memória corrompida.','A raridade de uma raça não mede a coragem de alguém. O juramento exige feitos, não apenas fragmentos.','A guilda promove aventureiros por missões e experiência. Ouro sozinho não compra um rank.'},
+}
+Catalog.Dialogue.Guild.Text='Sou Maelis. A sede da guilda fica fora das muralhas de Valoria. Registre-se no Rank F, pratique os aparos e proteja as caravanas de Nocthar.'
+Catalog.Enemies.Training={Name='Parceiro de Treino',Health=9999,Damage=1,Speed=0,Reward=0,XP=0,Color={153,127,77},Windup=1}
+Catalog.Enemies.VesperaBoss={Name='Arauto de Véspera',Health=1500,Damage=22,Speed=10,Reward=240,XP=500,Color={76,73,137},Boss=true}
+Catalog.Enemies.FallenRegent={Name='Regente do Reino Caído',Health=2000,Damage=26,Speed=9,Reward=350,XP=600,Color={81,105,169},Boss=true}
+Catalog.Enemies.Knight.Windup=0.9
+local localQuests={
+ {'ValoriaDefense','Sinos de Valoria','Defense:Valoria',1,120,130,'F','Valoria'},
+ {'ArkheimDefense','Muralha do Juramento','Defense:Arkheim',1,150,180,'E','Arkheim'},
+ {'EldoriaRoots','Raízes e Memórias','Visit:Eldoria',1,90,110,'F','Eldoria'},
+ {'DurakhCaravan','Aço das Caravanas','Talk:Durakh:Merchant',1,100,120,'F','Durakh'},
+ {'AsterionCrown','A Coroa Celeste','Visit:Asterion',1,170,250,'E','Asterion'},
+ {'VesperaTrail','O Caminho do Eclipse','Visit:Vespera',1,200,300,'E','Asterion'},
+ {'VesperaHerald','O Arauto sob as Raízes','VesperaBoss',1,300,550,'D','Asterion'},
+ {'DepthsClear','Dez Juramentos','Dungeon:MalgorthDepths',1,350,600,'F','Arkheim'},
+ {'SanctumClear','O Reino Caído','Dungeon:FallenSanctum',1,600,1000,'D','Asterion'},
+ {'LakeMemory','A Canção da Cascata','LakeDiscovery',1,90,110,'F','Eldoria'},
+}
+for _,v in localQuests do Catalog.Quests[v[1]]={Name=v[2],Target=v[3],Required=v[4],Gold=v[5],XP=v[6],MinRank=v[7],City=v[8],Category='Adventure',Description='Objetivo: '..v[2]..'. Consulte o atlas e os sinais da região.'} end
+for _,item in Catalog.Items do item.Description=item.Description or (item.Name..' • '..item.Kind..' • '..item.Rarity) end
 return Catalog

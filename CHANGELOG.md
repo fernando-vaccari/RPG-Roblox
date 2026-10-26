@@ -1,3 +1,17 @@
+# Changelog
+
+## 0.6.0 — Eldravyn: Rise of Shadows — 26/10/2026
+
+- Nome público atualizado; IDs internos, saves e conteúdos legados preservados.
+- Parry frontal, postura/quebra, crítico moderado e windup de ataques comuns; resolução de golpe separada da IA.
+- Cinco cidades de 26 edifícios, terceira floresta, guilda externa, lago/cascata, marcos e falas regionais.
+- Duas expedições de 10/20 andares, seis ambientes, recompensas/baús condicionados, derrota, tickets persistentes e espera de grupo.
+- Tutorial por ações, personagem/classe inicial, armadura explícita, compatibilidade de armas, ranks e 10 missões de aventura/defesa.
+- Interface responsiva, hotbar com mira touch, menus de expedição, carga/morte e feedback de combate.
+- Correções: payload de UI; travessa nas portas; parâmetro de grupo ocultando dungeon; flags de chefe bloqueando replay; IDs negativos do Studio; fragmentos de pisos aninhados; recuperação de transferência sem recarregar perfis intactos.
+- PrepareStudio prepara e valida no editor, com prévia local sem APIs; dois builds, manifesto de estrutura, guia Windows e checklist real.
+- Studio, visuais, física, multiplayer/serviços reais e benchmarks continuam pendentes.
+
 # Histórico
 
 ## 0.1.0 — Fase 1

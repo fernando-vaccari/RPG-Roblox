@@ -24,7 +24,7 @@ function TerrainMath.validate(c)
     assert(c.BaseHeight - c.Amplitude > c.MinY + 4, "Solo pode ficar abaixo do volume")
     assert(c.BaseHeight + c.Amplitude + c.MountainHeight < c.MaxY - 4, "Relevo pode ultrapassar MaxY")
     assert(c.QualityProfiles[c.Quality], "Qualidade inválida")
-    assert(#c.Cities == 4 and #c.Forests == 2, "Esperadas quatro cidades e duas florestas")
+    assert(#c.Cities >= 4 and #c.Forests >= 2, "Conteúdo legado deve ser preservado")
     local ids = {}
     for _, regions in { c.Cities, c.Forests } do
         for _, region in regions do
@@ -93,6 +93,8 @@ function TerrainMath.signature(c)
     local tokens={}
     for _,key in {"WorldSize","Seed","MinY","MaxY","BaseHeight","Amplitude","Frequency","MountainHeight","CityBlend"} do table.insert(tokens,tostring(c[key])) end
     if c.River then for _,key in {"Z","Meander","Frequency","HalfWidth","BankWidth","WaterY","BedY"} do table.insert(tokens,tostring(c.River[key])) end end
+    if c.Lake then for _,key in {'X','Z','Radius','Bank','WaterY','BedY'} do table.insert(tokens,tostring(c.Lake[key])) end end
+    if c.Guild then for _,key in {'X','Z','Height'} do table.insert(tokens,tostring(c.Guild[key])) end end
     for _,city in c.Cities do for _,key in {"Id","X","Z","Radius","Height"} do table.insert(tokens,tostring(city[key])) end end
     for _,forest in c.Forests do for _,key in {"Id","X","Z","Radius"} do table.insert(tokens,tostring(forest[key])) end end
     for _,road in c.Roads or {} do
@@ -130,11 +132,20 @@ function TerrainMath.height(c,x,z)
         local blend=smooth((d-city.Radius)/c.CityBlend)
         h=city.Height+(h-city.Height)*blend
     end
+    if c.Guild then
+        local g=c.Guild;local d=math.sqrt((x-g.X)^2+(z-g.Z)^2)
+        h=g.Height+(h-g.Height)*smooth((d-100)/48)
+    end
+    if c.Lake then
+        local l=c.Lake;local d=math.sqrt((x-l.X)^2+(z-l.Z)^2)
+        h=l.BedY+(h-l.BedY)*smooth((d-l.Radius)/l.Bank)
+    end
     return h
 end
 function TerrainMath.column(c,x,z)
     local h=TerrainMath.height(c,x,z)
     local water=if c.River and TerrainMath.riverDistance(c,x,z)<c.River.HalfWidth+c.River.BankWidth and h<c.River.WaterY then c.River.WaterY else nil
+    if c.Lake then local l=c.Lake;if (x-l.X)^2+(z-l.Z)^2<(l.Radius+l.Bank)^2 and h<l.WaterY then water=l.WaterY end end
     local bank=c.River and TerrainMath.riverDistance(c,x,z)<c.River.HalfWidth+c.River.BankWidth and h<c.River.WaterY+7
     return h,water,if bank then (if water then 'Mud' else 'Sand')else 'Grass'
 end

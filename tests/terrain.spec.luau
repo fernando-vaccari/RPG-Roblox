@@ -48,7 +48,7 @@ test("terreno contínuo, limitado e não plano em 10201 amostras", function()
     end
     assert(hi-lo > 25)
 end)
-test("plataformas reservadas para as quatro cidades", function()
+test("plataformas reservadas para as cinco cidades", function()
     for _, city in c.Cities do
         for _, offset in { {0,0}, {city.Radius*0.5,0}, {0,-city.Radius*0.5} } do
             assert(math.abs(mathTerrain.height(c,city.X+offset[1],city.Z+offset[2])-city.Height) < 1e-8)

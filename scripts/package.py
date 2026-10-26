@@ -8,7 +8,7 @@ BUILD=ROOT/'build'
 files=[ROOT/'.gitignore',ROOT/'default.project.json',ROOT/'dungeon.project.json']+sorted(ROOT.glob('*.md'))
 for folder in ['src','scripts','tests','docs','assets']:
     files+=sorted(p for p in (ROOT/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
-for name in ['ProjectMedievalRPG.rbxlx','ProjectMedievalRPG_Dungeon.rbxlx']:
+for name in ['ProjectMedievalRPG.rbxlx','ProjectMedievalRPG_Dungeon.rbxlx','BUILD_MANIFEST.json']:
     path=BUILD/name
     if not path.is_file():raise SystemExit('Execute scripts/check.py antes: '+str(path))
     files.append(path)

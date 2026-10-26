@@ -2,7 +2,7 @@ local G=require(script.Parent.Geometry)
 local Catalog=require(game.ReplicatedStorage.MedievalRPG.Config.ContentConfig)
 local Interiors=require(game.ReplicatedStorage.MedievalRPG.Core.InteriorPlan)
 local B={}
-local palette={Valoria=Color3.fromRGB(144,65,45),Arkheim=Color3.fromRGB(63,88,123),Eldoria=Color3.fromRGB(83,62,128),Durakh=Color3.fromRGB(69,75,77)}
+local palette={Valoria=Color3.fromRGB(144,65,45),Arkheim=Color3.fromRGB(63,88,123),Eldoria=Color3.fromRGB(72,121,91),Durakh=Color3.fromRGB(136,94,56),Asterion=Color3.fromRGB(67,88,147)}
 function B.build(parent,lot,city,index)
     local kind=lot.Kind
     local m=G.model(parent,lot.Id); m:SetAttribute('Template',kind)
@@ -25,7 +25,9 @@ function B.build(parent,lot,city,index)
             part('TimberPost',Vector3.new(1.2,height+1,1.2),side*width/2,height/2,z,G.Palette.Wood,Enum.Material.Wood)
         end
         for _,y in {4,height-2} do
-            part('TimberRail',Vector3.new(width+1,0.6,1.3),0,y,side*depth/2,G.Palette.Wood,Enum.Material.Wood)
+            if side==-1 and y<9 then
+                for _,xSide in {-1,1} do part('TimberRail',Vector3.new((width-8)/2,0.6,1.3),xSide*(width+8)/4,y,-depth/2,G.Palette.Wood,Enum.Material.Wood) end
+            else part('TimberRail',Vector3.new(width+1,0.6,1.3),0,y,side*depth/2,G.Palette.Wood,Enum.Material.Wood) end
         end
         local glass=part('Window',Vector3.new(4,4,0.25),side*width*0.32,9,-depth/2-0.7,Color3.fromRGB(241,200,103),Enum.Material.Glass)
         glass.CanCollide=false
@@ -50,7 +52,7 @@ function B.build(parent,lot,city,index)
     if Catalog.Shops[role] or role=='Guild' then
         part('Counter',Vector3.new(10,3,3),-8,2,-depth/2-6,G.Palette.Wood,Enum.Material.WoodPlanks)
         part('Awning',Vector3.new(13,0.5,8),-8,8,-depth/2-5,roofColor,Enum.Material.Fabric)
-        for _,x in {-14,-2} do part('AwningPost',Vector3.new(0.5,8,0.5),x,4,-depth/2-9,G.Palette.Wood,Enum.Material.Wood) end
+        for _,x in {-14,-4} do part('AwningPost',Vector3.new(0.5,8,0.5),x,4,-depth/2-9,G.Palette.Wood,Enum.Material.Wood) end
     end
     for i=1,3 do part('Step',Vector3.new(7,0.5,2),0,0.25*i,-depth/2-4+i,G.Palette.Stone,Enum.Material.Cobblestone) end
     G.sign(m,Catalog.Labels[kind] or kind,cf*CFrame.new(0,12,-depth/2-1),math.min(20,width))

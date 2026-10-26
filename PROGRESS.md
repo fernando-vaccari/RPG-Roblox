@@ -1,5 +1,8 @@
 # Progresso
 
+> Estado atual: Eldravyn 0.6.0. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
+
+
 ## Fase 1 — código implementado, aguardando execução no Studio
 
 - Repositório inicial continha somente `README.md`; nenhum mapa existente foi removido.
@@ -98,3 +101,7 @@ Artefatos finais: build/ProjectMedievalRPG.rbxlx, build/ProjectMedievalRPG_Dunge
 - Clima local/qualidade de efeitos e movimento reduzido; LOW mantém chuva sem Parts e 16 inimigos. Contagem mock de mundo: 6138 Parts/63 NPCs; não há benchmark real.
 - Check completo passou com 50 Luau, 40 cenários CLI e 21 fluxos mock. Dois builds com 37 módulos. Relatório detalhado e limitações: docs/IMPROVEMENTS.md.
 - Não publicar nem ativar compras; testes manuais seguem adiados. Não declarar melhoria estética/fluidez/desempenho reais validados a partir de compilação/mock.
+
+## Eldravyn 0.6.0 — estado atual
+
+Continuação concluída em código/testes cloud sobre esta base. Cinco cidades, três florestas, 10/20 andares, parry/postura, tutorial, ranks, defesa, equipamentos, interface e preparação Studio integrados. O estado completo e a próxima tarefa exata estão em PROGRESSO.md. Verificação: 63 Luau, 52 CLI, 36 fluxos mock, 48 módulos por Place. Studio e serviços reais pendentes.

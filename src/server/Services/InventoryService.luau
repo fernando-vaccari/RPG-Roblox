@@ -33,8 +33,22 @@ function I.sync(player,state,combat)
             for _,child in container:GetChildren() do if child:IsA('Tool') and child:GetAttribute('ItemId') then child:Destroy() end end
         end
     end
-    if state.Equipment~='' and (state.Inventory[state.Equipment] or 0)>0 then I.tool(player,state.Equipment,combat) end
     local hum=player.Character and player.Character:FindFirstChildOfClass('Humanoid')
+    if state.Equipment~='' and (state.Inventory[state.Equipment] or 0)>0 then
+        local tool=I.tool(player,state.Equipment,combat)
+        if tool and tool.Parent and hum and hum.Health>0 then hum:EquipTool(tool) end
+    end
+    local char=player.Character
+    if char then
+        local old=char:FindFirstChild('MedievalArmor');if old then old:Destroy() end
+        local torso=char:FindFirstChild('UpperTorso') or char:FindFirstChild('Torso')
+        if torso and state.Armor=='Armor' and (state.Inventory.Armor or 0)>0 then
+            local plate=Instance.new('Part');plate.Name='MedievalArmor';plate.Size=Vector3.new(torso.Size.X*0.95,torso.Size.Y*0.85,0.25)
+            plate.CFrame=torso.CFrame*CFrame.new(0,0,-torso.Size.Z/2-0.1);plate.Color=Color3.fromRGB(116,132,151);plate.Material=Enum.Material.Metal
+            plate.Massless=true;plate.CanCollide=false;plate.CanTouch=false;plate.CanQuery=false;plate.Parent=char
+            local weld=Instance.new('WeldConstraint');weld.Part0=torso;weld.Part1=plate;weld.Parent=plate
+        end
+    end
     if hum then hum.MaxHealth=Stats.stats(state,Abilities).Health;hum.Health=math.min(hum.Health,hum.MaxHealth) end
 end
 return I

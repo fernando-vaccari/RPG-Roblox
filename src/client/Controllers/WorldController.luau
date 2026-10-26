@@ -8,7 +8,8 @@ local Environment=require(game.ReplicatedStorage.MedievalRPG.Core.EnvironmentRul
 local W={}
 function W.start(ui,effects)
     local projectiles={};local rain={};local lastVisual=os.clock()
-    local palette={Fire=Color3.fromRGB(255,121,52),Ice=Color3.fromRGB(118,220,250),Lightning=Color3.fromRGB(243,228,112),Arrow=Color3.fromRGB(194,165,105),Shadow=Color3.fromRGB(163,96,203),Steel=Color3.fromRGB(220,224,234)}
+    local palette={Heal=Color3.fromRGB(121,222,170),Fire=Color3.fromRGB(255,121,52),Ice=Color3.fromRGB(118,220,250),Lightning=Color3.fromRGB(243,228,112),Arrow=Color3.fromRGB(194,165,105),Shadow=Color3.fromRGB(163,96,203),Steel=Color3.fromRGB(220,224,234)}
+    local poses=setmetatable({}, {__mode='k'})
     local weatherLabel=Instance.new('TextLabel');weatherLabel.Size=UDim2.fromOffset(120,22);weatherLabel.Position=UDim2.new(1,-135,0,206);weatherLabel.BackgroundTransparency=1;weatherLabel.TextColor3=Color3.fromRGB(223,222,201);weatherLabel.TextSize=13;weatherLabel.Parent=ui.Hud.Parent
     local weatherGrade=Instance.new('ColorCorrectionEffect');weatherGrade.Name='LocalWeatherGrade';weatherGrade.Parent=Lighting
     local currentWeather=''
@@ -23,6 +24,32 @@ function W.start(ui,effects)
     local d=Instance.new('TextLabel');d.Size=UDim2.fromOffset(12,12);d.Text='D';d.BackgroundTransparency=1;d.TextColor3=Color3.fromRGB(241,80,107);d.Position=UDim2.fromScale(0.5,0.5+Config.DungeonEntrance.Z/Config.WorldSize);d.Parent=map
     local boss=Instance.new('TextLabel');boss.Size=UDim2.fromScale(0.6,0.04);boss.Position=UDim2.fromScale(0.2,0.21);boss.BackgroundColor3=Color3.fromRGB(59,26,36);boss.TextColor3=Color3.fromRGB(244,191,181);boss.TextScaled=true;boss.Visible=false;boss.Parent=ui.Hud.Parent
     effects.OnClientEvent:Connect(function(data)
+        if data.Kind=='Cast' or data.Kind=='Defense' or data.Kind=='MeleeWarning' then
+            local char=Players.LocalPlayer.Character;local r=char and char:FindFirstChild('HumanoidRootPart')
+            if not r or (r.Position-data.Position).Magnitude>130 then return end
+            if os.clock()-fxWindow>=1 then fxWindow=os.clock();fxCount=0 end
+            if data.Kind~='MeleeWarning' then
+                fxCount+=1;if fxCount>math.min(Config.MaxCombatFX,Environment.Profiles[ui.Settings.Quality].FX) then return end
+            end
+            local anchor=Instance.new('Part');anchor.Name='ActionFeedback';anchor.Size=Vector3.new(0.15,0.15,0.15);anchor.Position=data.Position+Vector3.new(0,4,0);anchor.Anchored=true;anchor.Transparency=1;anchor.CanCollide=false;anchor.CanTouch=false;anchor.CanQuery=false;anchor.Parent=workspace
+            local billboard=Instance.new('BillboardGui');billboard.Size=UDim2.fromOffset(160,36);billboard.AlwaysOnTop=true;billboard.Parent=anchor
+            local text=Instance.new('TextLabel');text.BackgroundTransparency=1;text.Size=UDim2.fromScale(1,1);text.Font=Enum.Font.Garamond;text.TextSize=20;text.TextColor3=palette[data.Style] or Color3.fromRGB(247,204,103);text.Parent=billboard
+            text.Text=if data.Kind=='MeleeWarning' then '⚔ APARÁVEL' elseif data.Outcome=='Parry' then 'APARO!' elseif data.Outcome=='Break' then 'GUARDA QUEBRADA' elseif data.Outcome=='Block' then 'BLOQUEIO' elseif data.Outcome=='Dodge' then 'ESQUIVA' else ''
+            Debris:AddItem(anchor,data.Seconds or 0.65)
+            if data.Kind=='Cast' then
+                local actor=Players:GetPlayerByUserId(data.Actor);local model=actor and actor.Character
+                if model and not ui.Settings.ReducedMotion then
+                    for _,joint in model:GetDescendants() do
+                        if joint:IsA('Motor6D') and (joint.Name=='RightShoulder' or joint.Name=='Right Shoulder') then
+                            local pose=poses[joint] or {Base=joint.C0,Serial=0};poses[joint]=pose;pose.Serial+=1;local serial=pose.Serial
+                            Tween:Create(joint,TweenInfo.new(0.12),{C0=pose.Base*CFrame.Angles(-0.8,0,if data.Mode=='Heavy' then 0.8 else 0.35)}):Play()
+                            task.delay(0.18,function()if joint.Parent and pose.Serial==serial then Tween:Create(joint,TweenInfo.new(0.18),{C0=pose.Base}):Play() end end)
+                        end
+                    end
+                end
+            end
+            return
+        end
         if data.Kind=='Burst' then
             local root=Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
             if not root or (root.Position-data.Position).Magnitude>180 then return end
@@ -61,17 +88,6 @@ function W.start(ui,effects)
         end
         if data.Kind=='Cooldown' then
             ui.Cooldowns[data.Id]=os.clock()+(data.Seconds or 0)
-            local char=Players.LocalPlayer.Character
-            if char and not ui.Settings.ReducedMotion then
-                for _,joint in char:GetDescendants() do
-                    if joint:IsA('Motor6D') and (joint.Name=='RightShoulder' or joint.Name=='Right Shoulder') then
-                        local base=joint.C0
-                        Tween:Create(joint,TweenInfo.new(0.1),{C0=base*CFrame.Angles(-0.5-(data.Combo or 0)*0.1,0,if data.Id=='Heavy' then 0.6 else 0.3)}):Play()
-                        task.delay(0.15,function() if joint.Parent then Tween:Create(joint,TweenInfo.new(0.15),{C0=base}):Play() end end)
-                        break
-                    end
-                end
-            end
             return end
         if data.Kind=='Hit' and typeof(data.A)=='Vector3' and typeof(data.B)=='Vector3' then
             local midpoint=(data.A+data.B)/2
@@ -88,7 +104,7 @@ function W.start(ui,effects)
             if data.Damage then
                 local anchor=Instance.new('Part');anchor.Size=Vector3.new(0.1,0.1,0.1);anchor.Position=data.B;anchor.Transparency=1;anchor.Anchored=true;anchor.CanCollide=false;anchor.CanQuery=false;anchor.Parent=workspace
                 local billboard=Instance.new('BillboardGui');billboard.Size=UDim2.fromOffset(100,40);billboard.AlwaysOnTop=true;billboard.Parent=anchor
-                local number=Instance.new('TextLabel');number.Size=UDim2.fromScale(1,1);number.BackgroundTransparency=1;number.Text=tostring(data.Damage);number.TextSize=24;number.TextColor3=Color3.fromRGB(255,207,103);number.Parent=billboard;Debris:AddItem(anchor,0.7)
+                local number=Instance.new('TextLabel');number.Size=UDim2.fromScale(1,1);number.BackgroundTransparency=1;number.Text=tostring(data.Damage)..(if data.Critical then '!' else '');number.TextSize=if data.Critical then 28 else 24;number.TextColor3=Color3.fromRGB(255,207,103);number.Parent=billboard;Debris:AddItem(anchor,0.7)
             end
         elseif data.Kind=='Chest' then ui.notice('Tesouro recebido! O saque é individual.') end
     end)
@@ -102,6 +118,9 @@ function W.start(ui,effects)
         if now-updateAt<0.2 then return end;updateAt=now
         local char=Players.LocalPlayer.Character;local root=char and char:FindFirstChild('HumanoidRootPart')
         if not root then return end
+        map.Visible=not ui.Compact;weatherLabel.Visible=not ui.Compact
+        boss.Size=if ui.Compact then UDim2.new(0.4,-16,0,22) else UDim2.fromScale(0.6,0.04)
+        boss.Position=if ui.Compact then UDim2.fromOffset(10,172) else UDim2.new(0.2,0,0,218)
         local weather=Environment.weather(workspace:GetServerTimeNow())
         if weather~=currentWeather then
             currentWeather=weather
@@ -126,7 +145,7 @@ function W.start(ui,effects)
                 if (Vector2.new(root.Position.X,root.Position.Z)-Vector2.new(r.X,r.Z)).Magnitude<r.Radius then region=r.Name;dark=r.Id=='Nocthar' end
             end
         end
-        if Players.LocalPlayer:GetAttribute('InDungeon') then region='Abismo de Malgorth' end
+        if Players.LocalPlayer:GetAttribute('InDungeon') then region=Players.LocalPlayer:GetAttribute('DungeonName') or 'Abismo • Recepção e salas legadas' end
         if region~=current then
             current=region;ui.Region.Text=region
             Tween:Create(localGrade,TweenInfo.new(2),{TintColor=if dark then Color3.fromRGB(174,176,207) else Color3.new(1,1,1),Brightness=if dark then -0.06 else 0}):Play()
@@ -150,6 +169,10 @@ function W.start(ui,effects)
                     local npcs=world:FindFirstChild('NPCs')
                     if npcs then for _,m in npcs:GetChildren() do if m:IsA('Model') then table.insert(rigs,m) end end end
                     for _,m in world:GetChildren() do if m:IsA('Model') and m:GetAttribute('EnemyKind') then table.insert(rigs,m) end end
+                    local expeditions=world:FindFirstChild('Expeditions')
+                    if expeditions then for _,tower in expeditions:GetChildren() do for _,floor in tower:GetChildren() do
+                        if floor:GetAttribute('Active') then for _,m in floor:GetChildren() do if m:IsA('Model') and m:GetAttribute('EnemyKind') then table.insert(rigs,m) end end end
+                    end end end
                 end
             end
         end
@@ -164,7 +187,7 @@ function W.start(ui,effects)
                 if torso and not ui.Settings.ReducedMotion then
                     for _,j in torso:GetChildren() do
                         if j:IsA('Motor6D') then
-                            if j.Name=='Left Shoulder' or j.Name=='Right Shoulder' then j.Transform=CFrame.Angles(math.sin(now*2+r.Position.X)*0.07,0,0)
+                            if j.Name=='Left Shoulder' or j.Name=='Right Shoulder' then j.Transform=CFrame.Angles(if model:GetAttribute('State')=='WINDUP' then -1.4 else math.sin(now*2+r.Position.X)*0.07,0,0)
                             elseif j.Name=='Left Hip' or j.Name=='Right Hip' then
                                 local moving=r.AssemblyLinearVelocity.Magnitude>1
                                 j.Transform=CFrame.Angles(if moving then math.sin(now*7)*(if j.Name=='Left Hip' then 0.35 else -0.35) else 0,0,0)

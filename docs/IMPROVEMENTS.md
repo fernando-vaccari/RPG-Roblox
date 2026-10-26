@@ -1,5 +1,8 @@
 # Melhorias — versão 0.5.0
 
+> Estado atual: Eldravyn 0.6.0. Consulte [PROGRESSO.md](../PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](../COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
+
+
 Esta rodada amplia o projeto existente; não o recria. Preservados os dois projetos Rojo, a área de 4000 × 4000, coordenadas, quatro cidades, duas florestas, dungeon, IDs de quests/itens, probabilidades raciais e produtos desativados. **Não é uma declaração de homologação ou de revisão visual concluída no Roblox.**
 
 ## Correções e refinamentos

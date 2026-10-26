@@ -44,7 +44,12 @@ function Service.syncClass(profile)
  profile.Identity.CurrentClass=profile.Class
 end
 function Service.fragments(profile,enemy,root)
- if root.Name~='GeneratedDungeon' then return end
+ local cursor=root;local valid=false
+ while cursor and cursor~=workspace do
+  if cursor.Name=='GeneratedDungeon' and cursor:GetAttribute('ProjectId')=='ProjectMedievalRPG' then valid=true;break end
+  cursor=cursor.Parent
+ end
+ if not valid then return end
  local amount=Config.DungeonFragments[enemy]
  if amount then profile.Identity.Fragments=math.min(1000000,profile.Identity.Fragments+amount) end
 end

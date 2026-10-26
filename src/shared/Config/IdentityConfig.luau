@@ -27,5 +27,5 @@ return {
  Fusion={WeeklyFree=3,FreeTier='Basic',GoldPrice=1500,GoldPack=1,
   Pools={Basic={'Guerreiro','Espadachim','Mago','Arqueiro'},Premium={'Tanque','Valquíria','Samurai','Assassino','Invocador','Necromante'}},Recipes={}}, -- Resultados aguardam definição do criador.
  Products={RacialRetry={Id=0,Robux=150,Grant='Retry',Amount=1},BasicPack={Id=0,Robux=79,Grant='Basic',Amount=3},PremiumPack={Id=0,Robux=149,Grant='Premium',Amount=3}},
- DungeonFragments={Knight=1,Malgorth=3},
+ DungeonFragments={Knight=1,Malgorth=3,FallenRegent=5},
 }

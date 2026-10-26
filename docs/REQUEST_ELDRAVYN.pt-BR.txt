@@ -1,0 +1,178 @@
+# SUPER PROMPT — CONTINUAR, FINALIZAR E PREPARAR ELDRAVYN: RISE OF SHADOWS PARA JOGAR
+
+Você é o desenvolvedor principal do meu RPG medieval/anime no Roblox, chamado **Eldravyn: Rise of Shadows**.
+
+Este projeto era anteriormente chamado **Eternal Blade: Fallen Kingdom**.
+
+**NÃO comece do zero. NÃO crie um novo projeto. CONTINUE o desenvolvimento existente.**
+
+Sua missão é concluir as funcionalidades pendentes, corrigir os erros, melhorar radicalmente a qualidade visual e, principalmente, **entregar uma versão realmente jogável e testável no Roblox Studio**.
+
+## 1. RECUPERAR O PROGRESSO
+
+Antes de começar:
+
+1. Leia `PROGRESSO.md` e toda a documentação relevante.
+2. Analise o código existente e as alterações não commitadas.
+3. Identifique onde a sessão anterior foi interrompida.
+4. Preserve os sistemas existentes.
+5. Não sobrescreva trabalho funcional.
+
+A última sessão modificou aproximadamente 39 arquivos e foi interrompida durante os testes de integração.
+
+Continue exatamente desse ponto.
+
+## 2. ALTERAR O NOME DO JOGO
+
+Renomeie todas as referências visíveis ao jogo para:
+
+**Eldravyn: Rise of Shadows**
+
+Atualize menus, telas de carregamento, interfaces, textos e documentação.
+
+Preserve identificadores internos e dados persistentes quando a alteração puder causar incompatibilidade.
+
+## 3. FINALIZAR OS SISTEMAS
+
+Implemente, integre, teste e corrija:
+
+- Combate com combos, parry, esquiva e postura.
+- Classes, raças e habilidades.
+- Cinco cidades medievais grandes.
+- Três florestas detalhadas.
+- Dungeons de 10 e 20 andares.
+- Chefes e inimigos inteligentes.
+- Missões e guildas.
+- Tutorial guiado.
+- Inventário e equipamentos.
+- Economia e recompensas.
+- Salvamento persistente.
+- Controles de PC e celular.
+- Interfaces completas.
+
+Não deixe sistemas de demonstração ou funcionalidades falsas.
+
+## 4. MELHORAR A QUALIDADE VISUAL AO MÁXIMO
+
+Quero que Eldravyn tenha aparência de um RPG medieval/anime profissional.
+
+Capriche especialmente em:
+
+- Castelos e cidades grandes.
+- Casas medievais detalhadas.
+- Ruas de pedra e mercados.
+- Florestas densas e bonitas.
+- Montanhas, rios e cachoeiras.
+- Iluminação cinematográfica.
+- Efeitos mágicos impressionantes.
+- Animações de combate fluidas.
+- Dungeons com ambientes únicos.
+- Interfaces elegantes.
+
+Evite mapas vazios, construções genéricas e excesso de objetos repetidos.
+
+Otimize o jogo para funcionar também em dispositivos móveis.
+
+## 5. ENTREGAR UMA VERSÃO JOGÁVEL NO ROBLOX STUDIO
+
+**ESTA É UMA PRIORIDADE OBRIGATÓRIA.**
+
+Não quero receber apenas código-fonte.
+
+Quero conseguir abrir o projeto no Roblox Studio, clicar em **Play** e realmente jogar.
+
+Para isso:
+
+1. Identifique se o projeto utiliza Rojo ou outro sistema de sincronização.
+2. Verifique se existe um arquivo `.rbxl`, `.rbxlx` ou outro formato de projeto compatível.
+3. Se possível, gere um arquivo de Place jogável usando as ferramentas disponíveis.
+4. Caso utilize Rojo, configure corretamente o projeto e gere o Place por meio do processo de build compatível.
+5. Garanta que os scripts de cliente, servidor e módulos compartilhados estejam nos serviços corretos.
+6. Inclua o mundo, NPCs, interfaces, inimigos, sistemas de combate e pontos de spawn.
+7. Verifique se o jogador consegue iniciar uma partida.
+8. Prepare o projeto para testar em modo solo e multiplayer.
+9. Não substitua conteúdo existente por um mapa vazio.
+10. Não declare que o arquivo está pronto sem verificar sua geração e estrutura.
+
+Se não conseguir gerar um arquivo jogável diretamente no ambiente disponível, prepare todos os arquivos e comandos necessários e explique exatamente como abrir e sincronizar o jogo no Roblox Studio.
+
+**Não invente arquivos, resultados de testes ou funcionalidades.**
+
+## 6. TESTAR A EXPERIÊNCIA REAL
+
+Execute todos os testes automatizados possíveis.
+
+Depois, prepare uma lista curta de testes manuais no Roblox Studio:
+
+- Entrar no mundo.
+- Criar personagem.
+- Escolher classe.
+- Usar habilidades.
+- Atacar inimigos.
+- Testar parry e esquiva.
+- Explorar as cinco cidades.
+- Visitar as três florestas.
+- Entrar nas duas dungeons.
+- Derrotar chefes.
+- Concluir missões.
+- Salvar e carregar progresso.
+- Testar interface mobile.
+
+Corrija automaticamente os problemas que conseguir reproduzir.
+
+Se o ambiente permitir executar o Roblox Studio, realize os testes reais. Caso contrário, deixe essas verificações explicitamente pendentes.
+
+## 7. GERAR UMA ENTREGA ORGANIZADA
+
+Ao concluir a sessão, prepare:
+
+**A. Versão jogável**
+
+Um arquivo de projeto Roblox Studio ou um processo de build e sincronização reproduzível.
+
+**B. Instruções de abertura**
+
+Crie `COMO_JOGAR_NO_STUDIO.md` explicando como abrir o jogo, sincronizar o projeto e clicar em Play.
+
+**C. Relatório de progresso**
+
+Atualize `PROGRESSO.md` com funcionalidades concluídas, pendências e testes executados.
+
+**D. Checklist de validação**
+
+Crie `TESTES_STUDIO.md` com os testes que preciso realizar pessoalmente.
+
+**E. Próxima etapa**
+
+Indique a próxima tarefa mais importante para continuar o desenvolvimento.
+
+## 8. AUTONOMIA TOTAL PARA DESENVOLVIMENTO
+
+Trabalhe com autonomia, sem solicitar confirmação para decisões técnicas comuns.
+
+Não interrompa a implementação para apresentar apenas planos.
+
+Implemente, execute testes, corrija erros e continue enquanto houver recursos disponíveis.
+
+Não compre recursos pagos nem publique o jogo sem minha autorização.
+
+Preserve o histórico do Git e não descarte alterações existentes.
+
+## 9. RESULTADO ESPERADO
+
+Quero terminar esta sessão com:
+
+- **Eldravyn: Rise of Shadows** atualizado.
+- Sistemas existentes preservados.
+- Bugs conhecidos corrigidos.
+- Qualidade visual significativamente melhorada.
+- Mundo medieval explorável.
+- Combate jogável.
+- Dungeons integradas.
+- Projeto preparado para abrir no Roblox Studio.
+- Instruções simples para testar.
+- Progresso documentado.
+
+**PRIORIDADE ABSOLUTA: NÃO ENTREGUE APENAS CÓDIGOS. ENTREGUE UMA VERSÃO JOGÁVEL OU UM PROCESSO COMPLETO E VERIFICÁVEL PARA GERÁ-LA.**
+
+COMECE AGORA. CONTINUE O PROJETO EXISTENTE, FINALIZE OS TESTES INTERROMPIDOS E PREPARE ELDRAVYN: RISE OF SHADOWS PARA SER JOGADO NO ROBLOX STUDIO.

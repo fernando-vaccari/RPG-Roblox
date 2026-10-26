@@ -5,6 +5,7 @@ local Data=require(script.Parent.DataService)
 local Enemies=require(script.Parent.EnemyService)
 local Config=require(Shared.Config.AbilityConfig)
 local Rules=require(Shared.Core.CombatRules)
+local Defense=require(Shared.Core.DefenseRules)
 local Players=game:GetService('Players')
 local Rig=require(Shared.RigFactory)
 local Projectiles=require(script.Parent.ProjectileService)
@@ -33,14 +34,24 @@ function Combat.get(player)
     if not Combat.States[player] then Combat.States[player]=Rules.new(stats) end
     return Combat.States[player],stats,profile
 end
-function Combat.hurt(player,amount,origin)
+function Combat.hurt(player,amount,origin,attacker,parryable)
     local s,stats=Combat.get(player);local root=Security.alive(player)
-    if not s or not root or os.clock()<s.DodgeUntil then return end
+    if not s or not root or type(amount)~='number' or amount~=amount or amount<=0 then return end
     local now=os.clock()
-    if s.Blocking and s.Stamina>=10 and (not origin or (origin-root.Position).Unit:Dot(root.CFrame.LookVector)>0) then amount*=0.25;s.Stamina-=10 end
+    local delta=origin and origin-root.Position
+    local front=delta~=nil and delta.Magnitude>0.01 and delta.Unit:Dot(root.CFrame.LookVector)>0.15
+    local outcome
+    amount,outcome=Defense.resolve(s,now,amount,front,parryable==true)
+    if outcome=='Parry' and attacker and Enemies.Active[attacker.Model]==attacker then
+        Defense.pressure(attacker,now,55);attacker.StunnedUntil=math.max(attacker.StunnedUntil or 0,now+0.5)
+        attacker.Swing=nil;attacker.Pending=nil
+        if Combat.OnAction then Combat.OnAction(player,'Parry') end
+    end
+    if Combat.FX and outcome~='Hit' then Combat.FX:FireAllClients({Kind='Defense',Position=root.Position,Outcome=outcome}) end
+    if amount==0 then return outcome end
     if now<s.GuardUntil then amount*=0.5 end
     amount=math.max(1,math.floor(amount-stats.Defense))
-    s.RecoverUntil=now+0.35
+    s.RecoverUntil=math.max(s.RecoverUntil,now+0.35)
     player.Character:FindFirstChildOfClass('Humanoid'):TakeDamage(amount)
     if Combat.FX then Combat.FX:FireAllClients({Kind='Hit',A=origin or root.Position,B=root.Position,Damage=amount}) end
 end
@@ -48,12 +59,14 @@ function Combat.control(player,mode)
     local s,stats=Combat.get(player);local root=Security.alive(player)
     if not s or not root then return end
     local now=os.clock()
-    if mode=='BlockOff' then s.Blocking=false
-    elseif mode=='BlockOn' and now>=s.RecoverUntil and s.Stamina>10 then s.Blocking=true;s.Sprinting=false
+    if mode=='BlockOff' then Defense.block(s,now,false)
+    elseif mode=='BlockOn' then Defense.block(s,now,true)
     elseif mode=='RunOff' then s.Sprinting=false
-    elseif mode=='RunOn' and not s.Blocking and s.Stamina>10 then s.Sprinting=true
+    elseif mode=='RunOn' and now>=s.RecoverUntil and not s.Blocking and s.Stamina>10 then s.Sprinting=true
     elseif mode=='Dodge' and Rules.reserve(s,'Dodge',now,0,22,1,0.2) then
         s.DodgeUntil=now+0.32;root.AssemblyLinearVelocity=root.CFrame.LookVector*52+Vector3.new(0,root.AssemblyLinearVelocity.Y,0)
+        if Combat.OnAction then Combat.OnAction(player,'Dodge') end
+        if Combat.FX then Combat.FX:FireClient(player,{Kind='Cooldown',Id='Dodge',Seconds=1});Combat.FX:FireAllClients({Kind='Defense',Position=root.Position,Outcome='Dodge'}) end
     end
 end
 function Combat.tick(dt)
@@ -67,8 +80,9 @@ function Combat.tick(dt)
         local s,stats,profile=Combat.get(p);local root=Security.alive(p)
         if s and root then
             Rules.step(s,stats,dt)
+            Defense.step(s,now,dt)
             local hum=p.Character:FindFirstChildOfClass('Humanoid');hum.MaxHealth=stats.Health
-            hum.WalkSpeed=if s.Blocking then 8 elseif s.Sprinting then stats.Speed+10 else stats.Speed
+            hum.WalkSpeed=if now<s.BrokenUntil then 4 elseif s.Blocking then 8 elseif s.Sprinting then stats.Speed+10 else stats.Speed
             if os.clock()<(s.RegenUntil or 0) then hum.Health=math.min(hum.MaxHealth,hum.Health+(s.RegenRate or 8)*dt) end
             if s.Summon then
                 local summon=s.Summon
@@ -94,7 +108,7 @@ function Combat.tick(dt)
                 end
             end
             local level,progress,need=Rules.level(profile.XP,Config)
-            for k,v in {Mana=s.Mana,MaxMana=stats.Mana,Stamina=s.Stamina,MaxStamina=stats.Stamina,Level=level,LevelXP=progress,NextXP=need} do p:SetAttribute(k,v) end
+            for k,v in {Mana=s.Mana,MaxMana=stats.Mana,Stamina=s.Stamina,MaxStamina=stats.Stamina,Posture=s.Posture,MaxPosture=Defense.MaxPosture,PostureBroken=now<s.BrokenUntil,Level=level,LevelXP=progress,NextXP=need} do p:SetAttribute(k,v) end
         end
     end
 end
@@ -104,11 +118,13 @@ function Combat.apply(player,model,spec)
  local pos=e.Root.Position
  if not Enemies.damage(model,player,spec.Damage) then return false end
  local now=os.clock()
+ if not spec.Magic then Defense.pressure(e,now,spec.Pressure or 12) end
+ if Combat.OnAction then Combat.OnAction(player,'Attack') end
  if spec.Effect=='Slow' then e.SlowUntil=now+4 end
- if spec.Effect=='Stun' then e.StunnedUntil=now+(if e.Kind=='Malgorth' then 0.2 else 0.9) end
+ if spec.Effect=='Stun' then e.StunnedUntil=math.max(e.StunnedUntil or 0,now+(if e.Def and e.Def.Boss then 0.2 else 0.9)) end
  if spec.Effect=='Burn' then e.BurnUntil=now+4;e.BurnOwner=player end
  if spec.Effect=='Drain' then local h=player.Character:FindFirstChildOfClass('Humanoid');h.Health=math.min(h.MaxHealth,h.Health+math.floor(spec.Damage*0.2))end
- if Combat.FX then Combat.FX:FireAllClients({Kind='Hit',A=spec.Origin,B=pos,Magic=spec.Magic,Damage=spec.Damage,Effect=spec.Effect,Style=spec.Style})end
+ if Combat.FX then Combat.FX:FireAllClients({Kind='Hit',A=spec.Origin,B=pos,Magic=spec.Magic,Damage=spec.Damage,Effect=spec.Effect,Style=spec.Style,Critical=spec.Critical})end
  return true
 end
 function Combat.impact(player,position,part,spec)
@@ -130,6 +146,7 @@ function Combat.attack(player,target,mode)
     local s,stats,profile=Combat.get(player);local root=Security.alive(player)
     if not s or not root then return end
     local item=Catalog.Items[profile.Equipment]
+    if mode~='Racial' and profile.Class~='' and Config.Classes[profile.Class] and Config.Classes[profile.Class].Weapon~=profile.Equipment then return end
     local tool=player.Character:FindFirstChildOfClass('Tool')
     if mode~='Racial' and (not item or (profile.Inventory[profile.Equipment] or 0)<1 or not tool or tool:GetAttribute('ItemId')~=profile.Equipment) then return end
     item=item or {Damage=0,Range=0,Cooldown=1}
@@ -167,7 +184,14 @@ function Combat.attack(player,target,mode)
         if not Rules.reserve(s,mode,now,skill.Mana,skill.Stamina,skill.Cooldown,0.45) then return end
         damage,range,radius,effect=skill.Damage,skill.Range,skill.Radius,skill.Effect
     end
-    if Combat.FX then Combat.FX:FireClient(player,{Kind='Cooldown',Id=mode,Seconds=math.max(0,(s.Cooldowns[mode] or s.Cooldowns.Primary or now)-now),Combo=combo}) end
+    s.Sprinting=false
+    local critical=false
+    if mode=='Primary' or mode=='Heavy' then local multiplier=Defense.critical(math.random(1,100));damage*=multiplier;critical=multiplier>1 end
+    if Combat.OnAction and skillDefinition then Combat.OnAction(player,'Skill') end
+    if Combat.FX then
+        Combat.FX:FireClient(player,{Kind='Cooldown',Id=mode,Seconds=math.max(0,(s.Cooldowns[mode] or s.Cooldowns.Primary or now)-now),Combo=combo})
+        Combat.FX:FireAllClients({Kind='Cast',Position=root.Position,Style=style,Actor=player.UserId,Mode=mode})
+    end
     if effect=='Summon' then
         if s.Summon then s.Summon.Model:Destroy() end
         local model=Rig.create(workspace,'Espírito de '..player.DisplayName,root.Position-Vector3.new(0,3,0),Color3.fromRGB(111,137,180),false,'Mage')
@@ -189,7 +213,7 @@ function Combat.attack(player,target,mode)
     local dir=if target and (target-root.Position).Magnitude>0.1 then (target-root.Position).Unit else root.CFrame.LookVector
     if projectileSpeed then
         local character=player.Character;local class=profile.Class
-        local spec={Damage=math.floor(damage*stats.Damage),Radius=radius,Effect=effect,Origin=root.Position,Magic=profile.Equipment=='Staff',Style=style}
+        local spec={Damage=math.floor(damage*stats.Damage),Radius=radius,Effect=effect,Origin=root.Position,Magic=profile.Equipment=='Staff',Style=style,Critical=critical}
         Projectiles.launch(player,root.Position,dir,projectileSpeed,range,style,function()
             local current=Data.get(player);return current~=nil and player.Character==character and current.Class==class and Security.alive(player)~=nil
         end,function(at,part)Combat.impact(player,at,part,spec)end)
@@ -219,7 +243,7 @@ function Combat.attack(player,target,mode)
     for _,c in candidates do
         if hits>=8 or (radius==0 and hits>=1) then break end
         if radius>0 and center and (c.E.Root.Position-center).Magnitude>radius then continue end
-        if Combat.apply(player,c.Model,{Damage=math.floor(damage*stats.Damage),Effect=effect,Origin=root.Position,Magic=profile.Equipment=='Staff',Style=style}) then hits+=1 end
+        if Combat.apply(player,c.Model,{Damage=math.floor(damage*stats.Damage),Effect=effect,Origin=root.Position,Magic=profile.Equipment=='Staff',Style=style,Critical=critical,Pressure=if mode=='Heavy' then 35 else 12}) then hits+=1 end
     end
 end
 return Combat

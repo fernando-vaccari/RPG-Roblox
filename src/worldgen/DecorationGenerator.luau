@@ -1,6 +1,7 @@
 local G=require(script.Parent.Geometry)
 local D={}
 function D.generate(parent,c,plan,terrain)
+    require(script.Parent.LandmarkGenerator).waterfall(parent,c,terrain)
     local budget=c.QualityProfiles[c.Quality].DecorationBudget
     local count=0
     for _,road in plan.Roads do

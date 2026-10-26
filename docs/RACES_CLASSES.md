@@ -1,5 +1,8 @@
 # Linhagens, evolução, classes e fusões
 
+> Estado atual: Eldravyn 0.6.0. Consulte [PROGRESSO.md](../PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](../COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
+
+
 Esta versão estende o mesmo projeto, nos dois Places, sem reset de equipamento, XP, missões ou habilidades antigas. Uma conta tem um personagem persistente atualmente; respawn não cria outro personagem. Seleção de múltiplos personagens não foi adicionada.
 
 ## Sorteio e persistência
@@ -69,3 +72,7 @@ L no computador, ou **Linhagem** no celular, abre raça, características, evolu
 ## Limites de validação
 
 Testes CLI e host simulado não provam persistência, entrega financeira ou aparência real. Ainda devem ser testados no Roblox: primeira entrada/reconexão entre Places, desligamento durante save, morte durante transação, recibos reais e retries da plataforma, interface móvel e invocações multiplayer. O usuário adiou essa etapa; não é solicitada agora.
+
+## Compatibilidade em Eldravyn 0.6.0
+
+A escolha inicial no menu Personagem já define a classe e fornece/equipa a arma; Primeiros Passos continua sendo missão de guilda com o mesmo ID/recompensa. A prévia Studio não salva nem sorteia raça. No modo persistente, o sorteio original permanece durável e único. Cavaleiro/Malgorth/Regente concedem 1/3/5 fragmentos nas dungeons, incluindo seus andares. O catálogo de fusões continua inativo; as 48 técnicas e cinco raciais permanecem.

@@ -7,6 +7,8 @@ function D.GenerateDungeon(options)
     assert(not workspace:FindFirstChild('GeneratedDungeon'),'GeneratedDungeon já existe; nada foi substituído')
     assert(options.StudioTest==true or not workspace:FindFirstChild('GeneratedWorld'),'Use outro Place para a dungeon')
     local origin=options.Origin or Vector3.new(0,20,0)
+    local Expeditions=require(script.Parent.ExpeditionGenerator)
+    Expeditions.preflight(origin)
     local params=OverlapParams.new(); params.FilterType=Enum.RaycastFilterType.Exclude; params.FilterDescendantsInstances={workspace.Terrain}
     assert(#workspace:GetPartBoundsInBox(CFrame.new(origin+Vector3.new(30,35,330)),Vector3.new(220,100,800),params)==0,'Área da dungeon contém objetos existentes')
     local volume=Region3.new(origin+Vector3.new(-80,-15,-70),origin+Vector3.new(140,85,730)):ExpandToGrid(4)
@@ -16,7 +18,8 @@ function D.GenerateDungeon(options)
     end end end
     local m=G.model(workspace,'GeneratedDungeon'); m:SetAttribute('ProjectId','ProjectMedievalRPG'); m:SetAttribute('BossDefeated',false)
     m:SetAttribute('StudioTest',options.StudioTest==true); m:SetAttribute('Status','Generating')
-    for _,name in {'Rooms','EnemySpawns','TreasureChests','Traps','CinematicMarkers'} do local f=Instance.new('Folder');f.Name=name;f.Parent=m end
+    m:SetAttribute('Origin',origin)
+    for _,name in {'Rooms','EnemySpawns','TreasureChests','Traps','CinematicMarkers','NPCs'} do local f=Instance.new('Folder');f.Name=name;f.Parent=m end
     local ok,err=xpcall(function()
         local titles={'Salão do Juramento','Galeria das Sombras','Ponte do Abismo','Salão das Lâminas','Capela Corrompida','Antecâmara do Cavaleiro','Trono de Malgorth'}
         for i,title in titles do
@@ -76,7 +79,12 @@ function D.GenerateDungeon(options)
         local spawn=Instance.new('SpawnLocation');spawn.Name='DungeonSpawn';spawn.Anchored=true;spawn.Neutral=true
         spawn.Size=Vector3.new(10,1,10);spawn.Position=origin+Vector3.new(0,2,-18);spawn.Parent=m
         m:SetAttribute('SpawnPosition',spawn.Position+Vector3.new(0,4,0))
+        Content.npc(m.NPCs,'DepthsReception',origin+Vector3.new(-16,2,-18),'Dungeon','Malgorth'):SetAttribute('DungeonId','MalgorthDepths')
+        Content.npc(m.NPCs,'SanctumReception',origin+Vector3.new(16,2,-18),'Dungeon','Vespera'):SetAttribute('DungeonId','FallenSanctum')
+        local retreat=G.detail(m,'LobbyReturn',Vector3.new(6,9,2),CFrame.new(origin+Vector3.new(18,6,-25)),Color3.fromRGB(101,158,180),Enum.Material.Neon)
+        retreat:SetAttribute('ReturnPortal',true);G.prompt(retreat,'Retornar','Continente')
         G.marker(m.CinematicMarkers,'BossShot',origin+Vector3.new(0,20,610),{ShotName='MalgorthArena',RegionName='Abismo de Malgorth',CameraPosition=origin+Vector3.new(0,20,610),LookAtPosition=origin+Vector3.new(0,8,660),Duration=8,Category='Boss'})
+        Expeditions.build(m,origin)
         m:SetAttribute('Status','Complete')
     end,debug.traceback)
     if not ok then m:SetAttribute('Status','Failed');error(err,0) end

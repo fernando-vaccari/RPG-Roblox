@@ -1,60 +1,25 @@
-# Trabalho remanescente
+# Trabalho remanescente — Eldravyn
 
-## Implementado nesta tarefa (ainda sujeito à homologação Roblox)
+## Código integrado e coberto por verificações da nuvem
 
-- [x] Reaproveitar fase 1
-- [x] Rotas/rios/pontes/relevo
-- [x] Templates medievais e quatro cidades (60 lotes)
-- [x] Duas florestas com vegetação/ruínas/decoração
-- [x] Entrada e dungeon separada
-- [x] NPCs articulados R6 e diálogos/prompts
-- [x] Gold/inventário/lojas/equipamento/guilda
-- [x] Missões/combate/IA/baús/recompensas
-- [x] Solo/grupos até quatro e adapter TeleportService
-- [x] UI/HUD/minimapa/objetivos/barra do boss
-- [x] DataStore opcional e tratamento de falhas
-- [x] Orçamentos LOW e schedulers centralizados
-- [x] Regeneração seletiva com arquivo recuperável
-- [x] Suítes CLI, integração simulada, builds dos dois Places e documentação
+- [x] Base preservada, renomeação visível e dois Places Rojo
+- [x] Combos/parry/postura/esquiva/recursos/habilidades/projéteis e avisos de ataque
+- [x] Cinco cidades/130 edifícios, três florestas, guilda externa, lago/cascata
+- [x] NPCs/lojas/economia/equipamentos/45 missões/ranks e defesa de fronteiras
+- [x] Tutorial, personagem, HUD, atlas, menus, hotbar touch e estados de carga/morte
+- [x] Duas expedições de 10/20 andares, grupo, derrota, tickets e recompensas idempotentes
+- [x] Preparação única no editor, prévia sem APIs e separação do modo persistente
+- [x] Compilação, análise de regras, testes CLI/mock, builds e inspeção estrutural
 
-## Não considerar resolvido sem execução correspondente
+## Pendências explícitas
 
-- [ ] Instalação e PowerShell no Windows 11
-- [ ] Geração/visual/colisão/spawn e segurança no Studio
-- [ ] Gameplay real completo, pathfinding e grupo multiplayer
-- [ ] DataStore real e teleporte/retorno publicados
-- [ ] Benchmark no Ryzen 5700U/12 GB e celular
-- [ ] Balanceamento final e polish artístico/animações profissionais
-- [ ] Regeneração global segura de voxels editados (comando atual recusa)
-- [ ] Publicar ambiente/snapshot e validar restauração em nova tarefa
+- [ ] Executar TESTES_STUDIO.md: mundo/portas/física/IA/UI/combate reais
+- [ ] Homologar duas dungeons completas, dois/quatro jogadores e desconexões reais
+- [ ] Testar DataStore, migração, raça/24 h e TeleportService real em Experience de teste
+- [ ] Medir geração/FPS/RAM no Ryzen 7 5700U/12 GB e celulares
+- [ ] Revisar artisticamente cenas/rigs/animações no engine e ajustar o balanceamento
+- [ ] Fazer upload autorizado dos sons próprios e configurar IDs reais
+- [ ] Definir catálogo/resultados de fusão; implementar resolvedor antes de ativar consumos
+- [ ] Definir benefícios finais de monetização e homologar produtos oficiais; IDs continuam 0
 
-Não há implementação de Instagram/OBS, cobrança Robux, ranks acima de F ou troca de classe paga nesta versão.
-
-## Linhagens e classes — estado atual
-
-- [x] Sorteio 70/12/8/6/4 validado exatamente e gravação única no perfil
-- [x] Missões/evolução raciais, falha e espera persistida de 24h
-- [x] Seis ramificações de classe, segredos e integração de habilidades
-- [x] Fragmentos de dungeon e obrigatoriedade da missão racial
-- [x] Menu desktop/toque e aparência própria aditiva
-- [x] ProcessReceipt idempotente implementado; todos os produtos desativados
-- [x] Três gratuitas semanais e créditos básicos/premium preparados
-- [ ] Criador definir combinações/resultados/custos do catálogo de fusões
-- [ ] Implementar resolvedor de fusões após definição, antes de ativar compras de pacotes
-- [ ] IDs e homologação de produtos reais em Roblox
-- [ ] Homologação real de migração, 2 Places, racial/advanced/recibos/mobile
-
-## Qualidade 0.5.0
-
-- [x] Corrigir saída congelada/recibo incerto e quantidade zero em inventário
-- [x] Projéteis com tempo/colisão e limites no servidor
-- [x] Avisos de área, anel com centro seguro e fases de chefes
-- [x] Campo de Chamas persistente com expiração
-- [x] Interiores/cavernas, materiais de margem e refinamento estrutural da dungeon
-- [x] Menu/atlas/configurações, qualidade local e preview seguro de benefícios aprovados
-- [x] Regressões de dados/economia/combate/menus e novo pacote
-- [ ] Homologação visual/física/FPS e navegação dos pavimentos superiores no engine
-- [ ] Polimento individual das técnicas que ainda compartilham arquétipos
-- [ ] VIP/pacotes iniciais e resultados de fusão aguardam decisões do criador
-
-Relatório completo: docs/IMPROVEMENTS.md. Nenhum item de teste real deve ser marcado como concluído por compilação/mock.
+Não marcar nenhuma pendência de Roblox real como concluída por testes simulados. Substituição global de Terrain continua bloqueada; previews de produtos não concedem benefícios.

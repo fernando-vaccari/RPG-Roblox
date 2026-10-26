@@ -1,9 +1,20 @@
-# Download para Windows 11
+# Eldravyn: Rise of Shadows — download para Windows 11
 
 [Baixar RPG-Roblox-Windows11.zip](https://github.com/fernando-vaccari/RPG-Roblox/raw/refs/heads/codex/rpg-quality-delivery-20261024/delivery/RPG-Roblox-Windows11.zip)
 
 Se o download direto não iniciar, abra RPG-Roblox-Windows11.zip nesta pasta e use **Download raw file** no GitHub. Entre na sua conta se o repositório exigir autenticação.
 
-O ZIP contém o código, o manual, os catálogos e os dois Places compilados. A geração do mapa continua sendo executada no editor conforme o README do projeto. Testes reais no Roblox permanecem pendentes. Compras seguem desativadas; o jogo não foi publicado na Roblox.
+Entrega **0.6.0**. O ZIP contém código, catálogos, documentação e os dois Places `.rbxlx` compilados. **O cenário precisa ser gerado uma vez no editor e salvo antes de Play.** Siga [COMO_JOGAR_NO_STUDIO.md](../COMO_JOGAR_NO_STUDIO.md):
+
+1. Extraia o ZIP e abra `RPG-Roblox/build/ProjectMedievalRPG.rbxlx` no Studio.
+2. Fora de Play, execute na Command Bar:
+
+   ```lua
+   require(game.ServerStorage.MedievalWorldgen.WorldGenerator).PrepareStudio()
+   ```
+
+3. Aguarde a conclusão, salve como uma cópia nova e clique Play.
+
+A preparação padrão permite uma prévia sem APIs e sem salvamento. Testes reais no Roblox permanecem pendentes em [TESTES_STUDIO.md](../TESTES_STUDIO.md). Compras seguem desativadas; o jogo não foi publicado na Roblox. Confira o estado atual em [PROGRESSO.md](../PROGRESSO.md).
 
 Checksum em SHA256SUMS.txt.

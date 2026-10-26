@@ -22,13 +22,17 @@ function Plan.build(c,mathTerrain,content)
         table.insert(plan.Roads,{Id=road.Id,Segments=segments,A=road.A,B=road.B})
     end
     for _,city in c.Cities do
-        local result={Id=city.Id,Name=city.Name,X=city.X,Z=city.Z,H=city.Height,Lots={}}
+        local result={Id=city.Id,Name=city.Name,X=city.X,Z=city.Z,H=city.Height,Radius=city.Radius,Lots={}}
         for index,kind in content.CityBuildings[city.Id] do
             local major=kind=="Castle" or kind=="ArcaneTower" or kind=="Forge"
             local radius=if major then 39 else 30
             local found
+            if city.Id=='Valoria' and kind=='GuildHall' and c.Guild then
+                table.insert(result.Lots,{Id=city.Id..'_'..index,Kind=kind,X=c.Guild.X+50,Z=c.Guild.Z,H=c.Guild.Height,Radius=30,Yaw=math.pi/2,External=true})
+                continue
+            end
             -- Espiral determinística: grandes edifícios primeiro, círculo conservador evita sobreposição rotacionada.
-            for ring=1,5 do
+            for ring=1,9 do
                 if found then break end
                 local r=65+ring*32
                 local slots=math.floor(2*math.pi*r/(radius*2+10))
@@ -74,7 +78,7 @@ function Plan.build(c,mathTerrain,content)
         assert(count>=target*0.8,"Densidade mínima da floresta não atingida")
         for i=1,6 do
             local x,z=forest.X+math.cos(i*1.9)*80,forest.Z+math.sin(i*1.9)*80
-            table.insert(plan.EnemySpawns,{Id=forest.Id..i,X=x,Z=z,H=mathTerrain.height(c,x,z),Kind=if forest.Id=="Nocthar" then (if i%3==0 then "Skeleton" else "Bandit") else (if i%3==0 then "Slime" else "Wolf")})
+            table.insert(plan.EnemySpawns,{Id=forest.Id..i,X=x,Z=z,H=mathTerrain.height(c,x,z),Kind=if forest.Id=='Vespera' then (if i%2==0 then 'Demon' else 'DarkWolf') elseif forest.Id=="Nocthar" then (if i%3==0 then "Skeleton" else "Bandit") else (if i%3==0 then "Slime" else "Wolf")})
         end
         for i=1,5 do
             local x,z=forest.X+math.cos(i*2.1)*200,forest.Z+math.sin(i*2.1)*200

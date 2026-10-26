@@ -7,6 +7,9 @@ local effects=Instance.new('RemoteEvent');effects.Name='Effects';effects.Parent=
 require(script.Parent.Services.GameService).start(action,effects)
 local config=require(shared.Config.WorldConfig)
 local Lighting=game:GetService('Lighting')
+Lighting.ClockTime=9.5;Lighting.Brightness=2;Lighting.GlobalShadows=true
+Lighting.Ambient=Color3.fromRGB(77,79,100);Lighting.OutdoorAmbient=Color3.fromRGB(126,139,153)
+Lighting.EnvironmentDiffuseScale=0.45;Lighting.EnvironmentSpecularScale=0.65;Lighting.ExposureCompensation=0.05
 local function ownedEffect(class,name)
     local effect=Lighting:FindFirstChild(name)
     if not effect then effect=Instance.new(class);effect.Name=name;effect.Parent=Lighting end

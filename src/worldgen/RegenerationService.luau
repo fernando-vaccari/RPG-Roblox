@@ -54,14 +54,15 @@ function R.city(id)
         assert(old and old:GetAttribute('GeneratedBy')==Config.ProjectId,'Cidade não reconhecida')
         old.Parent=a
         for _,npc in w.NPCs:GetChildren() do if npc:GetAttribute('City')==id then npc.Parent=a end end
-        for _,name in {'InteractiveObjects','CinematicMarkers'} do
+        for _,name in {'InteractiveObjects','CinematicMarkers','EnemySpawns'} do
             for _,p in w[name]:GetChildren() do if string.sub(p.Name,1,#id+1)==id..'_' then p.Parent=a end end
         end
-        for _,name in {'Cities','NPCs','InteractiveObjects','CinematicMarkers'} do moveChildren(s[name],w[name]) end
+        for _,name in {'Cities','NPCs','InteractiveObjects','CinematicMarkers','EnemySpawns'} do moveChildren(s[name],w[name]) end
     end)
 end
 function R.forest(id)
-    assert(id=='Sylvarin' or id=='Nocthar','Floresta inválida')
+    local valid=false;for _,forest in Config.Forests do if forest.Id==id then valid=true end end
+    assert(valid,'Floresta inválida')
     local plan=Plan.build(Config,Terrain,Catalog);local subset={Trees={},Landmarks={},EnemySpawns={},Chests={}}
     for _,t in plan.Trees do if t.Forest==id then table.insert(subset.Trees,t) end end
     for _,key in {'Landmarks','EnemySpawns','Chests'} do

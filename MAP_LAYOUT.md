@@ -1,25 +1,26 @@
-# Layout planejado
+# Eldravyn — mapa atual
 
-Continente contínuo de 4000 × 4000 studs, centro (0,0); norte = Z negativo. Nesta fase, toda a área X/Z tem solo; mar, rios e lagos serão fase 2. Nenhuma ilha separa as cidades.
+Continente contínuo de 4.000 × 4.000 studs. Norte é Z negativo. O gerador verifica ocupação antes de escrever e nunca limpa Terrain global.
 
-| Região | X | Z | Reserva (raio) | Solo no centro |
+| Região | X | Z | Raio | Altura central |
 | --- | ---: | ---: | ---: | ---: |
-| Valoria | 0 | 1000 | 240 | 44 |
-| Arkheim | 0 | -850 | 320 | 48 |
-| Eldoria | 1150 | -150 | 240 | 48 |
-| Durakh | -1150 | -150 | 240 | 52 |
+| Valoria | 0 | 1000 | 330 | 44 |
+| Arkheim | 0 | -850 | 380 | 48 |
+| Eldoria | 1150 | -150 | 340 | 48 |
+| Durakh | -1150 | -150 | 330 | 52 |
+| Asterion | 1150 | 1200 | 360 | 64 |
 | Sylvarin | 1100 | -1100 | 400 | Procedural |
 | Nocthar | -1000 | 1000 | 400 | Procedural |
-| Malgorth (entrada) | 0 | -1700 | 60 (marcador) | Procedural |
+| Véspera | -1080 | -1170 | 390 | Procedural |
+| Guilda/treino | 0 | 1480 | Área externa | 44 |
+| Abismo (entrada) | 0 | -1700 | Portão | Procedural |
+| Santuário (entrada) | -900 | -1680 | Portão | Procedural |
+| Lago das Memórias | 1550 | 600 | 80 + margem 64 | Água 32 |
 
-Só centros das cidades têm plataformas planas. Áreas florestais e dungeon possuem marcadores, sem geometria construída. Estradas planejadas: Valoria–Arkheim, Valoria–Eldoria, Valoria–Durakh, Arkheim–Malgorth e ramais florestais. O planejamento de estradas ainda não altera a altura.
+Cada cidade tem 26 edifícios; a guilda de Valoria conserva o ID do lote e fica fora da muralha. Dez rotas ligam cidades, florestas, guilda e entradas. O rio meandrante próximo de Z=300 recebe leito/água por voxels e 42 segmentos de ponte nas rotas. O lago também usa voxels; a cascata usa geometria própria.
 
-Limites verticais de escrita: -32 a 192. Chunk 128 × 128 studs, último chunk ajustado à borda. Voxels de 4 studs. Escrita total de 56 milhões de voxels em 1024 chunks; memória temporária limitada ao chunk corrente. Pré-leitura de ocupação também percorre esse volume. Custo de execução no Studio pendente de medição.
+LOW: 300 árvores/15 baús, clareiras/cavernas/altares e chefes nas três florestas. Postos de defesa ficam nas fronteiras norte de Valoria/Arkheim. Reservas/rotas mudaram: não regenerar por cima de um Terrain antigo; use um Place novo ou preserve a versão anterior.
 
-## Atualização da continuação
+O segundo Place mantém sete salas legadas ao longo de Z=0..660. Expedições adicionais têm 10/20 andares, centros locais X=480/900, Z=300, separação vertical de 96 studs; cada piso mede 140 × 150. Portais autoritativos fazem a passagem após confirmar progresso. Em teste no continente, todo o interior recebe origem X=6000, fora do mapa, uma vez por sessão.
 
-As reservas agora recebem construções/florestas. Seis estradas do WorldConfig têm altura interpolada e máscaras no terreno. O rio cruza o continente próximo de Z=300, com meandro de 70 studs; as rotas que cruzam seus bancos recebem decks/guarda-corpos de ponte. Água/leito são voxels, sem oceanos dividindo cidades.
-
-60 lotes são planejados em anéis com afastamento conservador de estradas e de outros lotes. LOW produz 100 árvores em cada floresta. Cada bosque tem clareira/ruína/objetivos, inimigos e cinco baús.
-
-Entrada de Malgorth ao norte. Interior publicado fica em outro Place (7 salas ligadas ao longo de Z=0..660). Apenas o teste Studio usa origem X=6000 no mesmo Place, com aviso explícito; o gerador principal não incorpora uma ilha/dungeon no continente.
+Terrain: Y -32..192, voxels 4, chunks 128, 1.024 chunks/56 milhões de voxels. Pré-leitura e escrita têm custo real ainda não medido. Navegação, física e composição visual precisam de inspeção no Studio.

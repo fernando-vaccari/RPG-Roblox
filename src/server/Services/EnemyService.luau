@@ -7,11 +7,11 @@ local Config=require(Shared.Config.WorldConfig)
 local Security=require(script.Parent.AntiExploitService)
 local Patterns=require(Shared.Core.ActionMath)
 local E={Active={},Spawns={},SpawnSet={},OnKill=nil,Running=false}
-local function nearest(pos,radius)
+local function nearest(pos,radius,scope)
     local best,dist
     for _,p in Players:GetPlayers() do
         local root=Security.alive(p)
-        if root then
+        if root and (not E.CanTarget or E.CanTarget(p,scope)) then
             local d=(root.Position-pos).Magnitude
             if d<radius and (not dist or d<dist) then best,dist=p,d end
         end
@@ -45,12 +45,17 @@ local function spawnEnemy(s)
     end
     model:SetAttribute('HealthMax',health);model:SetAttribute('Health',health)
     hum.MaxHealth=health;hum.Health=health;hum.WalkSpeed=def.Speed
+    local multiplier=s.Marker:GetAttribute('Difficulty') or 1
+    health=math.floor(health*multiplier);hum.MaxHealth=health;hum.Health=health
+    model:SetAttribute('HealthMax',health);model:SetAttribute('Health',health)
     local e={Model=model,Hum=hum,Root=root,Kind=kind,Def=def,MaxHealth=health,HeightOffset=heightOffset,Spawn=s,Home=s.Marker.Position,LastAttack=0,Contributors={},State='IDLE',PathAt=0,Waypoints=nil,Waypoint=1,PathBusy=false,Target=nil,LastSpecial=os.clock(),SpecialCooldown=5}
+    e.Damage=math.floor(def.Damage*math.min(2.5,multiplier))
     s.Enemy=e;E.Active[model]=e
     hum.HealthChanged:Connect(function(h) if model.Parent then model:SetAttribute('Health',h) end end)
     hum.Died:Connect(function()
         e.State='DEAD';model:SetAttribute('State','DEAD')
         if kind=='Malgorth' then s.Root:SetAttribute('BossDefeated',true) end
+        if s.Marker:GetAttribute('Once') then s.Marker:SetAttribute('Defeated',true) end
         if E.OnKill then local ok,err=xpcall(function()E.OnKill(e)end,debug.traceback);if not ok then warn(err)end end
         E.Active[model]=nil;s.Enemy=nil;s.Next=os.clock()+(if kind=='Malgorth' or kind=='Knight' then 300 else 25)
         task.delay(4,function() if model.Parent then model:Destroy() end end)
@@ -59,8 +64,12 @@ end
 function E.damage(model,player,damage)
     local e=E.Active[model]
     if not e or e.Hum.Health<=0 then return false end
+    if E.CanTarget and not E.CanTarget(player,e.Spawn and e.Spawn.Root) then return false end
     if type(damage)~='number' or damage~=damage or damage<=0 or damage>100000 then return false end
     local actual=math.min(damage,e.Hum.Health)
+    if e.Spawn and e.Spawn.Marker:GetAttribute('Training') then
+        e.Hum.Health=e.Hum.MaxHealth;e.ReactionUntil=os.clock()+0.15;return true
+    end
     e.Contributors[player]=(e.Contributors[player] or 0)+actual
     e.Hum:TakeDamage(actual);e.ReactionUntil=os.clock()+0.15;return true
 end
@@ -76,26 +85,47 @@ local function pathTo(e,target)
         e.PathBusy=false
     end)
 end
+function E.resolveSwing(e,now)
+    local swing=e.Swing
+    if not swing then return end
+    if e.Hum.Health<=0 or now<(e.StunnedUntil or 0) or (e.Root.Position-e.Home).Magnitude>95 then e.Swing=nil;return end
+    if now<swing.At then return end
+    e.Swing=nil
+    local r=Security.alive(swing.Player)
+    local delta=r and r.Position-e.Root.Position
+    if not delta or delta.Magnitude>swing.Range or (delta.Magnitude>0.01 and swing.Direction and delta.Unit:Dot(swing.Direction)<0.1) then return end
+    if E.CanTarget and not E.CanTarget(swing.Player,e.Spawn and e.Spawn.Root) then return end
+    local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={e.Model}
+    local hit=workspace:Raycast(e.Root.Position,delta,params)
+    if E.OnPlayerHit and (not hit or hit.Instance:IsDescendantOf(swing.Player.Character)) then
+        E.OnPlayerHit(swing.Player,e.Damage or e.Def.Damage,e.Root.Position,e,true)
+    end
+end
 function E.step()
     local now=os.clock();local count=0
     for _ in E.Active do count+=1 end
     local cap=Config.QualityProfiles[Config.Quality].ActiveEnemies
     for _,s in E.Spawns do
-        if s.Marker.Parent and not s.Enemy and now>=s.Next and count<cap and nearest(s.Marker.Position,220) then
+        if s.Marker.Parent and s.Marker:GetAttribute('Enabled')~=false and not s.Marker:GetAttribute('Defeated') and not s.Enemy and now>=s.Next and count<cap and nearest(s.Marker.Position,220,s.Root) then
             if not (s.Marker:GetAttribute('EnemyKind')=='Malgorth' and s.Root:GetAttribute('BossDefeated')) then spawnEnemy(s);count+=1 end
         end
     end
     for model,e in E.Active do
+        if e.Spawn and e.Spawn.Marker:GetAttribute('Enabled')==false then
+            E.Active[model]=nil;e.Spawn.Enemy=nil;model:Destroy();continue
+        end
         if not model.Parent or not e.Root.Parent then E.Active[model]=nil;e.Spawn.Enemy=nil;continue end
         if now<(e.BurnUntil or 0) and now-(e.LastBurn or 0)>0.75 and e.BurnOwner then e.LastBurn=now;E.damage(model,e.BurnOwner,5) end
         if e.Hum.Health<=0 then continue end
         e.Hum.WalkSpeed=if now<(e.SlowUntil or 0) then e.Def.Speed*0.5 else e.Def.Speed
-        if now<(e.StunnedUntil or 0) then e.Pending=nil;e.Hum:MoveTo(e.Root.Position);continue end
+        if now-(e.LastPressure or 0)>2 then e.Posture=math.max(0,(e.Posture or 0)-4) end
+        model:SetAttribute('Posture',e.Posture or 0)
+        if now<(e.StunnedUntil or 0) then e.Pending=nil;e.Swing=nil;e.Hum:MoveTo(e.Root.Position);model:SetAttribute('State','STAGGER');continue end
         local homeDist=(e.Root.Position-e.Home).Magnitude
         if e.Pending and (homeDist>95 or now<(e.StunnedUntil or 0)) then e.Pending=nil end
         if e.Def.Boss and homeDist<=95 then
             local phase=if e.Hum.Health<(e.MaxHealth or e.Def.Health)*0.5 then 2 else 1;model:SetAttribute('Phase',phase)
-            if not e.Pending and nearest(e.Root.Position,45) and now-(e.LastSpecial or now-2)>e.SpecialCooldown then
+            if not e.Pending and not e.Swing and nearest(e.Root.Position,45,e.Spawn and e.Spawn.Root) and now-(e.LastSpecial or now-2)>e.SpecialCooldown then
                 e.PatternIndex=(e.PatternIndex or 0)+1
                 local pattern=Patterns.boss(e.Kind,phase,e.PatternIndex)
                 e.LastSpecial=now;e.SpecialCooldown=pattern.Cooldown
@@ -109,17 +139,22 @@ function E.step()
                     for _,p in Players:GetPlayers() do
                         local pr=Security.alive(p)
                         local delta=pr and pr.Position-pending.Origin
-                        if delta and Patterns.inArea(Vector2.new(delta.X,delta.Z).Magnitude,delta.Y,pending.Pattern) then
+                        if delta and (not E.CanTarget or E.CanTarget(p,e.Spawn and e.Spawn.Root)) and Patterns.inArea(Vector2.new(delta.X,delta.Z).Magnitude,delta.Y,pending.Pattern) then
                             local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={model}
                             local hit=workspace:Raycast(pending.Origin,pr.Position-pending.Origin,params)
-                            if E.OnPlayerHit and (not hit or hit.Instance:IsDescendantOf(p.Character))then E.OnPlayerHit(p,e.Def.Damage*pending.Pattern.Multiplier,pending.Origin)end
+                            if E.OnPlayerHit and (not hit or hit.Instance:IsDescendantOf(p.Character))then E.OnPlayerHit(p,(e.Damage or e.Def.Damage)*pending.Pattern.Multiplier,pending.Origin,e,false)end
                         end
                     end
                 end
                 continue
             end
         end
-        local player,dist=nearest(e.Root.Position,90)
+        if e.Swing then
+            e.Hum:MoveTo(e.Root.Position);model:SetAttribute('State','WINDUP')
+            E.resolveSwing(e,now)
+            continue
+        end
+        local player,dist=nearest(e.Root.Position,90,e.Spawn and e.Spawn.Root)
         local homeDist=(e.Root.Position-e.Home).Magnitude
         local target
         if homeDist>95 or not player then
@@ -132,7 +167,9 @@ function E.step()
             local hit=pRoot and workspace:Raycast(e.Root.Position,pRoot.Position-e.Root.Position,rayParams)
             if pRoot and now-e.LastAttack>1.3 and (not hit or hit.Instance:IsDescendantOf(player.Character)) then
                 e.LastAttack=now
-                if E.OnPlayerHit then E.OnPlayerHit(player,e.Def.Damage,e.Root.Position) end
+                local delta=pRoot.Position-e.Root.Position
+                e.Swing={Player=player,At=now+(e.Def.Windup or 0.65),Direction=if delta.Magnitude>0.01 then delta.Unit else nil,Range=7+(if e.Kind=='Malgorth' then 3 else 0)}
+                if E.OnWarning then E.OnWarning({Kind='MeleeWarning',Position=e.Root.Position,Seconds=e.Def.Windup or 0.65,Name=e.Def.Name,Target=player.UserId}) end
             end
         else e.State='CHASE';local r=Security.alive(player);target=r and r.Position end
         model:SetAttribute('State',e.State)
@@ -147,7 +184,7 @@ function E.step()
             end
             -- Sem caminho válido não atravessa paredes tentando mover o CFrame.
         end
-        if not nearest(e.Home,300) then
+        if not nearest(e.Home,300,e.Spawn and e.Spawn.Root) then
             E.Active[model]=nil;e.Spawn.Enemy=nil;e.Spawn.Next=now+3;model:Destroy()
         end
     end
@@ -165,8 +202,18 @@ function E.step()
         end
     end
 end
+function E.clearScope(scope)
+    for model,e in E.Active do
+        if e.Spawn and e.Spawn.Root==scope then e.Spawn.Enemy=nil;E.Active[model]=nil;model:Destroy() end
+    end
+end
 function E.start()
     if E.Running then return end;E.Running=true
+    local last=0
+    game:GetService('RunService').Heartbeat:Connect(function()
+        local now=os.clock();if now-last<0.03 then return end;last=now
+        for _,e in E.Active do if e.Swing then E.resolveSwing(e,now) end end
+    end)
     task.spawn(function() while task.wait(0.25) do local ok,err=xpcall(E.step,debug.traceback);if not ok then warn(err) end end end)
 end
 return E

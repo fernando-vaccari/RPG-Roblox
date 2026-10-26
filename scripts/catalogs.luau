@@ -2,8 +2,18 @@
 local catalog=require('../src/shared/Config/ContentConfig')
 local abilities=require('../src/shared/Config/AbilityConfig')
 local identity=require('../src/shared/Config/IdentityConfig')
+local world=require('../src/shared/Config/WorldConfig')
+local dungeon=require('../src/shared/Config/DungeonConfig')
 local function keys(map)local out={};for key in map do table.insert(out,key)end;table.sort(out);return out end
 print('# Catálogos atuais\n\nGerados das configurações do projeto. Implementação não equivale a homologação Roblox.\n')
+print('## Eldravyn: Rise of Shadows — mundo\n\nRegião | Tipo | X | Z | Edifícios\n--- | --- | --- | --- | ---')
+for _,r in world.Cities do print(r.Name..' | Cidade | '..r.X..' | '..r.Z..' | '..#catalog.CityBuildings[r.Id]) end
+for _,r in world.Forests do print(r.Name..' | Floresta | '..r.X..' | '..r.Z..' | —') end
+print('\n## Expedições\n\nDungeon | Andar | Ambiente | Encontro\n--- | --- | --- | ---')
+local dungeonRules=require('../src/shared/Core/DungeonRules')
+for _,id in dungeon.Order do for floor=1,dungeon.Dungeons[id].Floors do local f=dungeonRules.floor(dungeon,id,floor);print(dungeon.Dungeons[id].Name..' | '..floor..' — '..f.Name..' | '..f.Layout..' | '..table.concat(f.Enemies,', ')) end end
+print('\n## Ranks da guilda\n\nRank | XP acumulada | Missões concluídas\n--- | --- | ---')
+for _,rank in catalog.Ranks do local r=catalog.RankRequirements[rank];print(rank..' | '..r.XP..' | '..r.Quests) end
 print('## Raças\n\nID | Nome | Probabilidade | Evolução | Habilidade\n--- | --- | --- | --- | ---')
 for _,id in identity.RaceOrder do
  local r=identity.Races[id]

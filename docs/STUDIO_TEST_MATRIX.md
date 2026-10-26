@@ -1,5 +1,8 @@
 # Matriz de homologação no Roblox Studio / cliente publicado
 
+> Estado atual: Eldravyn 0.6.0. Consulte [PROGRESSO.md](../PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](../COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
+
+
 **Todos os casos desta matriz: NÃO TESTADOS no engine nesta entrega.** Não marcar como PASSOU a partir do mock. Registrar versão do Studio, dispositivo, perfil, número de jogadores e resultado real em TEST_RESULTS.md.
 
 | Caso | Procedimento | Resultado esperado |

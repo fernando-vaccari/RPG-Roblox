@@ -32,7 +32,7 @@ test('campanha com 15 principais e 20 secundárias e pré-requisitos acíclicos'
  local supported={Bandit=true,Wolf=true,Slime=true,Skeleton=true,Demon=true,Knight=true,Malgorth=true,SylvarinBoss=true,NoctharBoss=true,Mage=true,Ruins=true,Herb=true,Supplies=true}
  for id,q in Catalog.Quests do
   if q.Category=='Main'then main+=1 elseif q.Category=='Side'then side+=1 end
-  assert(supported[q.Target] or string.sub(q.Target,1,6)=='Visit:' or string.sub(q.Target,1,5)=='Talk:')
+  assert(supported[q.Target] or string.sub(q.Target,1,6)=='Visit:' or string.sub(q.Target,1,5)=='Talk:' or string.sub(q.Target,1,8)=='Defense:' or string.sub(q.Target,1,8)=='Dungeon:' or q.Target=='VesperaBoss' or q.Target=='LakeDiscovery')
   local seen={};local function walk(key)assert(not seen[key]);seen[key]=true;for _,pre in Catalog.Quests[key].Prerequisites or {} do assert(Catalog.Quests[pre]);walk(pre)end;seen[key]=nil end;walk(id)
  end
  assert(main==15 and side==20)

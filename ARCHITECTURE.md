@@ -1,5 +1,8 @@
 # Arquitetura atual
 
+> Estado atual: Eldravyn 0.6.0. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
+
+
 Fase 1 preservada: WorldConfig, TerrainMath, TerrainGenerator, WorldGenerator, ValidationGenerator e Rojo permanecem a base. O pedido integral está em docs/REQUIREMENTS.pt-BR.txt.
 
 ## Editor
@@ -51,3 +54,9 @@ São agora 37 módulos e dois bootstraps em cada Place. ActionMath centraliza or
 InteriorPlan separa disposição de móveis da construção. EnvironmentRules fornece clima determinístico e orçamento local de apresentação. BenefitPreview e TesterService oferecem apenas relatórios de produtos já aprovados: Studio, opt-in e sem persistência; não introduzem comandos de concessão ao perfil.
 
 DataService recusa saves de snapshots congelados e libera somente o lock ao sair nesse estado; envelopes/locks inválidos e lease expirado são tratados conservadoramente. DungeonService usa o mesmo save/release e distingue recuperação confirmada de simples tentativa de load. Ver docs/IMPROVEMENTS.md para evidência e limites.
+
+## Eldravyn 0.6.0 — extensão atual
+
+48 módulos, 2 bootstraps por Place. DefenseRules centraliza janela de parry/postura/crítico; EnemyService mantém IA a 4 Hz e resolve golpes anunciados em Heartbeat limitado a ~33 Hz. AdventureRules/TutorialService registram ações reais sem prêmios arbitrários. DungeonRules/ExpeditionService controlam andares/roster/derrota e usam a transação atômica existente de perfil para tickets e marcos. Reservas são duráveis; TeleportData não autoriza progresso. SiegeService usa ledger compacto por cidade para recompensa de evento.
+
+O segundo Place contém geração das sete salas antigas e 30 andares adicionais, com inimigos ativados apenas no piso atual. PrepareStudio usa MedievalPlaceKind para preparar o Place correto, preservando mapas e distinguindo prévia sem APIs de persistência. AdventureController amplia menus/status e o UIController mantém controles touch e dados públicos sem tickets/recibos.

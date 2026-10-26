@@ -1,5 +1,8 @@
 # Resultados atuais — continuação fases 2–11
 
+> Estado atual: Eldravyn 0.6.0. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
+
+
 ## PASSOU na nuvem Linux
 
 - `python3 scripts/check.py`: **37 arquivos Luau compilados**, análise estática dos módulos puros sem diagnósticos e duas compilações Rojo.
@@ -82,3 +85,13 @@ Fechamento atual: **43 arquivos Luau compilados, 33 cenários CLI e 13 fluxos mo
 Os cenários estão em tests/quality.spec.luau e na extensão de tests/editor.integration.luau. Foi corrigida a venda que deixava quantidade 0 e a possibilidade de gravar snapshot antigo após congelamento. A estrutura do mapa foi gerada no mock, com 6138 Parts e 63 NPCs. Isso não valida sua aparência ou custo real de renderização.
 
 **Não testado:** renderização/física/navegação real, fluidez de combate/móvel, FPS/RAM no notebook, áudio com assets publicados, DataStore/teleporte/recibos reais. O relatório docs/IMPROVEMENTS.md separa cada implementação da evidência disponível e lista pendências. Nenhuma compra ou publicação foi executada.
+
+## Eldravyn 0.6.0 — 26/10/2026
+
+`python3 scripts/check.py` passou: 63 Luau compilados, análise pura, 52 cenários CLI (51 nomeados + planejamento composto), 36 fluxos mock. Ambos os Places foram construídos com 48 módulos + 2 bootstraps; serviços, papel World/Dungeon e grafo de referências verificados.
+
+Regressões novas: janela/frente/spam de parry, postura/crítico, tutorial sem recompensa inventada, armadura/capacidade/ranks, 30 andares, recompensa única, grupo/tickets persistentes, espera de chegada, dupla até o final de ambas as expedições, replay de chefe, derrota, commit com resposta perdida, quatro clientes negativos/limite e reunião no portal, defesa de cidade e fluxo real de personagem/loja/equipamento. Preparação de editor não reescreve mapa pronto, prévia não acessa DataStore nem substitui persistência publicada.
+
+Contagem mock: 11.888 Parts, 135 NPCs, 130 lotes, 300 árvores e 15 baús florestais; 30 pisos adicionais na dungeon. Teste geométrico detecta travessas nas entradas centrais. UI calcula áreas sem sobreposição de tutorial/toast/hotbar em 667×375, 844×390 e 390×844. Isso não testa pixels, toque ou física.
+
+Manifesto: build/BUILD_MANIFEST.json com `scenes_baked=false` e `studio_tested=false`. Nenhum Roblox Studio/cliente, publicação, compra, DataStore/teleporte real ou benchmark foi executado. Checklist real em TESTES_STUDIO.md.

@@ -116,10 +116,10 @@ function WorldGenerator.GenerateNewWorld(config)
         spawn.Material = Enum.Material.Cobblestone
         spawn.Color = Color3.fromRGB(170, 164, 140)
         spawn.Parent = root.Spawns
-        assert(#root.TerrainMarkers:GetChildren() == 7 and spawn.Parent, "Validação das reservas falhou")
+        assert(#root.TerrainMarkers:GetChildren() == #c.Cities+#c.Forests+1 and spawn.Parent, "Validação das reservas falhou")
         local plan=Plan.build(c,TerrainMath,Catalog)
         print('[04/09] Estradas e pontes...'); Content.roads(root,plan,checkpoint)
-        print('[05/09] Quatro cidades e NPCs...'); Content.cities(root,c,plan,checkpoint)
+        print('[05/09] Cidades e NPCs...'); Content.cities(root,c,plan,checkpoint)
         print('[06/09] Florestas, inimigos e baús...'); Content.forests(root,c,plan,checkpoint)
         print('[07/09] Entrada da dungeon e decoração...'); Content.entrance(root,c,TerrainMath)
         require(script.Parent.DecorationGenerator).generate(root.Decorations,c,plan,TerrainMath)
@@ -150,6 +150,31 @@ end
 function WorldGenerator.ValidateWorld(config)
     return Validation.validate(workspace, config or Config)
 end
+-- One editor command for files built by either Rojo project. It never deletes old maps.
+function WorldGenerator.PrepareStudio(options)
+    assert(RunService:IsStudio() and not RunService:IsRunning(),'Prepare no editor do Studio, antes de Play')
+    options=options or {}
+    local kind=ServerStorage:FindFirstChild('MedievalPlaceKind')
+    assert(kind and (kind.Value=='World' or kind.Value=='Dungeon'),'Use um dos Places gerados pelo projeto Rojo')
+    if kind.Value=='World' then
+        local existing=workspace:FindFirstChild('GeneratedWorld')
+        if not existing then WorldGenerator.GenerateNewWorld() else
+            assert(existing:GetAttribute('ProjectId')==Config.ProjectId and existing:GetAttribute('Status')=='Complete','Mapa existente incompleto/desconhecido; foi preservado')
+            assert(existing:GetAttribute('ConfigSignature')==TerrainMath.signature(Config),'O mapa salvo usa outra geografia. Abra o build em uma cópia nova; seu mapa foi preservado.')
+            for _,check in WorldGenerator.ValidateWorld() do assert(check.Status~='FALHOU',check.Name) end
+        end
+    else
+        local existing=workspace:FindFirstChild('GeneratedDungeon')
+        if not existing then WorldGenerator.GenerateDungeon() else
+            assert(existing:GetAttribute('ProjectId')==Config.ProjectId and existing:GetAttribute('Status')=='Complete','Dungeon existente incompleta/desconhecida; foi preservada')
+            if not existing:FindFirstChild('Expeditions') then WorldGenerator.AddExpeditions() end
+        end
+    end
+    workspace:SetAttribute('StudioSessionPreview',options.Persistent~=true)
+    workspace:SetAttribute('EldravynPrepared',true)
+    print('[Eldravyn] Cenário preparado. Salve como uma cópia .rbxl/.rbxlx e clique Play. Prévia Studio: '..tostring(options.Persistent~=true)..'. Não publica o jogo.')
+    return {Kind=kind.Value,StudioSessionPreview=options.Persistent~=true,Status='Prepared',RequiresSave=true}
+end
 
 -- Substituições seletivas preservam o conteúdo anterior em ServerStorage.
 function WorldGenerator.RegenerateCity(id) return require(script.Parent.RegenerationService).city(id) end
@@ -161,5 +186,15 @@ function WorldGenerator.RegenerateGeneratedWorld()
 end
 function WorldGenerator.GenerateDungeon(options)
     return require(script.Parent.DungeonInteriorGenerator).GenerateDungeon(options)
+end
+function WorldGenerator.AddExpeditions()
+    assert(not RunService:IsRunning(),'Execute fora do Play')
+    local map=workspace:FindFirstChild('GeneratedDungeon')
+    assert(map and map:GetAttribute('ProjectId')==Config.ProjectId and map:GetAttribute('Status')=='Complete','Dungeon própria completa ausente')
+    assert(not map:FindFirstChild('Expeditions'),'Expedições já existem; nenhuma substituição será feita')
+    local origin=map:GetAttribute('Origin') or map:GetAttribute('SpawnPosition')-Vector3.new(0,6,-18)
+    local generator=require(script.Parent.ExpeditionGenerator)
+    generator.preflight(origin)
+    return generator.build(map,origin)
 end
 return WorldGenerator
