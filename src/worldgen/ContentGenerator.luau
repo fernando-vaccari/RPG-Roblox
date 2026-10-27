@@ -74,7 +74,11 @@ function C.cities(root,c,plan,checkpoint)
         G.part(parent,'Plaza',Vector3.new(64,0.5,64),cf,Color3.fromRGB(149,147,128),Enum.Material.Cobblestone)
         require(script.Parent.CityLandmarkGenerator).build(parent,city,c)
         for index,lot in city.Lots do
-            local _,pos,role=Buildings.build(parent,lot,city.Id,index)
+            local visible=lot
+            if sceneOnly(root) and lot.VisualKind then
+                visible=table.clone(lot);visible.Kind=lot.VisualKind
+            end
+            local _,pos,role=Buildings.build(parent,visible,city.Id,index)
             if not sceneOnly(root) then
                 local npc=C.npc(root.NPCs,lot.Id..'_NPC',pos,role,city.Id)
                 npc:PivotTo(CFrame.lookAt(npc.PrimaryPart.Position,Vector3.new(city.X,npc.PrimaryPart.Position.Y,city.Z)))
