@@ -1,5 +1,6 @@
 local G=require(script.Parent.Geometry)
 local Content=require(script.Parent.ContentGenerator)
+local TerrainGenerator=require(script.Parent.TerrainGenerator)
 local D={}
 function D.GenerateDungeon(options)
     options=options or {}
@@ -12,10 +13,7 @@ function D.GenerateDungeon(options)
     local params=OverlapParams.new(); params.FilterType=Enum.RaycastFilterType.Exclude; params.FilterDescendantsInstances={workspace.Terrain}
     assert(#workspace:GetPartBoundsInBox(CFrame.new(origin+Vector3.new(30,35,330)),Vector3.new(220,100,800),params)==0,'Área da dungeon contém objetos existentes')
     local volume=Region3.new(origin+Vector3.new(-80,-15,-70),origin+Vector3.new(140,85,730)):ExpandToGrid(4)
-    local _,occupied=workspace.Terrain:ReadVoxels(volume,4)
-    for _,plane in occupied do for _,row in plane do for _,fill in row do
-        assert(fill==0,'Área da dungeon contém Terrain existente; use um Place novo')
-    end end end
+    TerrainGenerator.assertRegionEmpty(workspace.Terrain,volume,'Área da dungeon contém Terrain existente; use um Place novo')
     local m=G.model(workspace,'GeneratedDungeon'); m:SetAttribute('ProjectId','ProjectMedievalRPG'); m:SetAttribute('BossDefeated',false)
     m:SetAttribute('StudioTest',options.StudioTest==true); m:SetAttribute('Status','Generating')
     m:SetAttribute('Origin',origin)

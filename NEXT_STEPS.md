@@ -1,7 +1,7 @@
-# Continuação exata — Eldravyn 0.6.0
+# Continuação exata — Eldravyn 0.6.1
 
 1. Leia PROGRESSO.md, COMO_JOGAR_NO_STUDIO.md, TESTES_STUDIO.md e docs/ELDRAVYN.md. Não recomece o projeto. Dois Places, ProjectId `ProjectMedievalRPG`, DataStore `MedievalRPG_v1`, raças e IDs legados foram preservados.
-2. Prioridade seguinte: executar a matriz curta no Roblox Studio, a partir dos dois `.rbxlx` e do comando `PrepareStudio()`. Salvar cada cenário após geração; o build Rojo contém código e não Terrain pré-gravado. A nuvem Linux não executou o Studio.
+2. Prioridade seguinte: confirmar a correção real de ReadVoxels no Studio pelo procedimento docs/READVOXELS_FIX.md (leitura, geração dos dois Places, proteção sólido/água). O código antigo falhou com o mock contendo Size: Vector3; a correção numérica passa em 42 fluxos simulados, mas isso não valida o engine. Depois executar a matriz curta no Roblox Studio, a partir dos dois `.rbxlx` e do comando `PrepareStudio()`. Salvar cada cenário após geração; o build Rojo contém código e não Terrain pré-gravado. A nuvem Linux não executou o Studio.
 3. Começar por spawn/criação, portas/caminhos, tutorial/parry e duas dungeons solo; depois dois/quatro clientes e mobile. Registrar Output e passos para reproduzir antes de alterar os sistemas já cobertos.
 4. Prévia usa atributo `StudioSessionPreview=true`, reconhecido exclusivamente no Studio: não salva nem sorteia raça temporária. `PrepareStudio({Persistent=true})` habilita o teste real com APIs em Experience dedicada. Publicado continua exigindo DataStore e IDs oficiais de ambos os Places.
 5. Expedições: 10/20 andares estáticos gerados no editor, encontros ativados por andar, uma tentativa por servidor reservado, espera de até 90 s pelo grupo. Melhor andar/recompensa confirmados no portal; nova tentativa começa no andar 1. Sete salas legadas permanecem. Não trocar tickets persistentes por confiança em TeleportData.

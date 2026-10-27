@@ -6,18 +6,34 @@ function TerrainGenerator.region(c, chunk)
         Vector3.new(chunk.X + chunk.Width, c.MaxY, chunk.Z + chunk.Depth))
 end
 
+-- ReadVoxels returns TWO 3D arrays, each with a non-array Size: Vector3 field.
+-- Iterate numeric coordinates only; generalized iteration also visits Size.
+-- Shared by continent, legacy dungeon and expedition preflights.
+function TerrainGenerator.assertRegionEmpty(terrain, region, message)
+    local _, occupancy = terrain:ReadVoxels(region, 4)
+    local size = occupancy.Size
+    assert(typeof(size) == "Vector3"
+        and size.X >= 1 and size.Y >= 1 and size.Z >= 1
+        and size.X % 1 == 0 and size.Y % 1 == 0 and size.Z % 1 == 0,
+        "ReadVoxels retornou dimensões inválidas; geração bloqueada para preservar o Terrain.")
+    for x = 1, size.X do
+        local plane = occupancy[x]
+        for y = 1, size.Y do
+            local row = plane[y]
+            for z = 1, size.Z do
+                -- Any nonzero occupancy (including partial water) is occupied.
+                -- Missing/unexpected cells also fail closed, never release writes.
+                assert(row[z] == 0, message or "Terrain existente na área reservada. Use um Place novo ou altere o projeto; nada foi sobrescrito.")
+            end
+        end
+    end
+end
+
 -- Executado em todos os chunks ANTES da primeira escrita. Não confunde
 -- voxels de água com espaço livre e nunca limpa o Terrain global.
 function TerrainGenerator.assertEmpty(terrain, c, chunks, checkpoint)
     for index, chunk in chunks do
-        local _, occupancy = terrain:ReadVoxels(TerrainGenerator.region(c, chunk), 4)
-        for _, plane in occupancy do
-            for _, row in plane do
-                for _, value in row do
-                    assert(value == 0, "Terrain existente na área reservada. Use um Place novo ou altere o projeto; nada foi sobrescrito.")
-                end
-            end
-        end
+        TerrainGenerator.assertRegionEmpty(terrain, TerrainGenerator.region(c, chunk))
         checkpoint(index, #chunks)
     end
 end

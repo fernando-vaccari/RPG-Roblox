@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1 — proteção de Terrain / ReadVoxels — 27/10/2026
+
+- Corrigida iteração do metadado `Size: Vector3` retornado junto das matrizes de ReadVoxels.
+- Verificador numérico X/Y/Z compartilhado pelo continente, dungeon legada e expedições; mantém recusa de sólido/água parcial antes de escrever ou criar cenário.
+- Mock agora inclui Size nas duas tabelas e reproduz o erro antigo; seis fluxos adicionais cobrem bordas, respostas malformadas, último chunk/andar e preservação de dungeon existente.
+- Script opcional somente de leitura para teste real no Studio; guia de reteste e relatório de causa. Script compilado, não executado no engine.
+- Check completo: 65 Luau, 52 cenários CLI, 42 fluxos simulados e dois Places reconstruídos/verificados. Homologação real continua pendente.
+
 ## 0.6.0 — Eldravyn: Rise of Shadows — 26/10/2026
 
 - Nome público atualizado; IDs internos, saves e conteúdos legados preservados.

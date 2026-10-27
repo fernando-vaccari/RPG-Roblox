@@ -57,6 +57,7 @@ for base,mount in [('src/shared','game.ReplicatedStorage.MedievalRPG'),('src/wor
         lines.append(f'do local m=Instance.new("ModuleScript");m.Name="{name}";m.Parent={parent} end')
 for file,expr in paths.items():
     lines.append(f'loaders[{expr}]=function() local script={expr}\n'+file.read_text()+'\nend')
+lines.append((ROOT/'tests/voxel-guard.integration.luau').read_text())
 lines.append((ROOT/'tests/editor.integration.luau').read_text())
 file=BUILD/'editor.integration.luau';file.write_text('\n'.join(lines))
 suffix='.exe' if os.name=='nt' else ''

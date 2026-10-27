@@ -1,10 +1,19 @@
-# Eldravyn: Rise of Shadows — estado de 26/10/2026
+# Eldravyn: Rise of Shadows — estado de 27/10/2026
 
 ## Resultado atual
 
-Versão 0.6.0 implementada sobre o commit `915588c`, com dois Places Rojo e o histórico preservados. Nome público atualizado; ProjectId `ProjectMedievalRPG`, DataStore `MedievalRPG_v1`, equipamentos, missões e identidade legados permanecem compatíveis.
+Versão 0.6.1, correção aplicada sobre `b5bb23e` (0.6.0), continuidade de `915588c`, com dois Places Rojo e o histórico preservados. Nome público atualizado; ProjectId `ProjectMedievalRPG`, DataStore `MedievalRPG_v1`, equipamentos, missões e identidade legados permanecem compatíveis.
 
 **Builds e verificações da nuvem passaram. Roblox Studio não foi executado.** O pacote fornece um processo completo de preparação: abrir o `.rbxlx`, executar `PrepareStudio()` no editor, salvar a cópia e clicar Play. Os builds não contêm Terrain/cenário pré-gravado; não confundir build de scripts com cena executada.
+
+## Correção real reportada — 0.6.1
+
+O usuário encontrou `attempt to iterate over a Vector3 value` em `TerrainGenerator.assertEmpty` no Roblox Studio. Causa: o retorno de ReadVoxels contém `Size: Vector3` além dos índices da matriz; os laços genéricos percorriam esse campo. O mock antigo omitia Size.
+
+- Regressão reproduzida com a mesma mensagem no código antigo após corrigir o formato do mock.
+- Verificador numérico X/Y/Z centralizado em TerrainGenerator, usado também pela dungeon legada e expedições, que tinham o mesmo defeito. Mantidas todas as proteções de Parts, Terrain, água parcial e locks; nenhum sistema de gameplay ou save alterado.
+- Seis fluxos novos (incluindo 48 posições/tipos de ocupação) e script opcional somente de leitura para reteste real.
+- Dois Places reconstruídos; ZIP, manifesto e hashes atualizados. [Diagnóstico e reteste](docs/READVOXELS_FIX.md). **Não executado no Studio; correção ainda aguarda confirmação no engine.**
 
 ## Etapas concluídas em código
 
@@ -30,7 +39,7 @@ Versão 0.6.0 implementada sobre o commit `915588c`, com dois Places Rojo e o hi
 
 ## Testes executados
 
-- `python3 scripts/check.py`: **63 arquivos Luau compilados**, análise das regras/configurações, **52 cenários CLI** (51 casos nomeados + planejamento/topologia/perfis) e **36 fluxos de integração simulada**.
+- `python3 scripts/check.py`: **65 arquivos Luau compilados**, análise das regras/configurações, **52 cenários CLI** (51 casos nomeados + planejamento/topologia/perfis) e **42 fluxos de integração simulada**.
 - Serviços reais sob host simulado: duas dungeons completas em dupla; replay de Malgorth; quatro clientes locais com IDs negativos; bloqueio de quinto/intruso; tickets e reunião de grupo; morte/derrota; resposta perdida após commit de andar e recompensa única; defesa da cidade; criação/equipamentos/lojas; parry e tutorial; prévia exclusiva de Studio; invariantes anteriores de raça/recibos/dados/projéteis.
 - Geração/estrutura em mock: **11.888 Parts, 135 NPCs, 130 lotes, 300 árvores LOW, 15 baús florestais e 30 andares adicionais**. Contagem não é benchmark nem avaliação estética.
 - Dois builds com **48 ModuleScripts + um Script de servidor + um LocalScript**, sem referências ausentes/ciclos. Verificados os serviços de destino e marcador World/Dungeon. `build/BUILD_MANIFEST.json` registra hashes e `studio_tested=false`, `scenes_baked=false`.
@@ -46,10 +55,10 @@ Versão 0.6.0 implementada sobre o commit `915588c`, com dois Places Rojo e o hi
 
 ## Bugs conhecidos e limites
 
-Nenhuma falha restante foi reproduzida nas suítes executadas. Isso não garante ausência de erros no Roblox. A geração é exclusiva do editor; geografia antiga não é sobrescrita. Prévia não salva; dungeon local usa o mesmo servidor de teste e só admite uma expedição ativa. Servidores publicados usam reserva separada. Fusão, áudio publicado e compras oficiais permanecem pendentes por definição/configuração.
+O erro real de ReadVoxels foi diagnosticado e corrigido em código; a regressão passa no mock atualizado, mas o reteste no Roblox Studio permanece pendente. As suítes completas passaram; isso não garante ausência de erros no engine. A geração é exclusiva do editor; geografia antiga não é sobrescrita. Prévia não salva; dungeon local usa o mesmo servidor de teste e só admite uma expedição ativa. Servidores publicados usam reserva separada. Fusão, áudio publicado e compras oficiais permanecem pendentes por definição/configuração.
 
 ## Próxima tarefa exata
 
-Executar [TESTES_STUDIO.md](TESTES_STUDIO.md), começando por abrir/preparar/salvar o continente e testar personagem, tutorial/parry, portas e dungeons solo. Depois dois/quatro clientes, mobile e serviços reais em Experience de teste. Corrigir erros reproduzidos com Output e passos exatos; não reiniciar o projeto. Detalhes de continuidade em NEXT_STEPS.md.
+Primeiro executar o [reteste ReadVoxels 0.6.1](docs/READVOXELS_FIX.md): leitura real, geração dos dois Places e proteção de sólido/água em cópias descartáveis. Depois executar [TESTES_STUDIO.md](TESTES_STUDIO.md), começando por abrir/preparar/salvar o continente e testar personagem, tutorial/parry, portas e dungeons solo. Depois dois/quatro clientes, mobile e serviços reais em Experience de teste. Corrigir erros reproduzidos com Output e passos exatos; não reiniciar o projeto. Detalhes de continuidade em NEXT_STEPS.md.
 
 Nada foi publicado no Roblox e nenhuma compra foi ativada. A entrega usa a branch GitHub já autorizada; `main` permanece preservada.

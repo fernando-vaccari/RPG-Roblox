@@ -2,6 +2,8 @@
 
 Action RPG medieval/anime no projeto **RPG-Roblox**, preservando os dois Places, o DataStore `MedievalRPG_v1`, as raças, classes e conteúdos anteriores.
 
+**Atualização 0.6.1:** corrigida a iteração de `ReadVoxels().Size` no continente, dungeon e expedições. Consulte [diagnóstico e reteste no Studio](docs/READVOXELS_FIX.md). A confirmação no engine ainda está pendente.
+
 **Abra primeiro [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md).** O pacote contém os dois arquivos `.rbxlx` construídos pelo Rojo. O cenário deve ser materializado **uma vez no editor** e salvo antes de Play; ele não está pré-gravado nos builds. Este ambiente Linux não executa Roblox Studio.
 
 ## Abrir no Windows 11

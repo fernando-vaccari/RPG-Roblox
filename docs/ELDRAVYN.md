@@ -32,4 +32,8 @@ As lacunas da auditoria foram implementadas em 0.6.0; PROGRESSO.md contém o est
 
 A preparação de editor usa o StringValue ServerStorage.MedievalPlaceKind do respectivo projeto Rojo. `PrepareStudio()` ativa uma prévia de sessão reconhecida somente no Studio; `Persistent=true` exige armazenamento real. O build XML verifica serviços/papel/dependências, mas não executa o engine. A entrega não deve ser anunciada como arquivo com mapa já gravado ou jogo homologado.
 
-Verificação atual: 63 Luau, 52 cenários CLI, 36 fluxos mock e dois builds de 48 módulos/2 bootstraps. O mock verifica áreas calculadas de UI em três resoluções, sem afirmar renderização responsiva validada. O teste de quatro jogadores usa IDs negativos como nos clientes locais do Studio.
+Verificação 0.6.0: 63 Luau, 52 cenários CLI, 36 fluxos mock e dois builds de 48 módulos/2 bootstraps. O mock verifica áreas calculadas de UI em três resoluções, sem afirmar renderização responsiva validada. O teste de quatro jogadores usa IDs negativos como nos clientes locais do Studio.
+
+## 0.6.1 — falha real de API no Studio
+
+ReadVoxels devolve Size: Vector3 junto das matrizes. O mock omitia esse metadado, permitindo que o laço genérico incorreto passasse. O código antigo agora falha no mock com a mesma mensagem reportada; TerrainGenerator, DungeonInteriorGenerator e ExpeditionGenerator usam o verificador numérico compartilhado corrigido. 65 Luau/52 cenários CLI/42 fluxos mock e dois builds passaram. Isso não substitui o reteste real de geração/proteção, ainda pendente. Consulte [READVOXELS_FIX.md](READVOXELS_FIX.md).

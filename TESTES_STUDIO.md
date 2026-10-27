@@ -2,6 +2,8 @@
 
 **Todos os itens abaixo estão pendentes de execução real.** Compilação, regras e integração simulada não marcam esta lista automaticamente. Registre versão, dispositivo, resultados e erros completos do Output.
 
+**Primeiro, validar a correção 0.6.1:** execute o [procedimento ReadVoxels](docs/READVOXELS_FIX.md#como-testar-novamente-no-roblox-studio): script de leitura real, geração dos dois Places e recusa de Terrain sólido/água em cópias descartáveis. O erro reportado foi reproduzido em mock e corrigido em código; ainda não houve reteste no engine.
+
 1. **Preparação e entrada:** abra cada `.rbxlx`, execute `PrepareStudio()`, salve, reabra a cópia e clique Play. Confira spawn, HUD e ausência de nova geração de continente na entrada de outro jogador.
 2. **Personagem:** escolha uma classe; confira arma nas mãos e habilidades iniciais. A segunda escolha gratuita deve ser recusada. Prévia deve mostrar ausência de salvamento/raça pendente; modo persistente deve preservar a raça original.
 3. **Combate:** teste combo, pesado, mana/stamina, cooldown, crítico, armadura e poção. Acerte com projéteis; paredes devem bloquear. Trocar arma/classe ou morrer deve encerrar projéteis e invocações apropriadas.

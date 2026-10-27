@@ -9,6 +9,7 @@ function Mock.new(enums,classes)
     vm.__unm=function(a)return V.new(-a.X,-a.Y,-a.Z)end
     vm.__mul=function(a,b)if type(a)=='number'then return b*a end;return V.new(a.X*b,a.Y*b,a.Z*b)end
     vm.__div=function(a,b)return a*(1/b)end
+    vm.__iter=function()error('attempt to iterate over a Vector3 value',2)end
     vm.__index=function(t,k)
         if k=='Magnitude' then return math.sqrt(t.X*t.X+t.Y*t.Y+t.Z*t.Z)end
         if k=='Unit' then return t/t.Magnitude end
@@ -93,7 +94,15 @@ function Mock.new(enums,classes)
     function methods:BindToClose(fn)env.OnClose=fn end
     function methods:IsRunning()return false end
     function methods:IsStudio()return env.Studio~=false end
-    function methods:ReadVoxels()return {{{enums.Material.Air}}},{{{if env.TerrainOccupied then 1 else 0}}}end
+    function methods:ReadVoxels(region,resolution)
+        assert(resolution==4)
+        env.VoxelReads=(env.VoxelReads or 0)+1
+        if env.ReadVoxelsFixture then return env.ReadVoxelsFixture(region,resolution,env.VoxelReads) end
+        -- Compact fixture for orchestration, not the full region allocation.
+        -- BOTH arrays must include the API's Size Vector3 metadata.
+        local size=V.new(1,1,1)
+        return {Size=size,{{enums.Material.Air}}},{Size=size,{{if env.TerrainOccupied then 1 else 0}}}
+    end
     function methods:WriteVoxels(_,resolution,materials,occupancy)
         assert(resolution==4);env.VoxelWrites+=1
         if env.CaptureVoxels then env.LastVoxels={Materials=materials,Occupancy=occupancy}end
@@ -187,7 +196,7 @@ function Mock.new(enums,classes)
     env.UDim2={fromScale=function(x,y)return dim2(x,0,y,0)end,fromOffset=function(x,y)return dim2(0,x,0,y)end,new=dim2}
     env.UDim={new=dim}
     env.TweenInfo={new=function(...)return {...}end}
-    env.Region3={new=function(a,b)return {Min=a,Max=b,ExpandToGrid=function(self)return self end}end}
+    env.Region3={new=function(a,b)return {Min=a,Max=b,Size=b-a,ExpandToGrid=function(self)return self end}end}
     env.OverlapParams={new=function()return {}end};env.RaycastParams=env.OverlapParams
     env.task={wait=function()end,delay=function()end,spawn=function()end}
     function methods:FireServer(...)env.LastRequest={...}end

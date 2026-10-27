@@ -2,6 +2,8 @@
 
 O pacote usa Rojo e inclui **dois Places `.rbxlx` com os scripts nos serviços corretos**. O mundo não está previamente gravado: o Studio deve executar o gerador uma vez. Depois de salvar essa cópia, basta abri-la e clicar Play nas próximas sessões. Não é necessário instalar Rojo/Python para esse caminho.
 
+**Correção 0.6.1:** se você encontrou `attempt to iterate over a Vector3 value` em TerrainGenerator, baixe o ZIP novo, extraia em outra pasta e abra o novo `.rbxlx` depois de fechar o Place antigo. Preserve seu mapa salvo. [Diagnóstico e teste de proteção do Terrain](docs/READVOXELS_FIX.md) explicam a causa e os passos de reteste. O script opcional `scripts/TestReadVoxels.command.luau` testa a leitura real sem alterar terreno; não foi executado no Studio pela nuvem.
+
 ## 1. Abrir e preparar o continente
 
 1. Baixe o ZIP pelo GitHub, clique com o botão direito → **Extrair Tudo**. Abra o arquivo extraído `RPG-Roblox/build/ProjectMedievalRPG.rbxlx` pelo Roblox Studio (**File → Open from File**).

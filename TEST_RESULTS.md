@@ -1,9 +1,18 @@
 # Resultados atuais — continuação fases 2–11
 
-> Estado atual: Eldravyn 0.6.0. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
+> Estado atual: Eldravyn 0.6.1. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
 
 
-## PASSOU na nuvem Linux
+## Correção ReadVoxels 0.6.1 — 27/10/2026
+
+- API oficial consultada: os dois retornos de ReadVoxels têm metadado Size. O erro real visitava Size como uma camada da matriz. O mesmo padrão existia nos dois geradores de dungeon.
+- Teste negativo antes da correção: com Size: Vector3 nas fixtures, o código antigo falhou em assertEmpty com `attempt to iterate over a Vector3 value`.
+- Check completo após a correção: **65 arquivos Luau compilados, análise pura sem diagnósticos, 52 cenários CLI, 42 fluxos simulados, dois builds Rojo de 48 módulos e verificação XML/dependências/serviços**.
+- Seis fluxos novos cobrem matriz não cúbica/metadados; 48 casos sólido/água parcial; formato inválido; último chunk antes da escrita; último andar/dungeon legada antes de criar cenário; AddExpeditions preservando legado.
+- `scripts/TestReadVoxels.command.luau` foi compilado. **Não foi executado no Studio.** ReadVoxels, WriteVoxels, geração completa, abertura dos Places e proteção sobre terreno real continuam pendentes. O mock de orquestração continua compacto.
+- Procedimento e escopo: [docs/READVOXELS_FIX.md](docs/READVOXELS_FIX.md). Logs locais: `build/readvoxels-before-fix.log`, `build/check.log` e `build/integration.log`.
+
+## Histórico anterior — PASSOU na nuvem Linux
 
 - `python3 scripts/check.py`: **37 arquivos Luau compilados**, análise estática dos módulos puros sem diagnósticos e duas compilações Rojo.
 - `tests/terrain.spec.luau`: **7 casos**; configurações, cobertura exata de 4000 × 4000, 10201 amostras de relevo/continuidade, plataformas, determinismo, materiais/ocupação e proteção de reservas.

@@ -1,6 +1,6 @@
 # Progresso
 
-> Estado atual: Eldravyn 0.6.0. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
+> Estado atual: Eldravyn 0.6.1. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
 
 
 ## Fase 1 — código implementado, aguardando execução no Studio
@@ -105,3 +105,7 @@ Artefatos finais: build/ProjectMedievalRPG.rbxlx, build/ProjectMedievalRPG_Dunge
 ## Eldravyn 0.6.0 — estado atual
 
 Continuação concluída em código/testes cloud sobre esta base. Cinco cidades, três florestas, 10/20 andares, parry/postura, tutorial, ranks, defesa, equipamentos, interface e preparação Studio integrados. O estado completo e a próxima tarefa exata estão em PROGRESSO.md. Verificação: 63 Luau, 52 CLI, 36 fluxos mock, 48 módulos por Place. Studio e serviços reais pendentes.
+
+## 27/10/2026 — ReadVoxels 0.6.1
+
+Erro real informado pelo usuário: iteração de Size: Vector3 em assertEmpty. Corrigidos os três preflights com verificador numérico compartilhado, mantendo proteção de terreno. Mock antigo omitia Size; regressão negativa reproduziu a mensagem antes da correção. Check atual: 65 Luau, 52 cenários CLI, 42 fluxos mock e dois builds. Confirmação no engine pendente; reteste em docs/READVOXELS_FIX.md e estado completo em PROGRESSO.md.

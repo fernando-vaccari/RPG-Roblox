@@ -4,7 +4,7 @@
 
 Se o download direto não iniciar, abra RPG-Roblox-Windows11.zip nesta pasta e use **Download raw file** no GitHub. Entre na sua conta se o repositório exigir autenticação.
 
-Entrega **0.6.0**. O ZIP contém código, catálogos, documentação e os dois Places `.rbxlx` compilados. **O cenário precisa ser gerado uma vez no editor e salvo antes de Play.** Siga [COMO_JOGAR_NO_STUDIO.md](../COMO_JOGAR_NO_STUDIO.md):
+Entrega **0.6.1**, com correção de `ReadVoxels` no continente/dungeon/expedições. [Diagnóstico e reteste](../docs/READVOXELS_FIX.md). O ZIP contém código, catálogos, documentação e os dois Places `.rbxlx` compilados. **O cenário precisa ser gerado uma vez no editor e salvo antes de Play.** Siga [COMO_JOGAR_NO_STUDIO.md](../COMO_JOGAR_NO_STUDIO.md):
 
 1. Extraia o ZIP e abra `RPG-Roblox/build/ProjectMedievalRPG.rbxlx` no Studio.
 2. Fora de Play, execute na Command Bar:

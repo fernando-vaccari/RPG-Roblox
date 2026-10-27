@@ -3,6 +3,7 @@ local Config=require(Shared.Config.DungeonConfig)
 local Rules=require(Shared.Core.DungeonRules)
 local G=require(script.Parent.Geometry)
 local Content=require(script.Parent.ContentGenerator)
+local TerrainGenerator=require(script.Parent.TerrainGenerator)
 local Generator={}
 function Generator.preflight(origin)
  for _,id in Config.Order do
@@ -14,8 +15,9 @@ function Generator.preflight(origin)
   -- Small per-floor reads avoid an enormous empty vertical voxel allocation.
   for n=1,d.Floors do
    local p=origin+Vector3.new(d.X,(n-1)*96,d.Z)
-   local _,fill=workspace.Terrain:ReadVoxels(Region3.new(p-Vector3.new(85,6,85),p+Vector3.new(85,45,85)):ExpandToGrid(4),4)
-   for _,plane in fill do for _,row in plane do for _,v in row do assert(v==0,'Terrain existente na área da expedição') end end end
+   TerrainGenerator.assertRegionEmpty(workspace.Terrain,
+    Region3.new(p-Vector3.new(85,6,85),p+Vector3.new(85,45,85)):ExpandToGrid(4),
+    'Terrain existente na área da expedição')
   end
  end
 end
