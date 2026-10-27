@@ -23,6 +23,12 @@ if result.returncode:
     print(result.stdout);raise SystemExit(result.returncode)
 for line in result.stdout.splitlines():
     if line.startswith('PASSOU MOCK:'):print(line,flush=True)
+result=subprocess.run([sys.executable,'scripts/integration.py','--map'],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+(BUILD/'map-integration.log').write_text(result.stdout)
+if result.returncode:
+    print(result.stdout);raise SystemExit(result.returncode)
+for line in result.stdout.splitlines():
+    if line.startswith(('PASSOU MOCK:','PASSOU MAPA:')):print(line,flush=True)
 for project,output in [('default.project.json','ProjectMedievalRPG.rbxlx'),('dungeon.project.json','ProjectMedievalRPG_Dungeon.rbxlx')]:
     run('rojo','build',project,'--output','build/'+output)
 run('rojo','sourcemap','default.project.json','--output','build/sourcemap.json')

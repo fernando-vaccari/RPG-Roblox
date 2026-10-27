@@ -155,7 +155,15 @@ function WorldGenerator.PrepareStudio(options)
     assert(RunService:IsStudio() and not RunService:IsRunning(),'Prepare no editor do Studio, antes de Play')
     options=options or {}
     local kind=ServerStorage:FindFirstChild('MedievalPlaceKind')
-    assert(kind and (kind.Value=='World' or kind.Value=='Dungeon'),'Use um dos Places gerados pelo projeto Rojo')
+    assert(kind and (kind.Value=='World' or kind.Value=='Dungeon' or kind.Value=='Map'),'Use um dos Places gerados pelo projeto Rojo')
+    if kind.Value=='Map' then
+        local scene=require(script.Parent.MapSceneGenerator)
+        if not workspace:FindFirstChild('GeneratedWorld') then scene.generate() end
+        local report=scene.completeTerrain()
+        workspace:SetAttribute('EldravynPrepared',true)
+        print('[Eldravyn] Continente preparado. Salve a cópia antes de Play. Validação visual/desempenho pendentes.')
+        return report
+    end
     if kind.Value=='World' then
         local existing=workspace:FindFirstChild('GeneratedWorld')
         if not existing then WorldGenerator.GenerateNewWorld() else
@@ -186,6 +194,12 @@ function WorldGenerator.RegenerateGeneratedWorld()
 end
 function WorldGenerator.GenerateDungeon(options)
     return require(script.Parent.DungeonInteriorGenerator).GenerateDungeon(options)
+end
+function WorldGenerator.GenerateMapScene(config)
+    return require(script.Parent.MapSceneGenerator).generate(config)
+end
+function WorldGenerator.ValidateMapScene(config)
+    return require(script.Parent.MapSceneGenerator).validate(config)
 end
 function WorldGenerator.AddExpeditions()
     assert(not RunService:IsRunning(),'Execute fora do Play')

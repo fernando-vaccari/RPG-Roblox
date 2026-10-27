@@ -6,6 +6,7 @@ from pathlib import Path
 import json
 import os
 import subprocess
+import sys
 import urllib.request
 ROOT=Path(__file__).resolve().parents[1]
 BUILD=ROOT/'build'
@@ -33,6 +34,7 @@ needed=set(['DataModel','Workspace','ReplicatedStorage','ServerStorage','ServerS
 for file in (ROOT/'src').rglob('*.luau'):
     needed.update(re.findall(r"Instance\.new\(['\"](\w+)['\"]\)",file.read_text()))
 needed.update(['Part','Model','Folder','ModuleScript','SurfaceGui','TextLabel','PointLight'])
+needed.update(['Atmosphere','BloomEffect','ColorCorrectionEffect','SunRaysEffect','Sky'])
 for k in list(needed):
     c=classes.get(k)
     while c and c['Super'] in classes:
@@ -57,8 +59,13 @@ for base,mount in [('src/shared','game.ReplicatedStorage.MedievalRPG'),('src/wor
         lines.append(f'do local m=Instance.new("ModuleScript");m.Name="{name}";m.Parent={parent} end')
 for file,expr in paths.items():
     lines.append(f'loaders[{expr}]=function() local script={expr}\n'+file.read_text()+'\nend')
-lines.append((ROOT/'tests/voxel-guard.integration.luau').read_text())
-lines.append((ROOT/'tests/editor.integration.luau').read_text())
-file=BUILD/'editor.integration.luau';file.write_text('\n'.join(lines))
+map_only='--map' in sys.argv
+if map_only:
+    lines.append((ROOT/'tests/architecture.integration.luau').read_text())
+    lines.append((ROOT/'tests/map.integration.luau').read_text())
+else:
+    lines.append((ROOT/'tests/voxel-guard.integration.luau').read_text())
+    lines.append((ROOT/'tests/editor.integration.luau').read_text())
+file=BUILD/('map.integration.luau' if map_only else 'editor.integration.luau');file.write_text('\n'.join(lines))
 suffix='.exe' if os.name=='nt' else ''
 subprocess.run([str(ROOT/'.tools/bin'/('luau'+suffix)),str(file)],cwd=ROOT,check=True)
