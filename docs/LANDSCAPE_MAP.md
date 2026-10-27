@@ -1,0 +1,13 @@
+# Paisagem do continente — Tarefa 01
+
+Código de cenário, sem novos sistemas de gameplay. `ContentGenerator` preserva os pontos de entrada legados, mas o modo `GeneratedWorld.SceneOnly=true` não instancia NPCs, inimigos, baús com recompensas ou prompts funcionais. Os serviços anteriores permanecem no projeto; não são o bootstrap do Place exclusivo do mapa.
+
+- Cinco variantes de árvore: copa larga, tronco claro, conífera, retorcida e ancestral com raízes; troncos cilíndricos, galhos e volumes de copa em posições controladas. Sylvarin usa verdes esmeralda, Nocthar paleta antiga/musgo/raízes monumentais, Véspera vegetação escura. Copas/galhos não bloqueiam travessia.
+- Cada floresta tem clareira central livre, arco de ruína, rochas com musgo e caverna visitável com abertura de 20 studs. Árvores monumentais e menires ficam deslocados do centro. Pads de Terrain e suas alturas são compartilhados com o planejamento para evitar chão atravessando as cavernas.
+- Cenário entre regiões: Acampamento da Estrada Dourada (440,1250), Vila do Salgueiro (1520,-600), Fortaleza do Sino Partido (-1550,480), Mirante das Coroas (440,-1450) e Jardim do Juramento (-520,-1390). São estruturas estáticas e áreas de descoberta reservadas.
+- As duas entradas externas têm torres, contrafortes, cornijas, janelas rúnicas, arco/keystone, escadaria e pátio aberto. Nenhum interior, teleporte ou batalha novo foi implementado.
+- Ruas consomem o plano curvo comum ao Terrain; os vãos das muralhas usam distância da mesma rota. Ruas de distrito e caminhos de fachada usam o planejamento dos lotes. Pilares de ponte alcançam o leito amostrado; rochas da cascata alcançam o fundo do lago.
+- `Content.integrationMarkers(root,c,plan,terrain)` cria slots inertes e identificadores estáveis para serviços, clareiras e entradas. Não usa `NpcId`, `EnemyId`, `ChestId` ou `Objective` para disparar gameplay.
+- Pequena vegetação/rochas decorativas usam `DetailTier=2` e distância de detalhe 220; não têm colisão ou sombras. As regiões, construções e massas de árvores permanecem presentes em todas as qualidades. A configuração de iluminação e seleção visual é responsabilidade do módulo de apresentação do mapa.
+
+Validações executadas nesta frente: compilador Luau nos quatro módulos; integração simulada dos geradores legados passou após corrigir a regeneração seletiva (o subset de cidade não contém `plan.Roads`, portanto o recorte da muralha usa diretamente a distância de rotas do Terrain). O host não executa física, renderização, navegação ou 56 milhões de voxels reais. Beleza, travessia e desempenho precisam de inspeção no Roblox Studio; contagem de geometria não é homologação visual.

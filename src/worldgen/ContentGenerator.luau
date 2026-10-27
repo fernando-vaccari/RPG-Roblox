@@ -5,6 +5,8 @@ local Catalog=require(Shared.Config.ContentConfig)
 local Rig=require(Shared.RigFactory)
 local C={}
 local Landmarks=require(script.Parent.LandmarkGenerator)
+local Scenery=require(script.Parent.ScenicGenerator)
+local function sceneOnly(root)return root:GetAttribute('SceneOnly')==true end
 local function color(t) return Color3.fromRGB(t[1],t[2],t[3]) end
 function C.npc(parent,id,position,role,city)
     local dialogue=Catalog.Dialogue[role] or Catalog.Dialogue.Citizen
@@ -31,17 +33,36 @@ function C.enemyMarker(parent,id,pos,kind)
     return G.marker(parent,id,pos,{EnemyId=id,EnemyKind=kind})
 end
 function C.tree(parent,t)
-    local cf=CFrame.new(t.X,t.H,t.Z); local s=t.Scale
-    local m=G.model(parent,'Tree_'..t.Variant)
-    G.part(m,'Trunk',Vector3.new(2*s,18*s,2*s),cf*CFrame.new(0,9*s,0),G.Palette.Wood,Enum.Material.Wood)
-    local dark=t.Forest=='Nocthar' or t.Forest=='Vespera'
-    for i=1,3 do
-        local canopy=color(if dark then {49,65+i*7,66} else {68+i*12,125+i*12,76})
-        local size=if t.Variant==0 then Vector3.new(16-i*3,10,16-i*3)*s else Vector3.new(16-i,9,13+i)*s
-        G.detail(m,'Canopy',size,cf*CFrame.new(if t.Variant==0 then 0 else math.sin(i+t.Variant)*3*s,(14+i*4)*s,0),canopy,Enum.Material.Grass,Enum.PartType.Ball)
+    local cf=CFrame.new(t.X,t.H,t.Z);local scale=t.Scale or 1
+    local variant=(t.Variant or 0)%5;local ancient=variant==4
+    local dark=t.Forest=='Vespera';local old=t.Forest=='Nocthar'
+    local m=G.model(parent,'Tree_'..variant);m:SetAttribute('TreeVariant',variant);m:SetAttribute('ForestId',t.Forest)
+    local wood=if variant==1 and not dark then Color3.fromRGB(178,177,149) elseif dark then Color3.fromRGB(65,58,67) else Color3.fromRGB(91,72,48)
+    local leaf=if dark then Color3.fromRGB(56,66,77) elseif old then Color3.fromRGB(81,109,76) else Color3.fromRGB(77,137,77)
+    local height=if ancient then 29 else 18+variant*2
+    local thickness=if ancient then 4.8 else 2.2
+    G.part(m,'Trunk',Vector3.new(height,thickness,thickness)*scale,cf*CFrame.new(0,height*0.5*scale,0)*CFrame.Angles(0,variant*0.7,math.pi/2+(if dark then 0.12 else 0.025)),wood,Enum.Material.Wood,Enum.PartType.Cylinder)
+    local count=if variant==2 then 5 else 4
+    for i=1,count do
+        local a=i*2.399+variant*0.7
+        local spread=if ancient then 9 elseif variant==2 then 1 else 5
+        local crownY=if variant==2 then 11+i*3.4 else height-3+(i%3)*3
+        local x,z=math.sin(a)*spread,math.cos(a)*spread
+        local size=if variant==2 then Vector3.new(17-i*2.2,6,17-i*2.2) else Vector3.new(12+i%2*4,10,11+i%3*2)
+        local crown=G.detail(m,'Canopy',size*scale,cf*CFrame.new(x*scale,crownY*scale,z*scale),leaf,Enum.Material.Grass,Enum.PartType.Ball)
+        crown.CastShadow=not dark
+        if variant~=2 then
+            local branch=G.beam(m,cf:PointToWorldSpace(Vector3.new(0,height*0.55*scale,0)),cf:PointToWorldSpace(Vector3.new(x*scale,(crownY-2)*scale,z*scale)),(if ancient then 1.4 else 0.8)*scale,wood,Enum.Material.Wood)
+            branch.CanCollide=false;branch.CanQuery=false
+        end
     end
-    if t.Variant==2 then G.detail(m,'GroundShrub',Vector3.new(5,2,4)*s,cf*CFrame.new(4,1,2),color(if dark then {70,76,81}else{82,129,71}),Enum.Material.Grass,Enum.PartType.Ball)end
-    G.beam(m,cf:PointToWorldSpace(Vector3.new(0,10*s,0)),cf:PointToWorldSpace(Vector3.new(6*s,17*s,0)),s,G.Palette.Wood,Enum.Material.Wood)
+    if ancient or old then
+        for i=1,4 do
+            local a=i*math.pi/2+variant*0.4
+            G.beam(m,cf:PointToWorldSpace(Vector3.new(math.sin(a)*2*scale,4*scale,math.cos(a)*2*scale)),cf:PointToWorldSpace(Vector3.new(math.sin(a)*9*scale,0.6*scale,math.cos(a)*9*scale)),(if ancient then 2.3 else 1.2)*scale,wood,Enum.Material.Wood)
+        end
+    end
+    if variant%2==0 then Scenery.shrub(m,cf*CFrame.new(5*scale,0,2*scale),0.8*scale,dark) end
     return m
 end
 function C.cities(root,c,plan,checkpoint)
@@ -51,30 +72,24 @@ function C.cities(root,c,plan,checkpoint)
         parent:SetAttribute('RegionName',city.Name)
         local cf=CFrame.new(city.X,city.H,city.Z)
         G.part(parent,'Plaza',Vector3.new(64,0.5,64),cf,Color3.fromRGB(149,147,128),Enum.Material.Cobblestone)
-        local well=G.model(parent,'Well')
-        G.part(well,'Basin',Vector3.new(10,3,10),cf*CFrame.new(23,1.5,0),G.Palette.Stone,Enum.Material.Cobblestone)
-        G.detail(well,'Water',Vector3.new(8,0.3,8),cf*CFrame.new(23,3,0),Color3.fromRGB(85,161,186),Enum.Material.Glass)
-        for _,x in {18,28} do G.part(well,'Post',Vector3.new(0.8,10,0.8),cf*CFrame.new(x,5,0),G.Palette.Wood,Enum.Material.Wood) end
-        G.part(well,'Canopy',Vector3.new(13,1,12),cf*CFrame.new(23,10,0),G.Palette.Roof,Enum.Material.Slate)
+        require(script.Parent.CityLandmarkGenerator).build(parent,city,c)
         for index,lot in city.Lots do
             local _,pos,role=Buildings.build(parent,lot,city.Id,index)
-            local npc=C.npc(root.NPCs,lot.Id..'_NPC',pos,role,city.Id)
-            npc:PivotTo(CFrame.lookAt(npc.PrimaryPart.Position,Vector3.new(city.X,npc.PrimaryPart.Position.Y,city.Z)))
+            if not sceneOnly(root) then
+                local npc=C.npc(root.NPCs,lot.Id..'_NPC',pos,role,city.Id)
+                npc:PivotTo(CFrame.lookAt(npc.PrimaryPart.Position,Vector3.new(city.X,npc.PrimaryPart.Position.Y,city.Z)))
+            end
             checkpoint()
         end
         local radius
         for _,config in c.Cities do if config.Id==city.Id then radius=config.Radius-6 end end
         -- Muralha com vãos reservados às rotas. Nada fecha uma estrada.
-        if city.Id=='Arkheim' or city.Id=='Valoria' then
+        if city.Id=='Arkheim' or city.Id=='Valoria' or city.Id=='Durakh' then
             for i=1,64 do
                 local a=i/64*math.pi*2
                 local x,z=city.X+math.sin(a)*radius,city.Z+math.cos(a)*radius
                 local free=true
-                for _,road in c.Roads do
-                    local dx,dz=road.B.X-road.A.X,road.B.Z-road.A.Z
-                    local t=math.clamp(((x-road.A.X)*dx+(z-road.A.Z)*dz)/(dx*dx+dz*dz),0,1)
-                    if math.sqrt((x-road.A.X-t*dx)^2+(z-road.A.Z-t*dz)^2)<30 then free=false end
-                end
+                if require(script.Parent.TerrainMath).roadDistance(c,x,z)<32 then free=false end
                 if free then
                     local h=if city.Id=='Arkheim' then 12 else 6
                     local frame=CFrame.new(x,city.H+h/2,z)*CFrame.Angles(0,a,0)
@@ -84,32 +99,39 @@ function C.cities(root,c,plan,checkpoint)
             end
         end
         for _,offset in {Vector3.new(-24,0,-24),Vector3.new(24,0,24)} do G.torch(parent,cf*CFrame.new(offset+Vector3.new(0,2,0)),true) end
-        local board=G.sign(parent,'MISSÕES • GUILDA',cf*CFrame.new(-23,5,0),12)
-        board:SetAttribute('QuestBoard',true); G.prompt(board,'Consultar','Quadro de missões')
-        local handoff=G.marker(root.InteractiveObjects,city.Id..'_Supplies',Vector3.new(city.X-24,city.H+3,city.Z+12),{Objective='Supplies'})
-        if city.Id=='Durakh' then handoff.Transparency=0; G.prompt(handoff,'Entregar','Suprimentos') end
+        local board=G.sign(parent,if sceneOnly(root) then 'AVISOS • GUILDA' else 'MISSÕES • GUILDA',cf*CFrame.new(-23,5,0),12)
+        if not sceneOnly(root) then board:SetAttribute('QuestBoard',true);G.prompt(board,'Consultar','Quadro de missões') end
+        if not sceneOnly(root) then
+            local handoff=G.marker(root.InteractiveObjects,city.Id..'_Supplies',Vector3.new(city.X-24,city.H+3,city.Z+12),{Objective='Supplies'})
+            if city.Id=='Durakh' then handoff.Transparency=0;G.prompt(handoff,'Entregar','Suprimentos') end
+        end
         G.marker(root.CinematicMarkers,city.Id..'_Shot',Vector3.new(city.X,city.H+60,city.Z+120),{
             ShotName=city.Id..'_Plaza',RegionName=city.Name,CameraPosition=Vector3.new(city.X,city.H+60,city.Z+120),LookAtPosition=Vector3.new(city.X,city.H+10,city.Z),Duration=8,Category='City'})
         Landmarks.city(parent,city,c,C)
-        Landmarks.defenses(root,c,C,parent,city)
+        if not sceneOnly(root) then Landmarks.defenses(root,c,C,parent,city) end
         if city.Id=='Valoria' then Landmarks.camp(root,c,C,parent) end
         checkpoint()
     end
 end
-function C.roads(root,plan,checkpoint)
+function C.roads(root,plan,checkpoint,config)
+    local c=config or require(Shared.Config.WorldConfig)
+    local terrain=require(script.Parent.TerrainMath)
     for _,route in plan.Roads do
         local parent=G.model(root.Roads,route.Id)
         parent:SetAttribute('RouteId',route.Id)
         for i,s in route.Segments do
             local a,b=Vector3.new(s.A.X,s.A.H+0.5,s.A.Z),Vector3.new(s.B.X,s.B.H+0.5,s.B.Z)
             local cf=CFrame.lookAt((a+b)/2,b)
-            G.part(parent,if s.Bridge then 'BridgeDeck' else 'Road',Vector3.new(18,0.7,(b-a).Magnitude+0.2),cf,
+            G.part(parent,if s.Bridge then 'BridgeDeck' else 'Road',Vector3.new(route.Width or 18,0.7,(b-a).Magnitude+0.2),cf,
                 if s.Bridge then G.Palette.Wood else Color3.fromRGB(149,128,93),if s.Bridge then Enum.Material.WoodPlanks else Enum.Material.Ground)
             if s.Bridge then
                 local bridge=G.model(root.Bridges,route.Id..'_'..i)
                 for _,side in {-1,1} do
-                    G.part(bridge,'Rail',Vector3.new(0.5,0.8,(b-a).Magnitude+0.2),cf*CFrame.new(side*9,3,0),G.Palette.Wood,Enum.Material.Wood)
-                    G.part(bridge,'Support',Vector3.new(1,18,1),cf*CFrame.new(side*8,-9,0),G.Palette.Stone,Enum.Material.Cobblestone)
+                    G.part(bridge,'Rail',Vector3.new(0.5,0.8,(b-a).Magnitude+0.2),cf*CFrame.new(side*((route.Width or 18)/2),3,0),G.Palette.Wood,Enum.Material.Wood)
+                    local p=cf:PointToWorldSpace(Vector3.new(side*((route.Width or 18)/2-1),0,0))
+                    local bed=terrain.height(c,p.X,p.Z)
+                    local height=math.max(1,p.Y-bed+1)
+                    G.part(bridge,'Support',Vector3.new(1.4,height,1.4),CFrame.new(p.X,bed+height/2-0.5,p.Z),G.Palette.Stone,Enum.Material.Cobblestone)
                 end
             end
         end
@@ -118,81 +140,95 @@ function C.roads(root,plan,checkpoint)
     end
 end
 function C.forests(root,c,plan,checkpoint)
-    local chestOverrides={}
-    local folders={}
-    for _,f in c.Forests do folders[f.Id]=G.model(root.Forests,f.Id); folders[f.Id]:SetAttribute('RegionName',f.Name) end
-    for i,t in plan.Trees do C.tree(folders[t.Forest],t); if i%20==0 then checkpoint() end end
+    local chestOverrides={};local folders={}
+    for _,f in c.Forests do
+        folders[f.Id]=G.model(root.Forests,f.Id);folders[f.Id]:SetAttribute('RegionName',f.Name)
+        folders[f.Id]:SetAttribute('ForestTheme',if f.Id=='Sylvarin' then 'Emerald' elseif f.Id=='Nocthar' then 'Ancient' else 'Shadow')
+    end
+    for i,t in plan.Trees do C.tree(folders[t.Forest],t);if i%20==0 then checkpoint() end end
+    local terrain=require(script.Parent.TerrainMath)
     for _,land in plan.Landmarks do
-        local cf=CFrame.new(land.X,land.H,land.Z)
-        local parent=folders[land.Id]
-        -- Clareira central: ruínas, altar, missão e acampamento.
-        for i=1,6 do
-            local a=i/6*math.pi*2
-            G.part(parent,'RuinedPillar',Vector3.new(4,8+i%3*3,4),cf*CFrame.new(math.sin(a)*35,4,math.cos(a)*35),G.Palette.Stone,Enum.Material.Rock)
-        end
-        local altar=G.part(parent,'Altar',Vector3.new(10,3,7),cf*CFrame.new(0,1.5,0),G.Palette.Stone,Enum.Material.Slate)
-        altar:SetAttribute('Objective','Ruins'); G.prompt(altar,'Investigar','Ruínas antigas')
-        local herb=G.crystal(parent,cf*CFrame.new(20,2,12),Color3.fromRGB(107,237,152),0.5)
-        herb:SetAttribute('Objective','Herb'); G.prompt(herb,'Coletar','Erva rara')
-        C.npc(root.NPCs,land.Id..'_Explorer',Vector3.new(land.X-20,land.H,land.Z), 'Quest',land.Id)
-        if land.Id=='Nocthar' then
-            for i=1,3 do G.part(parent,'BanditTent',Vector3.new(12,7,10),cf*CFrame.new(i*18-36,3.5,-40)*CFrame.Angles(0,0,0.2),Color3.fromRGB(91,75,61),Enum.Material.Fabric) end
-            G.sign(parent,'O selo está quebrado...',cf*CFrame.new(0,6,-15),20)
-        end
-        -- Small explorable cave in the reserved clearing, without deleting Terrain or adding loot IDs.
-        local caveZ=land.Z+45
-        local caveY=require(script.Parent.TerrainMath).height(c,land.X,caveZ)
-        local cave=G.model(parent,'HiddenCave');local caveFrame=CFrame.new(land.X,caveY,caveZ)
-        G.part(cave,'CaveFoundation',Vector3.new(24,5,24),caveFrame,G.Palette.Stone,Enum.Material.Rock)
-        for _,side in {-1,1}do G.part(cave,'CaveSide',Vector3.new(4,11,24),caveFrame*CFrame.new(side*11,7,0),G.Palette.Stone,Enum.Material.Rock)end
-        G.part(cave,'CaveRoof',Vector3.new(26,4,26),caveFrame*CFrame.new(0,14,0),G.Palette.Stone,Enum.Material.Rock)
-        for i=1,3 do G.part(cave,'CaveStep',Vector3.new(8,i*0.8,2),caveFrame*CFrame.new(0,i*0.4,-19+i*2),G.Palette.Stone,Enum.Material.Rock)end
-        for _,side in {-1,1}do
-            G.detail(cave,'EntranceBoulder',Vector3.new(8,11,8),caveFrame*CFrame.new(side*11,7,-9),G.Palette.Stone,Enum.Material.Rock,Enum.PartType.Ball)
-        end
-        G.detail(cave,'CaveCrown',Vector3.new(24,6,23),caveFrame*CFrame.new(0,15,1),G.Palette.Stone,Enum.Material.Rock,Enum.PartType.Ball)
-        G.part(cave,'CaveBack',Vector3.new(24,11,3),caveFrame*CFrame.new(0,7,11),G.Palette.Stone,Enum.Material.Rock)
-        G.crystal(cave,caveFrame*CFrame.new(7,6,5),if land.Id=='Sylvarin' then Color3.fromRGB(95,188,171)else Color3.fromRGB(155,97,177),0.5)
-        chestOverrides[land.Id..'Chest5']=Vector3.new(land.X,caveY+2.6,caveZ+5)
-        for i=1,8 do
-            local r=15+i*2
-            G.detail(parent,'Rock',Vector3.new(3+i%3,2,4),cf*CFrame.new(math.sin(i*2)*r,0.8,math.cos(i*2)*r),G.Palette.Stone,Enum.Material.Rock,Enum.PartType.Ball)
+        local parent=folders[land.Id];local cf=CFrame.new(land.X,land.H,land.Z)
+        chestOverrides[land.Id..'Chest5']=Scenery.forest(parent,land,c,terrain,C)
+        if not sceneOnly(root) then
+            local altar=G.part(parent,'Altar',Vector3.new(10,3,7),cf*CFrame.new(0,1.5,0),G.Palette.Stone,Enum.Material.Slate)
+            altar:SetAttribute('Objective','Ruins');G.prompt(altar,'Investigar','Ruínas antigas')
+            local herb=G.crystal(parent,cf*CFrame.new(20,2,12),Color3.fromRGB(107,237,152),0.5)
+            herb:SetAttribute('Objective','Herb');G.prompt(herb,'Coletar','Erva rara')
+            C.npc(root.NPCs,land.Id..'_Explorer',Vector3.new(land.X-20,land.H,land.Z),'Quest',land.Id)
+            C.enemyMarker(root.EnemySpawns,land.Id..'_Boss',Vector3.new(land.X+45,land.H,land.Z),if land.Id=='Sylvarin' then 'SylvarinBoss' elseif land.Id=='Vespera' then 'VesperaBoss' else 'NoctharBoss')
         end
         G.marker(root.CinematicMarkers,land.Id..'_Shot',Vector3.new(land.X,land.H+25,land.Z+65),{
             ShotName=land.Id,RegionName=land.Id,CameraPosition=Vector3.new(land.X,land.H+25,land.Z+65),LookAtPosition=Vector3.new(land.X,land.H+8,land.Z),Duration=7,Category='Forest'})
-        C.enemyMarker(root.EnemySpawns,land.Id..'_Boss',Vector3.new(land.X+45,land.H,land.Z),if land.Id=='Sylvarin' then 'SylvarinBoss' elseif land.Id=='Vespera' then 'VesperaBoss' else 'NoctharBoss')
         checkpoint()
     end
-    for _,s in plan.EnemySpawns do C.enemyMarker(root.EnemySpawns,s.Id,Vector3.new(s.X,s.H,s.Z),s.Kind) end
-    for _,chest in plan.Chests do C.chest(root.TreasureChests,chest.Id,chestOverrides[chest.Id] or Vector3.new(chest.X,chest.H,chest.Z),chest.Rarity) end
+    if not sceneOnly(root) then
+        for _,spawn in plan.EnemySpawns do C.enemyMarker(root.EnemySpawns,spawn.Id,Vector3.new(spawn.X,spawn.H,spawn.Z),spawn.Kind) end
+        for _,chest in plan.Chests do C.chest(root.TreasureChests,chest.Id,chestOverrides[chest.Id] or Vector3.new(chest.X,chest.H,chest.Z),chest.Rarity) end
+    end
 end
 function C.entrance(root,c,terrain)
-    local d=c.DungeonEntrance
-    local pos=Vector3.new(d.X,terrain.height(c,d.X,d.Z),d.Z)
-    local cf=CFrame.new(pos); local m=root.DungeonEntrance
-    G.part(m,'StairPlatform',Vector3.new(60,2,40),cf,G.Palette.Stone,Enum.Material.Cobblestone)
-    for _,x in {-20,20} do
-        G.part(m,'GateTower',Vector3.new(12,36,12),cf*CFrame.new(x,18,0),G.Palette.Stone,Enum.Material.Slate)
-        G.crystal(m,cf*CFrame.new(x,38,0),Color3.fromRGB(210,58,107),2)
-        G.torch(m,cf*CFrame.new(x,7,9),true)
-    end
-    G.part(m,'Lintel',Vector3.new(48,7,10),cf*CFrame.new(0,30,0),G.Palette.Stone,Enum.Material.Slate)
-    for i=1,5 do G.part(m,'Stairs',Vector3.new(30,i,4),cf*CFrame.new(0,i/2,28-i*4),G.Palette.Stone,Enum.Material.Cobblestone) end
-    G.sign(m,'ABISMO DE MALGORTH',cf*CFrame.new(0,23,6),26)
-    C.npc(root.NPCs,'DungeonGuardian',pos+Vector3.new(0,1,15),'Dungeon','Malgorth'):SetAttribute('DungeonId','MalgorthDepths')
-    local second=c.SecondDungeonEntrance
-    if second then
-        local p=Vector3.new(second.X,terrain.height(c,second.X,second.Z),second.Z)
-        local shrine=G.model(m,'FallenSanctumGate')
-        G.part(shrine,'ShrineFloor',Vector3.new(50,2,38),CFrame.new(p),G.Palette.Stone,Enum.Material.Cobblestone)
+    local function gate(id,def,title,dungeonId,shadow)
+        local pos=Vector3.new(def.X,terrain.height(c,def.X,def.Z),def.Z);local cf=CFrame.new(pos)
+        local m=G.model(root.DungeonEntrance,id);m:SetAttribute('RegionId',id)
+        m:SetAttribute('IntegrationKind','DungeonExterior');m:SetAttribute('IntegrationDungeonId',dungeonId)
+        local stone=if shadow then Color3.fromRGB(72,69,82) else Color3.fromRGB(126,135,150)
+        local glow=if shadow then Color3.fromRGB(169,79,111) else Color3.fromRGB(126,173,207)
+        G.part(m,'Forecourt',Vector3.new(76,2,58),cf,stone,Enum.Material.Cobblestone)
         for _,side in {-1,1} do
-            G.part(shrine,'Pillar',Vector3.new(6,28,6),CFrame.new(p+Vector3.new(side*17,14,0)),G.Palette.Stone,Enum.Material.Marble)
-            G.crystal(shrine,CFrame.new(p+Vector3.new(side*17,31,0)),Color3.fromRGB(136,159,223),1.5)
+            local x=side*25
+            G.part(m,'TowerPlinth',Vector3.new(19,4,22),cf*CFrame.new(x,2,-2),stone,Enum.Material.Cobblestone)
+            G.part(m,'GateTower',Vector3.new(13,43,16),cf*CFrame.new(x,23,-2),stone,Enum.Material.Slate)
+            for _,dx in {-6,6} do G.part(m,'Buttress',Vector3.new(3,31,20),cf*CFrame.new(x+dx,16,-1)*CFrame.Angles(0,0,side*0.035),stone,Enum.Material.Rock) end
+            for i=1,3 do
+                G.part(m,'TowerCornice',Vector3.new(16,1.2,19),cf*CFrame.new(x,12+i*10,-2),Color3.fromRGB(105,111,125),Enum.Material.Cobblestone)
+                G.detail(m,'RuneWindow',Vector3.new(3,5,0.3),cf*CFrame.new(x,11+i*8,6.15),glow,Enum.Material.Neon)
+            end
+            G.part(m,'SpireBase',Vector3.new(17,3,20),cf*CFrame.new(x,46,-2),stone,Enum.Material.Slate)
+            G.crystal(m,cf*CFrame.new(x,52,-2),glow,2)
+            G.part(m,'ArchHaunch',Vector3.new(16,5,12),cf*CFrame.new(side*13,36,-2)*CFrame.Angles(0,0,side*0.5),stone,Enum.Material.Cobblestone)
+            G.part(m,'OuterColumn',Vector3.new(6,20,6),cf*CFrame.new(side*39,10,13),stone,Enum.Material.Cobblestone)
+            G.torch(m,cf*CFrame.new(side*36,6,19),true)
+            for i=1,4 do G.part(m,'ApproachPost',Vector3.new(2,3,2),cf*CFrame.new(side*34,2,20+i*5),stone,Enum.Material.Cobblestone) end
         end
-        G.part(shrine,'Pediment',Vector3.new(42,4,8),CFrame.new(p+Vector3.new(0,28,0)),G.Palette.Stone,Enum.Material.Marble)
-        G.sign(shrine,'REINO CAÍDO • 20 ANDARES',CFrame.new(p+Vector3.new(0,22,-4)),28)
-        C.npc(root.NPCs,'SanctumGuardian',p+Vector3.new(0,1,-12),'Dungeon','Vespera'):SetAttribute('DungeonId','FallenSanctum')
+        G.part(m,'Keystone',Vector3.new(9,7,13),cf*CFrame.new(0,40,-2),stone,Enum.Material.Slate)
+        G.part(m,'UpperLintel',Vector3.new(58,4,17),cf*CFrame.new(0,45,-2),stone,Enum.Material.Slate)
+        for i=1,4 do G.part(m,'StairTread',Vector3.new(28,i*0.25,4),cf*CFrame.new(0,i*0.125,22-i*4),stone,Enum.Material.Cobblestone) end
+        -- The external threshold is open and inert; no false portal or prompt.
+        G.sign(m,title,cf*CFrame.new(0,28,7),35)
+        G.marker(m,id..'_Threshold',pos+Vector3.new(0,3,0),{IntegrationId=id,IntegrationKind='DungeonThreshold',DungeonId=dungeonId,OpeningWidth=34})
+        if not sceneOnly(root) then
+            C.npc(root.NPCs,if shadow then 'DungeonGuardian' else 'SanctumGuardian',pos+Vector3.new(0,1,15),'Dungeon',if shadow then 'Malgorth' else 'Vespera'):SetAttribute('DungeonId',dungeonId)
+        end
+        return pos
     end
+    local pos=gate('MalgorthGate',c.DungeonEntrance,'ABISMO DE MALGORTH','MalgorthDepths',true)
+    if c.SecondDungeonEntrance then gate('FallenSanctumGate',c.SecondDungeonEntrance,'SANTUÁRIO DO REINO CAÍDO','FallenSanctum',false) end
     G.marker(root.CinematicMarkers,'DungeonShot',pos+Vector3.new(0,48,100),{ShotName='DungeonGate',RegionName='Malgorth',CameraPosition=pos+Vector3.new(0,48,100),LookAtPosition=pos+Vector3.new(0,20,0),Duration=8,Category='Dungeon'})
+end
+function C.integrationMarkers(root,c,plan,terrain)
+    assert(not root:FindFirstChild('IntegrationPoints'),'IntegrationPoints já existe; nada foi substituído')
+    local folder=Instance.new('Folder');folder.Name='IntegrationPoints';folder.Parent=root
+    for _,city in plan.Cities do
+        G.marker(folder,city.Id..'_Services',Vector3.new(city.X,city.H+3,city.Z),{IntegrationId=city.Id,IntegrationKind='CityHub',RegionId=city.Id,Radius=city.Radius})
+        for index,lot in city.Lots do
+            local role=Catalog.Roles[lot.Kind] or 'Citizen'
+            local p=CFrame.new(lot.X,lot.H,lot.Z)*CFrame.Angles(0,lot.Yaw,0)
+            G.marker(folder,lot.Id..'_ServiceSlot',p:PointToWorldSpace(Vector3.new(0,3,-27)),{
+                IntegrationId=lot.Id,IntegrationKind='ServiceSlot',RegionId=city.Id,DesignRole=role,BuildingKind=lot.Kind,SlotIndex=index})
+        end
+    end
+    for _,forest in c.Forests do
+        G.marker(folder,forest.Id..'_Clearing',Vector3.new(forest.X,terrain.height(c,forest.X,forest.Z)+3,forest.Z),{
+            IntegrationId=forest.Id..'_Clearing',IntegrationKind='EncounterClearing',RegionId=forest.Id,Radius=28})
+    end
+    for _,entrance in {{Id='MalgorthDepths',Point=c.DungeonEntrance},{Id='FallenSanctum',Point=c.SecondDungeonEntrance}} do
+        if entrance.Point then
+            local p=entrance.Point
+            G.marker(folder,entrance.Id..'_Approach',Vector3.new(p.X,terrain.height(c,p.X,p.Z)+3,p.Z+30),{
+                IntegrationId=entrance.Id,IntegrationKind='DungeonApproach',RegionId=entrance.Id,Radius=28})
+        end
+    end
+    return folder
 end
 return C

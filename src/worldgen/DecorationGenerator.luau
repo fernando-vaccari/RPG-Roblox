@@ -2,6 +2,7 @@ local G=require(script.Parent.Geometry)
 local D={}
 function D.generate(parent,c,plan,terrain)
     require(script.Parent.LandmarkGenerator).waterfall(parent,c,terrain)
+    require(script.Parent.ScenicGenerator).continent(parent,c,plan,terrain)
     local budget=c.QualityProfiles[c.Quality].DecorationBudget
     local count=0
     for _,road in plan.Roads do
@@ -20,7 +21,9 @@ function D.generate(parent,c,plan,terrain)
                 end
                 if free and terrain.riverDistance(c,pos.X,pos.Z)>65 then
                     local ground=terrain.height(c,pos.X,pos.Z)
-                    G.detail(parent,'RoadsideRock',Vector3.new(4,2,3),CFrame.new(pos.X,ground+0.6,pos.Z),Color3.fromRGB(116,124,111),Enum.Material.Rock,Enum.PartType.Ball)
+                    local scenery=require(script.Parent.ScenicGenerator)
+                    if count%3==0 then scenery.shrub(parent,CFrame.new(pos.X,ground,pos.Z),0.8,false)
+                    else scenery.boulder(parent,CFrame.new(pos.X,ground+0.6,pos.Z),0.35+count%3*0.1) end
                     count+=1
                 end
             end
