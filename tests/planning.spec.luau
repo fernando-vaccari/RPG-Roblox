@@ -22,7 +22,16 @@ for _,road in plan.Roads do
     for i,s in road.Segments do
         if s.Bridge then bridges+=1 end
         if i>1 then assert(s.A.X==road.Segments[i-1].B.X and s.A.Z==road.Segments[i-1].B.Z) end
-        assert(math.abs(s.A.H-s.B.H)<1)
+        local length=math.sqrt((s.A.X-s.B.X)^2+(s.A.Z-s.B.Z)^2)
+        assert(length>0 and length<20,'Comprimento da seção de estrada')
+        assert(math.abs(s.A.H-s.B.H)/length<0.15,'Rampa rodoviária íngreme')
+        if not s.Bridge then
+            for _,point in {s.A,s.B} do
+                if terrain.riverDistance(c,point.X,point.Z)>=c.River.HalfWidth+c.River.BankWidth+40 then
+                    assert(math.abs(point.H-terrain.height(c,point.X,point.Z))<1e-8,'Estrada flutuante/enterrada')
+                end
+            end
+        end
     end
 end
 assert(bridges>0)
@@ -48,3 +57,42 @@ for _,quality in {'LOW','MEDIUM','HIGH'} do
     assert(#qPlan.Trees>=copyConfig.QualityProfiles[quality].TreesPerForest*#c.Forests*0.8)
 end
 print('PASSOU: grafo alcança cinco cidades e todos os perfis de qualidade respeitam densidade mínima.')
+
+-- Districts replace the previous spiral; stable lot IDs and capital integration survive.
+local distinct={}
+for _,city in plan.Cities do
+    distinct[city.Theme]=true
+    assert(#city.Streets==10)
+    for _,lot in city.Lots do
+        assert(lot.Kind==content.CityBuildings[city.Id][tonumber(lot.Id:match('_(%d+)$'))])
+        assert(lot.District and lot.Variation~=nil and type(lot.Interior)=='boolean')
+        if not lot.External then
+            assert(math.abs(lot.X-city.X)>=84 and math.abs(lot.Z-city.Z)>=84)
+            -- Porch segment cannot pass through another building footprint.
+            local dx,dz=lot.StreetX-lot.X,lot.StreetZ-lot.Z
+            local length=math.sqrt(dx*dx+dz*dz)
+            local porch={X=lot.X+dx/length*23,Z=lot.Z+dz/length*23}
+            for _,other in city.Lots do
+                if other~=lot and not other.External then
+                    local clearance=terrain.segment(other.X,other.Z,porch,{X=lot.StreetX,Z=lot.StreetZ})
+                    assert(clearance>=other.Radius+3,'Caminho da porta cruza outra quadra')
+                end
+            end
+        end
+    end
+end
+local countThemes=0;for _ in distinct do countThemes+=1 end;assert(countThemes==5)
+local capitalCastle=false;for _,lot in plan.Cities[1].Lots do capitalCastle=capitalCastle or lot.VisualKind=='Castle' end;assert(capitalCastle)
+local bent=0
+for _,road in plan.Roads do
+    for _,point in road.Points do if terrain.segment(point.X,point.Z,road.A,road.B)>20 then bent+=1;break end end
+end
+assert(bent>=7,'Rotas devem acompanhar a composição, sem retornar a dez retas')
+local species,groves={},{}
+for _,tree in plan.Trees do
+    species[tree.Variant]=true;groves[tree.Forest..tree.Cluster]=true
+    local _,water=terrain.column(c,tree.X,tree.Z);assert(not water,'Árvore submersa')
+end
+assert(species[0] and species[1] and species[2] and species[3] and species[4])
+local clusters=0;for _ in groves do clusters+=1 end;assert(clusters==12)
+print('PASSOU: cinco temas/quadras planejadas, capital com castelo visual, caminhos de porta livres, curvas e doze bosquetes com cinco espécies.')

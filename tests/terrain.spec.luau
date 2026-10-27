@@ -78,4 +78,28 @@ test("configurações rejeitam cidades sobrepostas e IDs duplicados", function()
     bad.Cities[2] = table.clone(c.Cities[1])
     assert(not pcall(mathTerrain.validate,bad))
 end)
+test("cadeias, lagos e reservas cênicas mantêm fundações e entradas livres", function()
+    assert(#c.MountainRanges==3 and #c.AdditionalLakes==2 and c.SchemaVersion==4)
+    for _,site in c.ScenicReservations do
+        for _,offset in {{0,0},{-14,-17},{14,-17},{-14,17},{14,17}} do
+            assert(math.abs(mathTerrain.height(c,site.X+offset[1],site.Z+offset[2])-site.Height)<1e-8,'Terrain invadiu cave/portal/estrutura: '..site.Id)
+        end
+    end
+    for _,lake in c.AdditionalLakes do
+        local h,water=mathTerrain.column(c,lake.X,lake.Z)
+        assert(h==lake.BedY and water==lake.WaterY)
+        assert(mathTerrain.voxel(c,lake.X,lake.WaterY-4,lake.Z)=='Water')
+    end
+end)
+test("distância de estrada não confunde parâmetro t com distância e assinatura inclui controles", function()
+    -- Regression: math.min(best, segment()) would also consume the second return t.
+    local point=c.Cities[1];local distance=mathTerrain.roadDistance(c,point.X+84,point.Z+84)
+    assert(distance>50 and distance<110)
+    local modified=table.clone(c);modified.Roads=table.clone(c.Roads)
+    modified.Roads[1]=table.clone(c.Roads[1]);modified.Roads[1].Points=table.clone(c.Roads[1].Points)
+    modified.Roads[1].Points[2]=table.clone(c.Roads[1].Points[2]);modified.Roads[1].Points[2].X+=1
+    assert(mathTerrain.signature(modified)~=mathTerrain.signature(c))
+    local bad=table.clone(c);bad.ScenicReservations={{Id='Invalid',X=0,Z=0,Radius=30,Height=40,Blend=0}}
+    assert(not pcall(mathTerrain.validate,bad))
+end)
 print(string.format("%d testes passaram; execução do engine Roblox NÃO TESTADA.",count))
