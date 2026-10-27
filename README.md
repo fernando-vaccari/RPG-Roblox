@@ -2,6 +2,8 @@
 
 Action RPG medieval/anime no projeto **RPG-Roblox**, preservando os dois Places, o DataStore `MedievalRPG_v1`, as raças, classes e conteúdos anteriores.
 
+**Alerta de segurança em investigação:** o ZIP completo 0.6.1 foi bloqueado pelo Defender como `Trojan:Script/Ulthar.A!ml`. A causa não foi determinada; não há confirmação de falso positivo. [Relatório e limitações](docs/SECURITY_REVIEW_0.6.1.md), [entrega separada contendo somente os dois Places](delivery-minimal/0.6.1/README.md). Essa entrega não é uma liberação de antivírus.
+
 **Atualização 0.6.1:** corrigida a iteração de `ReadVoxels().Size` no continente, dungeon e expedições. Consulte [diagnóstico e reteste no Studio](docs/READVOXELS_FIX.md). A confirmação no engine ainda está pendente.
 
 **Abra primeiro [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md).** O pacote contém os dois arquivos `.rbxlx` construídos pelo Rojo. O cenário deve ser materializado **uma vez no editor** e salvo antes de Play; ele não está pré-gravado nos builds. Este ambiente Linux não executa Roblox Studio.

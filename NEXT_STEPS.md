@@ -1,5 +1,6 @@
 # Continuação exata — Eldravyn 0.6.1
 
+0. Prioridade atual: investigar com a Microsoft qualquer novo alerta `Trojan:Script/Ulthar.A!ml`. Consulte docs/SECURITY_REVIEW_0.6.1.md e delivery-minimal/0.6.1. O ZIP completo anterior permanece preservado; o mínimo contém os mesmos dois Places, sem auxiliares, e não tem liberação de antivírus. Nunca desativar/contornar o Defender. A causa não foi determinada.
 1. Leia PROGRESSO.md, COMO_JOGAR_NO_STUDIO.md, TESTES_STUDIO.md e docs/ELDRAVYN.md. Não recomece o projeto. Dois Places, ProjectId `ProjectMedievalRPG`, DataStore `MedievalRPG_v1`, raças e IDs legados foram preservados.
 2. Prioridade seguinte: confirmar a correção real de ReadVoxels no Studio pelo procedimento docs/READVOXELS_FIX.md (leitura, geração dos dois Places, proteção sólido/água). O código antigo falhou com o mock contendo Size: Vector3; a correção numérica passa em 42 fluxos simulados, mas isso não valida o engine. Depois executar a matriz curta no Roblox Studio, a partir dos dois `.rbxlx` e do comando `PrepareStudio()`. Salvar cada cenário após geração; o build Rojo contém código e não Terrain pré-gravado. A nuvem Linux não executou o Studio.
 3. Começar por spawn/criação, portas/caminhos, tutorial/parry e duas dungeons solo; depois dois/quatro clientes e mobile. Registrar Output e passos para reproduzir antes de alterar os sistemas já cobertos.

@@ -1,5 +1,13 @@
 # Eldravyn: Rise of Shadows — estado de 27/10/2026
 
+## Alerta Defender — investigação e entrega mínima
+
+O usuário informou `Trojan:Script/Ulthar.A!ml` no ZIP completo 0.6.1. O registro aponta o contêiner webfile, sem identificar um membro. A revisão dos 106 arquivos, scripts/instaladores, origens/hashes e XML não localizou payload malicioso; **a causa continua indeterminada e não há confirmação de falso positivo**. Não há Defender/antivírus ou Studio disponíveis neste Linux.
+
+Foi criada `delivery-minimal/0.6.1`, com dois Places individuais e um ZIP contendo somente esses dois arquivos. O ZIP antigo permanece byte a byte preservado. Os Places reconstruídos são idênticos aos anteriores; gameplay/saves não foram alterados. Reduzir o pacote não é remoção de malware identificado nem garante ausência de novo alerta. Hashes e relatório ficam fora do ZIP.
+
+Evidências, limitações e verificações efetivas em [docs/SECURITY_REVIEW_0.6.1.md](docs/SECURITY_REVIEW_0.6.1.md). Nesta etapa executados: inventário/hash/CRC, análise estática, AST Python, parsing XML/WAV/JSON, comparação de Sources, conferência de três downloads oficiais, dois builds Rojo e verificador estrutural. Testes de gameplay da etapa anterior não foram repetidos. Se persistir o bloqueio, manter o Defender ativo e submeter à Microsoft para análise; não restaurar da quarentena nem criar exclusões.
+
 ## Resultado atual
 
 Versão 0.6.1, correção aplicada sobre `b5bb23e` (0.6.0), continuidade de `915588c`, com dois Places Rojo e o histórico preservados. Nome público atualizado; ProjectId `ProjectMedievalRPG`, DataStore `MedievalRPG_v1`, equipamentos, missões e identidade legados permanecem compatíveis.

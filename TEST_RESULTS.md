@@ -3,6 +3,12 @@
 > Estado atual: Eldravyn 0.6.1. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
 
 
+## Auditoria do alerta Defender — etapa posterior
+
+Revisados os 106 membros do ZIP 0.6.1 e sua correspondência Git. Parsing XML/WAV/JSON e AST dos oito Python; revisão dos dois PowerShell, busca estática nos 65 Luau, oito Python e dois PowerShell e comparação dos 50 Sources por Place. Três downloads oficiais corresponderam aos hashes fixos. Dois builds Rojo reconstruídos, verificador estrutural e pacote mínimo de exatamente dois arquivos passaram. Places byte a byte iguais aos anteriores; ZIP anterior preservado.
+
+**Não executados: Microsoft Defender/qualquer antivírus, sandbox Windows, PowerShell ou Roblox Studio.** Não há veredicto de falso positivo ou de segurança. Não repetidos os testes CLI/mock de gameplay, pois o código do jogo não foi alterado. Detalhes/evidência em [docs/SECURITY_REVIEW_0.6.1.md](docs/SECURITY_REVIEW_0.6.1.md).
+
 ## Correção ReadVoxels 0.6.1 — 27/10/2026
 
 - API oficial consultada: os dois retornos de ReadVoxels têm metadado Size. O erro real visitava Size como uma camada da matriz. O mesmo padrão existia nos dois geradores de dungeon.

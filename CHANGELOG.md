@@ -1,5 +1,12 @@
 # Changelog
 
+## Entrega mínima 0.6.1 — alerta de segurança em investigação
+
+- Recebido alerta `Trojan:Script/Ulthar.A!ml` no ZIP completo; causa não identificada e sem confirmação de falso positivo.
+- Inventário estático/estrutural dos 106 membros, origens/hashes conferidos e relatório de limitações; antivírus/Studio não executados.
+- Entrega separada em delivery-minimal/0.6.1: ZIP de somente dois Places, arquivos individuais, hashes e relatório fora do ZIP.
+- Places reconstruídos idênticos aos anteriores; nenhum código de jogo removido/alterado. Pacote anterior preservado.
+
 ## 0.6.1 — proteção de Terrain / ReadVoxels — 27/10/2026
 
 - Corrigida iteração do metadado `Size: Vector3` retornado junto das matrizes de ReadVoxels.

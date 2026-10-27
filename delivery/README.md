@@ -1,5 +1,7 @@
 # Eldravyn: Rise of Shadows — download para Windows 11
 
+**Histórico: alerta do Defender em investigação.** Este ZIP 0.6.1 foi reportado como `Trojan:Script/Ulthar.A!ml` e permanece preservado sem alterações para rastreabilidade. Não foi confirmado falso positivo. Consulte o [relatório](../docs/SECURITY_REVIEW_0.6.1.md) e a [entrega mínima separada](../delivery-minimal/0.6.1/README.md), também sem homologação de antivírus. Não desative a proteção ou libere um arquivo bloqueado.
+
 [Baixar RPG-Roblox-Windows11.zip](https://github.com/fernando-vaccari/RPG-Roblox/raw/refs/heads/codex/rpg-quality-delivery-20261024/delivery/RPG-Roblox-Windows11.zip)
 
 Se o download direto não iniciar, abra RPG-Roblox-Windows11.zip nesta pasta e use **Download raw file** no GitHub. Entre na sua conta se o repositório exigir autenticação.
