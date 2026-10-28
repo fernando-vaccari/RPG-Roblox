@@ -1,0 +1,17 @@
+{
+  "file": "Eldravyn-Continent.rbxlx",
+  "sha256": "a08fd280bd8835943f3e29c0777196e277831cb39e1405560cc892779fc49dab",
+  "scene_instances_baked": 21323,
+  "geometry_baked": true,
+  "native_terrain_baked": false,
+  "studio_executed": false,
+  "visual_quality_validated": false,
+  "requires_editor_completion": true,
+  "prepare_command": "require(game.ServerStorage.MedievalWorldgen.WorldGenerator).PrepareStudio()",
+  "report": {
+    "Parts": 20001,
+    "SceneOnly": true,
+    "StudioVisualsValidated": false,
+    "TerrainPending": true
+  }
+}

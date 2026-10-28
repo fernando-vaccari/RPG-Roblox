@@ -1,10 +1,10 @@
 # Continente — progresso da Tarefa 01
 
-Atualização: 27/10/2026. Branch: `codex/eldravyn-map-20261027`. Base preservada: `17b4f8e` (0.6.1 + investigação Defender). Consulte o log Git para o último commit desta entrega.
+Atualização: 27/10/2026. Branch: `codex/eldravyn-map-20261027`. Base preservada: `17b4f8e` (0.6.1 + investigação Defender). Último commit de código desta etapa: `3f7e4fa`; o commit de documentação/artefato da entrega aparece a seguir no log Git.
 
 ## Estado
 
-Reconstrução do cenário em implementação e testes. Esta tarefa substituiu o escopo amplo anterior: **somente continente**, sem novos sistemas de gameplay. Mapa antigo rejeitado substituído nos geradores/novo artefato; versões anteriores e dados do RPG preservados. Rojo/Luau são o fluxo de origem. Não existe Studio neste Linux.
+Reconstrução do cenário integrada, testada na nuvem e materializada no arquivo `delivery-map/task-01/Eldravyn-Continent.rbxlx`. Esta tarefa substituiu o escopo amplo anterior: **somente continente**, sem novos sistemas de gameplay. Mapa antigo rejeitado substituído nos geradores/novo artefato; versões anteriores e dados do RPG preservados. Rojo/Luau são o fluxo de origem. Não existe Studio neste Linux.
 
 O cenário é materializado offline como instâncias nativas XML, e não entregue apenas como um gerador. **Terrain nativo, inspeção visual e medições reais continuam pendentes. Portanto o mapa final ainda não está concluído segundo os critérios do pedido.** O comando PrepareStudio completa o Terrain numa cópia nova e deve ser seguido de salvamento.
 
@@ -28,9 +28,16 @@ Streaming: mínimo 64/alvo 256 studs. Perfis visuais limitam luzes, sombras, par
 
 ## Verificação e continuidade
 
-Resultados finais e números serão registrados ao terminar a integração. A revisão estrutural já localizou e encaminhou correções de cavernas/portais atravessados pelo relevo e estradas suspensas. Não substituir essas verificações por suposições de beleza.
+- `python3 scripts/check.py` passou: **79 arquivos Luau compilados**, análise das regras/configurações, todas as suítes CLI, **42 fluxos simulados legados e oito novos fluxos de arquitetura/mapa**. Dois builds legados passaram no verificador de dependências/serviços (55 módulos e dois bootstraps por Place).
+- Nove testes puros de terreno; planejamento de 130 lotes sem sobreposição, portas/ruas com folga, topologia das dez rotas, inclinação máxima testada e densidade dos três perfis; quatro casos de gramática arquitetônica; histerese do modo Automático. A classificação de casos integrados não equivale a testar no engine.
+- Materialização final: **21.323 instâncias de cenário, incluindo 20.001 BaseParts**, 130 lotes e 480 árvores LOW. Há 100 módulos de tabuleiro de ponte, não 100 pontes independentes. O arquivo tem 38 ModuleScripts e somente os dois bootstraps de apresentação do mapa.
+- `python3 scripts/bake_continent.py --self-test`: atributos nativos/UTF-8/vetores, aliases de propriedades e referências preservados num round-trip pelo Rojo. `python3 scripts/bake_continent.py` materializou e verificou a hierarquia final.
+- Verificação independente do arquivo final: 21.323 nós, 20.001 transformações e tamanhos iguais aos dados gerados, referências válidas; nenhum Humanoid/ProximityPrompt; nenhum bootstrap de gameplay.
+- Corrigidos: relevo atravessando cavernas/antepátios dos portais; trechos de estrada suspensos; descontinuidade na margem de lago; retorno duplo distância/t confundido com distância; caminhos de portas atravessando outras quadras. As verificações são geométricas/puras e simuladas, sem afirmar colisões reais homologadas.
+- `python3 scripts/package_map.py`: ZIP com somente um `.rbxlx`, CRC e SHA-256 conferidos. Manifesto registra `native_terrain_baked=false`, `studio_executed=false`, `visual_quality_validated=false`. Hashes em delivery-map/task-01/SHA256SUMS.txt.
+- O Place contém a geometria real serializada; **os 56 milhões de voxels ainda não foram escritos em Terrain real**. Metas de FPS, caminhada física, renderização, streaming e aparência não foram verificadas no Studio.
 
-Próxima tarefa exata: executar os testes de integração da branch, reconstruir o Place, registrar hashes/manifesto e confirmar push. No Studio, seguir COMO_ABRIR_MAPA.md e o checklist abaixo.
+Próxima tarefa exata: no Roblox Studio, seguir COMO_ABRIR_MAPA.md para materializar o Terrain, salvar/reabrir e executar o checklist abaixo, começando por portas/ruas, cavernas e antepátios. Registrar Output e capturas com coordenadas; corrigir apenas problemas reproduzidos, sem recomeçar o cenário. A branch de entrega é codex/eldravyn-map-20261027; conferir o commit remoto contra o log local.
 
 ## Checklist real pendente
 
@@ -43,3 +50,7 @@ Próxima tarefa exata: executar os testes de integração da branch, reconstruir
 7. Registrar ajustes artísticos por coordenada e captura. Sem esta revisão, o mapa não é final nem visualmente homologado.
 
 O alerta Defender anterior permanece indeterminado. Nenhum antivírus foi desativado; nenhum arquivo foi declarado seguro. Compras/publicação do jogo não fazem parte desta tarefa.
+
+## Arquivos desta etapa
+
+Configuração WorldConfig; TerrainMath/WorldPlan; ArchitecturalPlan/BuildingGenerator/CityLandmarkGenerator; ContentGenerator/ScenicGenerator/LandmarkGenerator/DecorationGenerator; MapSceneGenerator e extensão Map de WorldGenerator; MapEnvironment/MapVisualConfig/MapVisualRules; src/map-preview; map.project.json; scripts de materialização/empacotamento e testes de mapa/arquitetura/terreno/planejamento. Nenhum arquivo de src/server ou src/client do RPG foi alterado. Detalhes técnicos por área estão em docs/MAP_LAYOUT_REBUILD.md, ARCHITECTURE_MAP.md, LANDSCAPE_MAP.md, MAP_VISUALS.md e SCENE_BAKE_LIMITS.md.

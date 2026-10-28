@@ -1,5 +1,7 @@
 # Eldravyn: Rise of Shadows
 
+**Tarefa atual: somente reconstrução do continente.** A branch `codex/eldravyn-map-20261027` contém o [Place do mapa com geometria materializada](delivery-map/task-01/README.md), [guia de abertura](COMO_ABRIR_MAPA.md) e [progresso específico](PROGRESSO_MAPA.md). Terrain nativo e inspeção no Studio ainda pendentes: não é uma declaração de mapa final. Os sistemas do RPG abaixo são histórico/preservação e não foram ampliados nesta tarefa.
+
 Action RPG medieval/anime no projeto **RPG-Roblox**, preservando os dois Places, o DataStore `MedievalRPG_v1`, as raças, classes e conteúdos anteriores.
 
 **Alerta de segurança em investigação:** o ZIP completo 0.6.1 foi bloqueado pelo Defender como `Trojan:Script/Ulthar.A!ml`. A causa não foi determinada; não há confirmação de falso positivo. [Relatório e limitações](docs/SECURITY_REVIEW_0.6.1.md), [entrega separada contendo somente os dois Places](delivery-minimal/0.6.1/README.md). Essa entrega não é uma liberação de antivírus.

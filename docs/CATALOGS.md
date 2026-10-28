@@ -7,13 +7,13 @@ Gerados das configurações do projeto. Implementação não equivale a homologa
 Região | Tipo | X | Z | Edifícios
 --- | --- | --- | --- | ---
 Valoria • Cidade da Aurora | Cidade | 0 | 1000 | 26
-Arkheim • Bastião Real | Cidade | 0 | -850 | 26
+Arkheim • Vigília das Sombras | Cidade | 0 | -850 | 26
 Eldoria • Cidade das Raízes | Cidade | 1150 | -150 | 26
-Durakh • Cidade das Caravanas | Cidade | -1150 | -150 | 26
+Durakh • Coração das Montanhas | Cidade | -1150 | -150 | 26
 Asterion • Coroa Celeste | Cidade | 1150 | 1200 | 26
-Bosque de Sylvarin | Floresta | 1100 | -1100 | —
-Floresta de Nocthar | Floresta | -1000 | 1000 | —
-Véspera • Floresta do Eclipse | Floresta | -1080 | -1170 | —
+Sylvarin • Bosque Esmeralda | Floresta | 1100 | -1100 | —
+Nocthar • Floresta dos Ancestrais | Floresta | -1000 | 1000 | —
+Véspera • Floresta Sombria | Floresta | -1080 | -1170 | —
 
 ## Expedições
 

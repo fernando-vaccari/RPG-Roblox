@@ -1,4 +1,12 @@
-# Continuação exata — Eldravyn 0.6.1
+# Próxima tarefa — continente
+
+A solicitação específica Tarefa 01 substituiu o escopo de desenvolvimento amplo durante esta sessão. Leia PROGRESSO_MAPA.md e COMO_ABRIR_MAPA.md. Trabalhe em `codex/eldravyn-map-20261027`, não amplie gameplay.
+
+O Place `delivery-map/task-01/Eldravyn-Continent.rbxlx` contém 20.001 peças de cenário, com `TerrainPending=true`. A próxima ação real é completar o Terrain no Studio, salvar/reabrir, caminhar e capturar dia/noite nas cinco cidades e três florestas, verificando ruas/portas/cavernas/portais. Sem isso a Tarefa 01 não está finalizada. Studio, FPS e Defender não foram executados aqui.
+
+Preserve IDs/dados/versões anteriores. O alerta Defender continua indeterminado; não desative ou contorne a proteção. Entrega do mapa separada e sem instaladores no ZIP. Para validar novas mudanças: `python3 scripts/check.py`, `python3 scripts/bake_continent.py --self-test`, `python3 scripts/bake_continent.py`, `python3 scripts/package_map.py`. Copie apenas o novo artefato da etapa, confirme commit/push remoto. O jogo não foi publicado no Roblox.
+
+# Histórico anterior — Eldravyn 0.6.1
 
 0. Prioridade atual: investigar com a Microsoft qualquer novo alerta `Trojan:Script/Ulthar.A!ml`. Consulte docs/SECURITY_REVIEW_0.6.1.md e delivery-minimal/0.6.1. O ZIP completo anterior permanece preservado; o mínimo contém os mesmos dois Places, sem auxiliares, e não tem liberação de antivírus. Nunca desativar/contornar o Defender. A causa não foi determinada.
 1. Leia PROGRESSO.md, COMO_JOGAR_NO_STUDIO.md, TESTES_STUDIO.md e docs/ELDRAVYN.md. Não recomece o projeto. Dois Places, ProjectId `ProjectMedievalRPG`, DataStore `MedievalRPG_v1`, raças e IDs legados foram preservados.

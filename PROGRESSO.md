@@ -1,5 +1,7 @@
 # Eldravyn: Rise of Shadows — estado de 27/10/2026
 
+**Escopo vigente: Tarefa 01, somente continente.** Estado atualizado em [PROGRESSO_MAPA.md](PROGRESSO_MAPA.md), branch `codex/eldravyn-map-20261027`. A nova geometria está serializada num Place de inspeção sem gameplay; Terrain/validação real pendentes. O conteúdo abaixo registra o RPG anterior e a investigação do Defender.
+
 ## Alerta Defender — investigação e entrega mínima
 
 O usuário informou `Trojan:Script/Ulthar.A!ml` no ZIP completo 0.6.1. O registro aponta o contêiner webfile, sem identificar um membro. A revisão dos 106 arquivos, scripts/instaladores, origens/hashes e XML não localizou payload malicioso; **a causa continua indeterminada e não há confirmação de falso positivo**. Não há Defender/antivírus ou Studio disponíveis neste Linux.
