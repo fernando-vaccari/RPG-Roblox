@@ -1,0 +1,883 @@
+{
+  "scope": "static and structural inspection, NOT antivirus clearance",
+  "baseline_commit": "ad159de046f98198a191a0b33d8dc1fa80c1e472",
+  "reported_detection": "Trojan:Script/Ulthar.A!ml",
+  "defender_affected_item": "ZIP webfile; no inner member identified",
+  "archive_sha256": "6e6f990a241d75821cfc9d2e36f601d3ae6749af68aea6139c502480a3194d65",
+  "archive_bytes": 437883,
+  "archive_matches_git_baseline": true,
+  "defender_executed": false,
+  "studio_executed": false,
+  "entries": [
+    {
+      "path": "RPG-Roblox/.gitignore",
+      "bytes": 43,
+      "sha256": "2164095e04deaecf56987e0b6fde6470ecb108248559ae0dc493b7a08855b084",
+      "type": "gitignore",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/default.project.json",
+      "bytes": 1051,
+      "sha256": "1a227080f44176bbaf0875aba881e78beebe6961b45bf9c80759cbf2dc73f18b",
+      "type": ".json",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/dungeon.project.json",
+      "bytes": 1061,
+      "sha256": "f2bf2403b8ea5c53037887c870c909cd5ec94c1ee2ca2bfca387e3c56925d1f2",
+      "type": ".json",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/ARCHITECTURE.md",
+      "bytes": 8106,
+      "sha256": "2a9355806088401fe921372f91b768a790601a77e57d4f3d0665e5ca29e2ee9a",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/CHANGELOG.md",
+      "bytes": 4269,
+      "sha256": "f950215ff575930e567abb33e8eb978782fae64b9408e33c5d6fae7e39dc48a7",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/COMO_JOGAR_NO_STUDIO.md",
+      "bytes": 8181,
+      "sha256": "364536486fd80981affe148c1a88628f37ee01501171876605d8b6a871d1161e",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/MAP_LAYOUT.md",
+      "bytes": 1973,
+      "sha256": "bce980c5b2332161eea11480f173b2ba259bea9d439e51ae6b4cc7aa40208cd2",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/NEXT_STEPS.md",
+      "bytes": 2691,
+      "sha256": "93bdeb470c22dcff967178352dd6cf499959749c1dc45590d89abc19217d7281",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/PROGRESS.md",
+      "bytes": 12365,
+      "sha256": "bd8a449866b81b26f9999212d351edb05aaa642fed9e74eb59816104820ada77",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/PROGRESSO.md",
+      "bytes": 7837,
+      "sha256": "13ff0c386be8fa17f401cb9bbfb2249d794fbdc4d65972ab890dd5e720c8b8c6",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/PROJECT_PLAN.md",
+      "bytes": 2834,
+      "sha256": "0f099b2cd9209623938930310937a0a5a201456fa022bbc366198c0e1dfee6fb",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/README.md",
+      "bytes": 6949,
+      "sha256": "1163ce844977c754c756aac5732d73c4f0aa5debba9bbe9c1f6cf0048afad0e7",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/TESTES_STUDIO.md",
+      "bytes": 4113,
+      "sha256": "60e6c57a6981c0b1b4e9c40f73ceb2ea0d2577bd4536decc099e72ab27838c97",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/TEST_RESULTS.md",
+      "bytes": 12517,
+      "sha256": "a029cf2a96e612b8e10ec7425d676c55c044d23f5be31a02fed4adb2448f1b75",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/TODO.md",
+      "bytes": 1646,
+      "sha256": "87f36c40c3798ab3e86485cfc8b234fc3e531ceb06f4118d467066bde142f91f",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/client/Controllers/AdventureController.luau",
+      "bytes": 5593,
+      "sha256": "aa73f0f9ba34afde2f991d36d58a88ea2b68480c2e14abf87193a72b1fa0645c",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/client/Controllers/UIController.luau",
+      "bytes": 28756,
+      "sha256": "d2765bec921f122f8154c949adcab75ae86252a674e6075c5ce17b5e9a248bd2",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/client/Controllers/WorldController.luau",
+      "bytes": 17867,
+      "sha256": "ba3aad6cc5f4984b438aac581d9a24d94280c3fc0560471960e6526f712dfb83",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/client/Main.client.luau",
+      "bytes": 3344,
+      "sha256": "bbe8d99e1181db7506ae1e3bd352b2a13b31d867097ad7ca902bf6f9430a0e48",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Main.server.luau",
+      "bytes": 1687,
+      "sha256": "b04d1c4ed82b4d1284e06eb6b8646819c2345aed340d8c8eeb3d680e5e0be0e8",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/AntiExploitService.luau",
+      "bytes": 1167,
+      "sha256": "c8b219a5d0375fe5038697ac5430685c38add020125ee0c36614f7ab4cf273db",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/CombatService.luau",
+      "bytes": 16045,
+      "sha256": "8558b81e4f89e77303d4158fcc23ceee8f144c8eab6cbd7fae558824d229f34f",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/DataService.luau",
+      "bytes": 11115,
+      "sha256": "8c978ab9cbba29cfbc619699b343c7911da99facb95a3010c6fed435b95bd1ee",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/DungeonService.luau",
+      "bytes": 9583,
+      "sha256": "7ea2173d19413ad4c5707bd7337f7367fd39ea5f1cd92cdb2995998db58af096",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/EnemyService.luau",
+      "bytes": 13079,
+      "sha256": "103e480630e821817ad796154e479f239dbc90bf33bd5550842e70235f68068a",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/ExpeditionService.luau",
+      "bytes": 8981,
+      "sha256": "9420f3acf16068a7ade3c21207ad08c5830bab4d6976f214b0b6f283744f6a3d",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/GameService.luau",
+      "bytes": 16731,
+      "sha256": "516359c0cc2da271bdf0c2844599e9a67de9a336be8eafcca4105a754dcacfe9",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/IdentityService.luau",
+      "bytes": 4461,
+      "sha256": "432f0e33b044097abaf7b0234cb5b1d40b1570fd28615d75b3463d81ab1667b5",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/InventoryService.luau",
+      "bytes": 3477,
+      "sha256": "ca48476e6267252a10083cfb39d83817a5802deb7d77a272d3fca255a94b75c3",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/ProjectileService.luau",
+      "bytes": 2136,
+      "sha256": "d858c522908287e21d0b30bf7513fc162e1d348f934f40c5272ae8e17c644527",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/PurchaseService.luau",
+      "bytes": 2622,
+      "sha256": "f4992acb2be26ce1580dcb4a7960cdec0a32bfc75156d916b6f1f535196d60da",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/SiegeService.luau",
+      "bytes": 3249,
+      "sha256": "683c09d76ef6a641d186455744aa23df159a338d71fcda731c7c2cef9d5cc387",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/TesterService.luau",
+      "bytes": 687,
+      "sha256": "24a8b1d7ce2b588e8274a773930354b2367af09aa792674db24415c98353449e",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/server/Services/TutorialService.luau",
+      "bytes": 969,
+      "sha256": "e9c4e2ed21940b841596fd055e2e9d6064faf0ad81f964d2090cc3c58d5cd1ae",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Config/AbilityConfig.luau",
+      "bytes": 5122,
+      "sha256": "91797b95bb7673638106eac2bea9c03adc55315f7d8963c4ff01faf423aa491a",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Config/AdventureConfig.luau",
+      "bytes": 1415,
+      "sha256": "5ca92874d5f90bf2d603b5ecafd15fef364d02a50230407f8229cea492295377",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Config/ContentConfig.luau",
+      "bytes": 18797,
+      "sha256": "4c704513e8c1051ae1281ecd8da49b3317b89b2f2b9ca97da576ecae96e8f646",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Config/DungeonConfig.luau",
+      "bytes": 1195,
+      "sha256": "e0c216afbbc48a430582f2b4bde3ab7b4ac5d819611ac65f50073e02b0aa261d",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Config/IdentityConfig.luau",
+      "bytes": 3591,
+      "sha256": "47f1746e90afb04e76ed003b553c086a4ebc15b9a8988a7da0dd887aa425805a",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Config/WorldConfig.luau",
+      "bytes": 3212,
+      "sha256": "6a9c6c73b9940bf85e91ff6c4caa19508b166f125fa332abc090606374c4210d",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/ActionMath.luau",
+      "bytes": 1004,
+      "sha256": "0cd3b7c5fd0e482d2aabc3104cffc61f13ae1ce5f4b23f2fa6fee06da270e77d",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/AdventureRules.luau",
+      "bytes": 1426,
+      "sha256": "34f809e8d3b6b39b9c99e237da24b6d1d8874cb7ced24a7cf6abf6635d873f34",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/BenefitPreview.luau",
+      "bytes": 687,
+      "sha256": "e81374688099f494a8c65ec2996691a087e4df3ddd0019afea7461a344830ffb",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/CombatRules.luau",
+      "bytes": 2563,
+      "sha256": "6eeb0085e07ae313b788c3a1445bf6c9ce656df919639c93993982ff6cbb48e2",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/DefenseRules.luau",
+      "bytes": 2139,
+      "sha256": "9ab2bea3b4ebe02f23720a0cb3aa23a17ddf6f299bfcd89c97676d703b35dd41",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/DungeonRules.luau",
+      "bytes": 3364,
+      "sha256": "c9d8c939be644b42f4c4a4363992b4a6c9b360a325a009c84027b061ed6a9ddf",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/EnvironmentRules.luau",
+      "bytes": 281,
+      "sha256": "e19791912a3a140af309599178a1271886f9c7b55cce1ef503ac6b409f748bf2",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/IdentityRules.luau",
+      "bytes": 9106,
+      "sha256": "2b57eba87b12916d0b2e00f22a086b67254266e967c9a8c7edf3d42bd987b25d",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/InteriorPlan.luau",
+      "bytes": 1197,
+      "sha256": "760a7a194cd0c63f4918ee192911a69288ecf4388e4be31823204a069c547bb6",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/Party.luau",
+      "bytes": 1152,
+      "sha256": "fbd3b07ef19906eaaaa30dc988b2b3930749acae487e71cecac451d9277ce53c",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/Core/Progression.luau",
+      "bytes": 7628,
+      "sha256": "836a3add35c52fc7785fd5c33a9daf7bbc851aa65e2ed84aa05380105675b321",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/shared/RigFactory.luau",
+      "bytes": 4211,
+      "sha256": "7d5484c770bcd21d419070998d15c09a70490d5561e71539ac77740dc9dcf458",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/BuildingGenerator.luau",
+      "bytes": 9120,
+      "sha256": "98f4f3812d4b8f1a6907e91e263438a83b1bedb64d6326865513082da8658cb9",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/ContentGenerator.luau",
+      "bytes": 13867,
+      "sha256": "e872e7f875a09a73bd21bdcd0f6b688ae21fa5f9c74861c49cd1ab0ae47d872b",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/DecorationGenerator.luau",
+      "bytes": 1368,
+      "sha256": "859dd71fd499733b4bdc8f40837bb7f343857d77877e7f13a026c86c11e27b62",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/DungeonInteriorGenerator.luau",
+      "bytes": 8018,
+      "sha256": "6c55998f63747944a1d4faccf141f00bf58c06d92d417f81227f636abbe12e3e",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/ExpeditionGenerator.luau",
+      "bytes": 5734,
+      "sha256": "ce36eef9a3850526d25f76f39bf1aa457b10fcd292121c1938c4f2a6d0a4ec13",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/Geometry.luau",
+      "bytes": 2703,
+      "sha256": "62c8d298df9fa1a142b4b9184cbdd49aa7bfdf3b4efe61b86138c2a85f35685d",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/LandmarkGenerator.luau",
+      "bytes": 5040,
+      "sha256": "33a9701e1674a5e3ba52233f245e8720039792d6d8707928ec0d18e24f9e439f",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/RegenerationService.luau",
+      "bytes": 5616,
+      "sha256": "441f99a1e5fa6688a0d4da52cd965fc71dd720dfb8f604bf3fcc4d0ad58b18ef",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/TerrainGenerator.luau",
+      "bytes": 3348,
+      "sha256": "4621514dc89ce4fbb8cffa7fc1f741715126b268631d9777e755b47177b8153c",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/TerrainMath.luau",
+      "bytes": 9446,
+      "sha256": "afe4223d39cc7814686ef471bdc17a8595fe868f9a3448fcc69145303cd0f1eb",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/ValidationGenerator.luau",
+      "bytes": 2524,
+      "sha256": "2aa832fc0b36bd2a6abfe9ab5b4039b15b8ef942f5b8b910e86ef93a85c2fa8e",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/WorldGenerator.luau",
+      "bytes": 11280,
+      "sha256": "5ffe4fb8a2073c7a4eb4bb0ed7b3eaff6ef024be865649f5d5fe9f5a4efb112d",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/src/worldgen/WorldPlan.luau",
+      "bytes": 4979,
+      "sha256": "2cefcc54831a5a3d4aca4f1c7c18efa072c97bf31760dc37c3539c007c1c3418",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/scripts/GenerateDungeon.command.luau",
+      "bytes": 194,
+      "sha256": "b9da2e32068e131a57fa1e1e487ba89e27bb4227bb4e60ab235d0a77d7f0498e",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/scripts/GenerateWorld.command.luau",
+      "bytes": 204,
+      "sha256": "4f9a591b40e5497fb08029d36e00ba6d5b01783167cfd12368f84a39ff91326a",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/scripts/PrepareStudio.command.luau",
+      "bytes": 157,
+      "sha256": "448ae3e98233fb67bd0f89836b1fc58442336c5892bf2be0fe22beaa3060b7f7",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/scripts/TestReadVoxels.command.luau",
+      "bytes": 1394,
+      "sha256": "4cb3e20cbcce04bb821004a234eeb5d70dc0d58da71f8b8ec39cfa4c85196a5a",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/scripts/catalogs.luau",
+      "bytes": 4197,
+      "sha256": "bfe8e8dd765a0569f4169d259a48f81a865bd2545f6a38d81289816e9ab7f802",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/scripts/check.ps1",
+      "bytes": 1746,
+      "sha256": "263959e31aadafa2bd0058669ab453dd8f4ffd566d563ba590f377c6d6db6f2c",
+      "type": ".ps1",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/scripts/check.py",
+      "bytes": 1829,
+      "sha256": "ef31d670e9f2d3ee1edc7bebaa086397f7a53818504f8badc03c7ab8d06cf9ee",
+      "type": ".py",
+      "matches_checkout_at_audit": true,
+      "python_imports": [
+        "os",
+        "pathlib",
+        "subprocess",
+        "sys"
+      ]
+    },
+    {
+      "path": "RPG-Roblox/scripts/export_catalogs.py",
+      "bytes": 515,
+      "sha256": "953bbe6a7b30bc463454288d37098ffffcc604a4f1be786b3cb1fc4f5d05de91",
+      "type": ".py",
+      "matches_checkout_at_audit": true,
+      "python_imports": [
+        "os",
+        "pathlib",
+        "subprocess"
+      ]
+    },
+    {
+      "path": "RPG-Roblox/scripts/generate_audio.py",
+      "bytes": 811,
+      "sha256": "ad27cbbdcdf8ee69acbcebb754c6fb6af75c75801976a6072e697256aea0493e",
+      "type": ".py",
+      "matches_checkout_at_audit": true,
+      "python_imports": [
+        "math",
+        "pathlib",
+        "random",
+        "struct",
+        "wave"
+      ]
+    },
+    {
+      "path": "RPG-Roblox/scripts/install-tools.ps1",
+      "bytes": 1543,
+      "sha256": "d0a8d141f565cabd62d52969bfd6f47b7494e1c548b1c87c4c7baa28baa1b1da",
+      "type": ".ps1",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/scripts/install_tools.py",
+      "bytes": 1825,
+      "sha256": "5fe133d1373d260101c9a8348cc414b46bf444600fd1ded14474bf51193c97d7",
+      "type": ".py",
+      "matches_checkout_at_audit": true,
+      "python_imports": [
+        "hashlib",
+        "io",
+        "os",
+        "pathlib",
+        "platform",
+        "urllib.request",
+        "zipfile"
+      ]
+    },
+    {
+      "path": "RPG-Roblox/scripts/integration.py",
+      "bytes": 4667,
+      "sha256": "27ed8703ad99b943da5cd8d2c6a8744316fac53537570c6196720f136b020d73",
+      "type": ".py",
+      "matches_checkout_at_audit": true,
+      "python_imports": [
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "urllib.request"
+      ]
+    },
+    {
+      "path": "RPG-Roblox/scripts/package.py",
+      "bytes": 1502,
+      "sha256": "8851d387ed6ee735cb3d3c872c36fea568e798b40d8aedb4fedae1ffb74803d9",
+      "type": ".py",
+      "matches_checkout_at_audit": true,
+      "python_imports": [
+        "hashlib",
+        "pathlib",
+        "zipfile"
+      ]
+    },
+    {
+      "path": "RPG-Roblox/scripts/smoke_rojo.py",
+      "bytes": 1110,
+      "sha256": "b0cdba37380b251b4b8907a8b7562a4b95224e988cdddb8ff5a33070cf66b0d0",
+      "type": ".py",
+      "matches_checkout_at_audit": true,
+      "python_imports": [
+        "re",
+        "urllib.request"
+      ]
+    },
+    {
+      "path": "RPG-Roblox/scripts/verify_project.py",
+      "bytes": 3553,
+      "sha256": "a335d96585c17920e94c9b8896193989782b5cfdda66c2e9ba6bf3b657e09843",
+      "type": ".py",
+      "matches_checkout_at_audit": true,
+      "python_imports": [
+        "hashlib",
+        "json",
+        "pathlib",
+        "re",
+        "xml.etree.ElementTree"
+      ]
+    },
+    {
+      "path": "RPG-Roblox/tests/StudioMock.luau",
+      "bytes": 13144,
+      "sha256": "e52aa2eeb2d39b80a5ae734e0cc0f13a03f6a68427d11ce2e852f3af906ea6d8",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/tests/adventure.spec.luau",
+      "bytes": 7471,
+      "sha256": "2b2840a81b811a952fc4a3b83d3eaed2ef64cf4840a0aef29191d94b14b7f64a",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/tests/editor.integration.luau",
+      "bytes": 38414,
+      "sha256": "c73c8cfb19cbcaba2226fc0a26f6cd4076ce946a15ced2959995cf33965c7263",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/tests/expansion.spec.luau",
+      "bytes": 3507,
+      "sha256": "b4146091e86e1a5f794f1c1f99e86496c15ca48638cf8178109cd19b801795c1",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/tests/gameplay.spec.luau",
+      "bytes": 3961,
+      "sha256": "087792aae72fb306e4b7661682c5156c3e0d2dac51fb286d0b82bde8bb64531f",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/tests/identity.spec.luau",
+      "bytes": 6831,
+      "sha256": "2d64337d48e3757eb12278750283ce9a3acab8ea11357ef6bf9c19d1decfa15b",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/tests/planning.spec.luau",
+      "bytes": 2325,
+      "sha256": "2383155b59f9bad9b9d8a0b583ff2511505c7a5ec0497a4e25ac55ebf688ed3f",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/tests/quality.spec.luau",
+      "bytes": 3333,
+      "sha256": "859e54557133d6e24905b0bf447b23c18f6ae10ac7a6b4fa21e902c2e9aea6c2",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/tests/terrain.spec.luau",
+      "bytes": 3246,
+      "sha256": "26f2e69086edf41617c6bed80620f80fed4479c020e23dea65cf4f60026a2f58",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/tests/voxel-guard.integration.luau",
+      "bytes": 5842,
+      "sha256": "c259e736c750626c95fdcd0d812eaf1f9bf8bc94b8d40c1efb77cf6d1346dd35",
+      "type": ".luau",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/AUDIT_EXPANSION.md",
+      "bytes": 1389,
+      "sha256": "7654f30d222f7797e90d72076f34b9f30ead8ab661ddb3fc198bc0df9e5871ad",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/CATALOGS.md",
+      "bytes": 13952,
+      "sha256": "4a6e4f178a92be29bc5a73c6c02510007498a24e30b522a0e3b25b4f797a9d67",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/CONTROLS.md",
+      "bytes": 1085,
+      "sha256": "f0b07d6f8cbab08222e0311b5f43582ec56d73455b94638c72c4dbe78226e577",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/ELDRAVYN.md",
+      "bytes": 4398,
+      "sha256": "e1199670888ad963aa40ce7a9e7ad441caaf1d93568e8f23d3b29b25a7b0693e",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/IMPROVEMENTS.md",
+      "bytes": 10000,
+      "sha256": "931a77969353d1e4a70371099758778f78c5ab02199abc062c5a9ae7a66690a3",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/RACES_CLASSES.md",
+      "bytes": 8785,
+      "sha256": "f12f307bc24a76040fe741c80199e265c824d535914be958a8c09223d369708b",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/READVOXELS_FIX.md",
+      "bytes": 6190,
+      "sha256": "3d0608c304d853c9eae27e02c4619a9be30affb4ddf2c24ed5a88e9e4c65ac49",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/REQUEST_ELDRAVYN.pt-BR.txt",
+      "bytes": 6238,
+      "sha256": "7e5c96a15af34e0ed43d1ab91e7f57dc77fae6fad7b801d7cb5f9b442164fe0e",
+      "type": ".txt",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/REQUIREMENTS.pt-BR.txt",
+      "bytes": 42873,
+      "sha256": "b24353ef1b053d1097b78dbf7d6d6119a56a5f76c14413380af8cffe3f5c02ea",
+      "type": ".txt",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/docs/STUDIO_TEST_MATRIX.md",
+      "bytes": 7674,
+      "sha256": "193fd51d83fe6a5f0906512994d10560ecaeebbf260c6026a1065d14e9cefad5",
+      "type": ".md",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/assets/audio/cast.wav",
+      "bytes": 15478,
+      "sha256": "59af4fa4227c39735bd706e6245a625e19362a42b432701824132bb371bbcbd5",
+      "type": ".wav",
+      "matches_checkout_at_audit": true,
+      "audio": {
+        "channels": 1,
+        "sample_bytes": 2,
+        "rate": 22050,
+        "frames": 7717,
+        "compression": "NONE",
+        "description": "not compressed"
+      }
+    },
+    {
+      "path": "RPG-Roblox/assets/audio/dodge.wav",
+      "bytes": 9746,
+      "sha256": "51b6bf1f45b018a0b672bca6f61523525942913de106a830b1b70e992e4a3899",
+      "type": ".wav",
+      "matches_checkout_at_audit": true,
+      "audio": {
+        "channels": 1,
+        "sample_bytes": 2,
+        "rate": 22050,
+        "frames": 4851,
+        "compression": "NONE",
+        "description": "not compressed"
+      }
+    },
+    {
+      "path": "RPG-Roblox/assets/audio/impact.wav",
+      "bytes": 7982,
+      "sha256": "90462345725265c30361ec568bb7bb3d64cf795a9540fe09e6731c59d3cd2330",
+      "type": ".wav",
+      "matches_checkout_at_audit": true,
+      "audio": {
+        "channels": 1,
+        "sample_bytes": 2,
+        "rate": 22050,
+        "frames": 3969,
+        "compression": "NONE",
+        "description": "not compressed"
+      }
+    },
+    {
+      "path": "RPG-Roblox/build/ProjectMedievalRPG.rbxlx",
+      "bytes": 316263,
+      "sha256": "ada1163d26bbc45b42096cd7827627c194fe598a7343c902c4ed0b0f90dabde1",
+      "type": ".rbxlx",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/build/ProjectMedievalRPG_Dungeon.rbxlx",
+      "bytes": 316265,
+      "sha256": "2c247bb1ade9ca4207d94472e519c4bd3694498baf28c664ad401eab2ad254f4",
+      "type": ".rbxlx",
+      "matches_checkout_at_audit": true
+    },
+    {
+      "path": "RPG-Roblox/build/BUILD_MANIFEST.json",
+      "bytes": 646,
+      "sha256": "92d20d289b385842785bebde70a762eb191f4c9df46671b76f716d758177a94e",
+      "type": ".json",
+      "matches_checkout_at_audit": true
+    }
+  ],
+  "places": [
+    {
+      "path": "RPG-Roblox/build/ProjectMedievalRPG.rbxlx",
+      "classes": {
+        "ReplicatedStorage": 1,
+        "Folder": 8,
+        "ModuleScript": 48,
+        "ServerScriptService": 1,
+        "Script": 1,
+        "ServerStorage": 1,
+        "StringValue": 1,
+        "StarterPlayer": 1,
+        "StarterPlayerScripts": 1,
+        "LocalScript": 1,
+        "Workspace": 1
+      },
+      "embedded_sources_matching_archive_source": 50,
+      "sha256": "ada1163d26bbc45b42096cd7827627c194fe598a7343c902c4ed0b0f90dabde1"
+    },
+    {
+      "path": "RPG-Roblox/build/ProjectMedievalRPG_Dungeon.rbxlx",
+      "classes": {
+        "ReplicatedStorage": 1,
+        "Folder": 8,
+        "ModuleScript": 48,
+        "ServerScriptService": 1,
+        "Script": 1,
+        "ServerStorage": 1,
+        "StringValue": 1,
+        "StarterPlayer": 1,
+        "StarterPlayerScripts": 1,
+        "LocalScript": 1,
+        "Workspace": 1
+      },
+      "embedded_sources_matching_archive_source": 50,
+      "sha256": "2c247bb1ade9ca4207d94472e519c4bd3694498baf28c664ad401eab2ad254f4"
+    }
+  ],
+  "code_pattern_hits": [],
+  "entry_count": 106,
+  "extension_counts": {
+    "gitignore": 1,
+    ".json": 3,
+    ".md": 20,
+    ".luau": 65,
+    ".ps1": 2,
+    ".py": 8,
+    ".txt": 2,
+    ".wav": 3,
+    ".rbxlx": 2
+  },
+  "crc_valid": true,
+  "unique_normal_paths_no_symlinks_or_encryption": true
+}

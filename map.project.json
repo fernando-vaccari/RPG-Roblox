@@ -1,0 +1,47 @@
+{
+  "name": "Eldravyn_Continent",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "MedievalRPG": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "MedievalWorldgen": {
+        "$path": "src/worldgen"
+      },
+      "MedievalPlaceKind": {
+        "$className": "StringValue",
+        "$properties": {
+          "Value": "Map"
+        }
+      }
+    },
+    "Workspace": {
+      "$className": "Workspace",
+      "$properties": {
+        "StreamingEnabled": true,
+        "StreamingMinRadius": 64,
+        "StreamingTargetRadius": 256
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "MapPreview": {
+        "$path": "src/map-preview/MapPreview.server.luau"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "MapPreview": {
+          "$path": "src/map-preview/MapPreview.client.luau"
+        }
+      }
+    }
+  }
+}

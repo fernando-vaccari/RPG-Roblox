@@ -1,0 +1,491 @@
+# CODEX — ELDRAVYN: RISE OF SHADOWS
+## TAREFA 01: RECONSTRUÇÃO COMPLETA DO CONTINENTE MEDIEVAL
+
+Você é um especialista sênior em Roblox Studio, Luau, construção procedural de mundos, arquitetura medieval fantástica, direção artística 3D e otimização de jogos para PC e dispositivos móveis.
+
+**OBJETIVO:** reconstruir completamente o mapa do continente principal de **Eldravyn: Rise of Shadows**, criando um mundo medieval fantástico de grande escala, extremamente bonito, imersivo e otimizado.
+
+**IMPORTANTE: ESTA TAREFA É EXCLUSIVAMENTE SOBRE O MAPA DO CONTINENTE.**
+
+Não implemente sistemas de combate, classes, habilidades, missões, inteligência artificial, inventário, monetização, dungeons internas ou outros sistemas de gameplay.
+
+Não desperdice recursos desenvolvendo funcionalidades fora deste escopo.
+
+---
+
+# 1. INSPEÇÃO DO PROJETO EXISTENTE
+
+Antes de modificar qualquer arquivo:
+
+1. Examine a estrutura completa do repositório.
+2. Identifique como o mapa atual é gerado ou armazenado.
+3. Localize scripts, modelos e configurações responsáveis pelo continente.
+4. Identifique sistemas existentes que precisam ser preservados.
+5. Determine se o projeto utiliza Rojo, arquivos `.rbxl`, `.rbxlx`, `.rbxm`, `.rbxmx` ou scripts Luau.
+6. Verifique quais recursos realmente podem ser gerados e testados no ambiente disponível.
+
+**O mapa antigo foi rejeitado por apresentar baixa qualidade visual.**
+
+Você está autorizado a substituir completamente o mapa antigo, desde que preserve os sistemas úteis e não destrua dados ou funcionalidades independentes.
+
+Não substitua o mapa por uma versão simplificada.
+
+---
+
+# 2. REFERÊNCIAS VISUAIS
+
+O continente deve combinar as seguintes referências:
+
+**Sword Art Online: Alicization Lycoris**
+- Paisagens amplas e cinematográficas.
+- Grandes campos e florestas.
+- Arquitetura medieval fantástica.
+- Castelos imponentes.
+- Terrenos naturais e variados.
+- Sensação de estar explorando um mundo de fantasia.
+
+**Grand Piece Online (GPO)**
+- Grande escala de exploração.
+- Estilo visual atraente.
+- Boa leitura dos ambientes.
+- Otimização para PC e celular.
+
+Não copie mapas, modelos, texturas ou propriedades intelectuais dessas obras. Use-as apenas como referências de direção artística.
+
+O objetivo é criar uma identidade própria para Eldravyn.
+
+**ESTILO ARTÍSTICO:** fantasia medieval de alta qualidade, com influência de anime, iluminação cinematográfica, materiais coerentes, vegetação abundante e arquitetura detalhada.
+
+Evite aparência excessivamente quadrada, genérica ou artificial.
+
+---
+
+# 3. ESCALA DO CONTINENTE
+
+Construir **um continente grande, contínuo e explorável**, sem teletransportes obrigatórios entre as regiões externas.
+
+O continente precisa transmitir a sensação de uma verdadeira jornada.
+
+Não criar um mapa minúsculo.
+
+Não criar distâncias enormes e vazias apenas para aumentar artificialmente a escala.
+
+Dimensione o mundo considerando:
+
+- Distâncias significativas entre cidades.
+- Viagens por estradas.
+- Florestas realmente extensas.
+- Montanhas e vales naturais.
+- Regiões com identidades diferentes.
+- Exploração livre.
+- Áreas de descoberta.
+- Desempenho em dispositivos móveis.
+
+Escolha dimensões em studs com base em testes e orçamento de desempenho. Documente a escala adotada.
+
+O mundo deverá ser expansível para futuros continentes.
+
+---
+
+# 4. ESTRUTURA GEOGRÁFICA OBRIGATÓRIA
+
+Criar:
+
+- **5 cidades medievais principais.**
+- **3 grandes florestas.**
+- **2 entradas monumentais de dungeons.**
+- Cadeias de montanhas.
+- Colinas e vales.
+- Rios.
+- Lagos.
+- Cachoeiras.
+- Pontes.
+- Estradas.
+- Trilhas secundárias.
+- Cavernas naturais.
+- Ruínas.
+- Fortalezas abandonadas.
+- Vilarejos menores.
+- Áreas secretas.
+- Pontos panorâmicos.
+- Campos e pradarias.
+- Acampamentos e estruturas abandonadas.
+
+As duas dungeons terão seus interiores desenvolvidos em outra tarefa.
+
+**Nesta fase, crie somente as entradas externas, sua arquitetura, ambientação e espaço de integração.**
+
+---
+
+# 5. AS CINCO CIDADES
+
+Cada cidade deverá ter identidade visual própria.
+
+## Cidade 1 — A Capital Inicial
+
+Uma cidade medieval acolhedora e grandiosa.
+
+Elementos:
+
+- Praça central.
+- Casas medievais detalhadas.
+- Ruas de pedra.
+- Mercado.
+- Ferreiro.
+- Torre do relógio ou marco arquitetônico.
+- Pousada.
+- Muralhas.
+- Portões.
+- Jardins.
+- Fontes.
+- Iluminação noturna.
+- Castelo ou fortaleza visível ao longe.
+- Espaços reservados para NPCs e lojas.
+
+Criar uma área de spawn visualmente impressionante e segura.
+
+A guilda dos aventureiros deverá ficar fora da cidade, conectada por uma estrada curta e bonita.
+
+Construir o edifício da guilda, mas não implementar seu funcionamento.
+
+## Cidade 2 — Cidade das Florestas
+
+Arquitetura integrada à natureza.
+
+Elementos:
+
+- Construções de madeira e pedra.
+- Árvores monumentais.
+- Pontes.
+- Jardins.
+- Pequenos riachos.
+- Iluminação acolhedora.
+- Passagens entre árvores.
+- Atmosfera de fantasia élfica.
+
+## Cidade 3 — Cidade das Montanhas
+
+Cidade construída entre montanhas e penhascos.
+
+Elementos:
+
+- Arquitetura de pedra.
+- Grandes muralhas.
+- Torres defensivas.
+- Pontes elevadas.
+- Forjas.
+- Minas externas.
+- Cachoeiras próximas.
+- Ruas em diferentes alturas.
+
+## Cidade 4 — Cidade Arcana
+
+Cidade dedicada à magia.
+
+Elementos:
+
+- Torres arcanas.
+- Academia ou biblioteca de magia.
+- Cristais luminosos.
+- Arquitetura elegante.
+- Jardins encantados.
+- Fontes mágicas.
+- Símbolos rúnicos.
+- Praças monumentais.
+
+Os efeitos mágicos deverão ser leves e adaptáveis ao dispositivo.
+
+## Cidade 5 — Cidade das Sombras
+
+Uma cidade medieval antiga próxima a uma região corrompida.
+
+Elementos:
+
+- Arquitetura gótica.
+- Torres altas.
+- Muralhas envelhecidas.
+- Ruínas.
+- Névoa.
+- Vegetação escura.
+- Iluminação misteriosa.
+- Um grande castelo ou fortaleza sombria.
+
+Deve parecer perigosa e misteriosa, mas ainda ser uma cidade explorável.
+
+---
+
+# 6. AS TRÊS FLORESTAS
+
+## Floresta 1 — Bosque Esmeralda
+
+Floresta exuberante, com árvores variadas, vegetação densa, riachos, clareiras e ruínas.
+
+## Floresta 2 — Floresta dos Ancestrais
+
+Floresta antiga com árvores gigantescas, raízes monumentais, pedras cobertas de musgo e estruturas esquecidas.
+
+## Floresta 3 — Floresta Sombria
+
+Floresta misteriosa, com árvores retorcidas, neblina, ruínas e caminhos ocultos.
+
+As florestas devem ter composição natural, evitando repetição óbvia de modelos.
+
+Criar áreas abertas adequadas para futuros combates, sem implementar inimigos agora.
+
+---
+
+# 7. TERRENO E PAISAGENS
+
+Utilizar preferencialmente o sistema Terrain do Roblox para paisagens naturais, quando apropriado.
+
+Criar:
+
+- Relevo variado.
+- Encostas naturais.
+- Planícies.
+- Penhascos.
+- Montanhas.
+- Leitos de rios.
+- Praias de lagos.
+- Cavernas.
+- Desfiladeiros.
+- Platôs.
+- Cachoeiras.
+
+As estradas deverão acompanhar o relevo.
+
+Evitar interseções visuais, construções flutuantes, terrenos atravessando edifícios e caminhos impossíveis.
+
+Utilizar materiais coerentes e transições naturais.
+
+---
+
+# 8. ARQUITETURA E DETALHAMENTO
+
+Desenvolver um conjunto modular reutilizável de:
+
+- Casas.
+- Telhados.
+- Paredes.
+- Portas.
+- Janelas.
+- Torres.
+- Muralhas.
+- Pontes.
+- Escadas.
+- Postes.
+- Lanternas.
+- Cercas.
+- Barris.
+- Caixas.
+- Bancas de mercado.
+- Bancos.
+- Fontes.
+- Estátuas.
+- Ruínas.
+- Elementos decorativos.
+
+Utilizar variações de forma, escala, materiais e composição.
+
+As cidades devem parecer planejadas por um artista de ambientes, não geradas por posicionamento aleatório de objetos.
+
+Criar interiores exploráveis nos edifícios mais importantes, sem tentar construir interiores detalhados para todas as casas.
+
+Priorizar qualidade e coerência.
+
+---
+
+# 9. ILUMINAÇÃO, ATMOSFERA E CLIMA
+
+Configurar iluminação de alta qualidade compatível com o Roblox.
+
+Preparar o continente para:
+
+- Amanhecer.
+- Dia.
+- Entardecer.
+- Noite.
+- Chuva.
+- Neblina.
+- Tempestades.
+
+Nesta tarefa, implementar apenas a infraestrutura visual e as configurações ambientais necessárias.
+
+Não desenvolver ainda um sistema complexo de eventos climáticos ou de gameplay.
+
+As cidades devem ficar bonitas tanto de dia quanto à noite.
+
+Utilizar iluminação adaptativa e evitar efeitos excessivamente caros.
+
+---
+
+# 10. OTIMIZAÇÃO OBRIGATÓRIA
+
+O mapa deverá funcionar em PC e celular.
+
+Aplicar:
+
+- StreamingEnabled, conforme compatibilidade.
+- Carregamento progressivo.
+- Modelos reutilizáveis.
+- Organização espacial.
+- Redução de geometria desnecessária.
+- Limitação de partículas.
+- Controle de sombras.
+- Controle de luzes.
+- Uso eficiente de materiais.
+- Otimização de colisões.
+- Vegetação com orçamento de desempenho.
+- Níveis de detalhe quando viáveis.
+
+Preservar a estrutura do continente em todas as qualidades gráficas.
+
+Não remover regiões inteiras para melhorar FPS.
+
+Criar perfis visuais:
+
+- Baixo.
+- Médio.
+- Alto.
+- Automático.
+
+Meta: buscar 30 FPS em celulares intermediários compatíveis e 60 FPS em computadores adequados, sujeitos a testes reais.
+
+Não alegar resultados de desempenho sem medições.
+
+---
+
+# 11. QUALIDADE VISUAL E VALIDAÇÃO
+
+Não considere o mapa concluído apenas porque um script conseguiu gerar objetos.
+
+Verifique:
+
+- Proporção das construções.
+- Escala das estradas.
+- Variedade das cidades.
+- Composição das florestas.
+- Qualidade das paisagens.
+- Caminhos acessíveis.
+- Entradas de edifícios.
+- Ausência de objetos flutuantes.
+- Ausência de colisões incorretas.
+- Ausência de vazios artificiais.
+- Distribuição de pontos de interesse.
+- Desempenho.
+
+Se houver acesso ao Roblox Studio, abra o projeto e faça inspeções visuais.
+
+Se não houver acesso ao Studio, crie instruções objetivas para o proprietário verificar o mapa e não declare a qualidade visual como validada.
+
+Não substitua testes visuais por afirmações genéricas de que o mapa está perfeito.
+
+---
+
+# 12. INTEGRAÇÃO FUTURA
+
+O mapa deve ficar preparado para receber posteriormente:
+
+- NPCs.
+- Monstros.
+- Chefões.
+- Guildas.
+- Missões.
+- Lojas.
+- Combate.
+- Dungeons.
+- Eventos.
+- Sistemas de clima.
+- Multiplayer.
+
+Criar pontos de integração claramente identificados, sem implementar os sistemas nesta tarefa.
+
+Definir identificadores estáveis para cidades, florestas, entradas de dungeon, áreas de spawn e pontos de interesse.
+
+Não criar dependências desnecessárias entre cenário e sistemas de gameplay.
+
+---
+
+# 13. ECONOMIA DE CRÉDITOS E TEMPO
+
+O objetivo é maximizar resultado por sessão de Codex.
+
+Portanto:
+
+1. Faça uma auditoria inicial curta.
+2. Evite explicações longas antes de programar.
+3. Não gere documentação excessiva.
+4. Não reescreva sistemas que já funcionam.
+5. Não desenvolva gameplay.
+6. Não crie dezenas de alternativas de arquitetura sem necessidade.
+7. Implemente diretamente a melhor solução técnica viável.
+8. Reutilize componentes modulares.
+9. Execute testes relevantes.
+10. Salve o progresso após cada etapa significativa.
+
+Não gaste a maior parte da sessão apenas planejando.
+
+**Não sacrifique a qualidade do mapa para economizar tokens. Economize eliminando retrabalho e tarefas fora do escopo.**
+
+---
+
+# 14. CONTINUIDADE ENTRE SESSÕES
+
+Criar ou atualizar `PROGRESSO_MAPA.md` com:
+
+- Estado atual.
+- Arquivos alterados.
+- Regiões concluídas.
+- Regiões pendentes.
+- Testes realizados.
+- Problemas conhecidos.
+- Próxima tarefa exata.
+- Branch e último commit.
+
+Trabalhar em uma branch específica para o mapa.
+
+Fazer commits pequenos e frequentes.
+
+Publicar no GitHub quando houver permissão e confirmar que a branch remota realmente existe.
+
+Se não conseguir publicar, deixar um patch ou os arquivos modificados recuperáveis.
+
+Ao continuar em uma sessão futura, ler `PROGRESSO_MAPA.md` e prosseguir sem reconstruir o que já está pronto.
+
+---
+
+# 15. CRITÉRIOS DE CONCLUSÃO
+
+Esta tarefa só estará concluída quando:
+
+- O continente estiver construído.
+- As cinco cidades estiverem presentes.
+- As três florestas estiverem presentes.
+- As duas entradas de dungeon estiverem prontas.
+- O relevo e as paisagens estiverem integrados.
+- As regiões estiverem conectadas.
+- A iluminação estiver configurada.
+- O mapa estiver organizado para futuras expansões.
+- Os sistemas existentes estiverem preservados.
+- Os arquivos puderem ser abertos no Roblox Studio.
+- Os testes possíveis tiverem sido executados.
+- As limitações de validação visual e desempenho estiverem documentadas.
+- O progresso estiver salvo em commits recuperáveis.
+
+Não declare o trabalho concluído se apenas um gerador procedural estiver pronto, mas o mapa final ainda não tiver sido construído ou inspecionado.
+
+---
+
+# 16. COMECE AGORA
+
+Inspecione o projeto e comece imediatamente a reconstrução do continente.
+
+Não desenvolva dungeons internas, combate, classes, NPCs funcionais ou monetização.
+
+**FOCO ABSOLUTO: O CONTINENTE DE ELDRAVYN: RISE OF SHADOWS.**
+
+O resultado deverá ser um mundo medieval fantástico de grande escala, visualmente marcante, explorável, otimizado e pronto para receber os sistemas do RPG.
+
+Execute a implementação real, teste o que for possível, faça commits e preserve o progresso.
+
+**COMECE AGORA.**

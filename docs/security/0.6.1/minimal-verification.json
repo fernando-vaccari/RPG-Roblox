@@ -1,0 +1,23 @@
+{
+  "original_archive_sha256": "6e6f990a241d75821cfc9d2e36f601d3ae6749af68aea6139c502480a3194d65",
+  "minimal_zip_contains_only_two_places": true,
+  "antivirus_executed": false,
+  "roblox_studio_executed": false,
+  "places": [
+    {
+      "file": "ProjectMedievalRPG.rbxlx",
+      "bytes": 316263,
+      "sha256": "ada1163d26bbc45b42096cd7827627c194fe598a7343c902c4ed0b0f90dabde1",
+      "byte_identical_to_0_6_1_alerted_archive": true
+    },
+    {
+      "file": "ProjectMedievalRPG_Dungeon.rbxlx",
+      "bytes": 316265,
+      "sha256": "2c247bb1ade9ca4207d94472e519c4bd3694498baf28c664ad401eab2ad254f4",
+      "byte_identical_to_0_6_1_alerted_archive": true
+    }
+  ],
+  "minimal_zip_sha256": "0d66f526d774d960f6b886312432676977b1c91ec337c50d6a9727a7869550c4",
+  "minimal_zip_bytes": 171646,
+  "no_game_source_changes": true
+}

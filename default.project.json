@@ -1,0 +1,47 @@
+{
+  "name": "ProjectMedievalRPG",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "MedievalRPG": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "MedievalWorldgen": {
+        "$path": "src/worldgen"
+      },
+      "MedievalPlaceKind": {
+        "$className": "StringValue",
+        "$properties": {
+          "Value": "World"
+        }
+      }
+    },
+    "Workspace": {
+      "$className": "Workspace",
+      "$properties": {
+        "StreamingEnabled": true,
+        "StreamingMinRadius": 64,
+        "StreamingTargetRadius": 256
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "MedievalServer": {
+        "$path": "src/server"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "MedievalClient": {
+          "$path": "src/client"
+        }
+      }
+    }
+  }
+}

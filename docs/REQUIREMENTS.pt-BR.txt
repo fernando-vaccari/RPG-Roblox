@@ -1,0 +1,2590 @@
+VOCÊ É UM DESENVOLVEDOR SÊNIOR ESPECIALIZADO EM ROBLOX STUDIO,
+LUAU, GERAÇÃO PROCEDURAL DE MUNDOS, WORLD BUILDING,
+LEVEL DESIGN, RPGs MEDIEVAIS, NPCs, OTIMIZAÇÃO E GAME DESIGN.
+
+MISSÃO PRINCIPAL:
+
+DESENVOLVER UM SISTEMA COMPLETO DE GERAÇÃO AUTOMÁTICA
+DE UM CONTINENTE MEDIEVAL DE FANTASIA PARA ROBLOX STUDIO.
+
+O SISTEMA DEVE GERAR AUTOMATICAMENTE:
+
+- O TERRENO COMPLETO.
+- QUATRO CIDADES MEDIEVAIS.
+- DUAS FLORESTAS EXPLORÁVEIS.
+- UMA ENTRADA PARA DUNGEON.
+- O MAPA INTERNO DA DUNGEON.
+- ESTRADAS.
+- PONTES.
+- RIOS.
+- MONTANHAS.
+- CASAS.
+- CASTELOS.
+- MUROS.
+- LOJAS.
+- NPCS.
+- ANIMAÇÕES BÁSICAS.
+- INTERAÇÕES.
+- MISSÕES INICIAIS.
+- INIMIGOS.
+- BAÚS.
+- PONTOS DE SPAWN.
+- EFEITOS VISUAIS.
+- ILUMINAÇÃO.
+- SINALIZAÇÃO.
+- SISTEMAS BÁSICOS DE RPG.
+
+O OBJETIVO É QUE EU NÃO PRECISE CONSTRUIR MANUALMENTE
+O MAPA INTEIRO NO ROBLOX STUDIO.
+
+QUERO EXECUTAR O SISTEMA DE GERAÇÃO E VER O CONTINENTE
+CRIADO AUTOMATICAMENTE.
+
+O PROJETO DEVE SER PROFISSIONAL, ORGANIZADO, MODULAR,
+OTIMIZADO E EXPANSÍVEL.
+
+==================================================
+1. CONCEITO GERAL DO JOGO
+==================================================
+
+NOME TEMPORÁRIO:
+PROJECT MEDIEVAL RPG
+
+GÊNERO:
+MMORPG MEDIEVAL DE FANTASIA.
+
+ESTILO:
+FANTASIA MEDIEVAL COLORIDA COM INSPIRAÇÃO EM ANIME.
+
+REFERÊNCIAS DE DIREÇÃO ARTÍSTICA:
+
+- Mapas coloridos e relativamente leves.
+- Construções medievais estilizadas.
+- Cidades bonitas e memoráveis.
+- Florestas densas.
+- Castelos.
+- Magia.
+- Espadas.
+- Demônios.
+- Monstros.
+- Exploração.
+- Progressão de personagem.
+
+O jogo deve ter a leveza visual de RPGs populares
+do Roblox, mas identidade própria.
+
+A inspiração em jogos como Blox Fruits e GPO
+é somente conceitual.
+
+NÃO COPIAR:
+
+- Mapas existentes.
+- Personagens protegidos.
+- Interfaces idênticas.
+- Texturas proprietárias.
+- Nomes protegidos.
+- Construções específicas de outros jogos.
+- Modelos de terceiros sem autorização.
+
+Criar um universo medieval original.
+
+==================================================
+2. DIMENSÕES DO CONTINENTE
+==================================================
+
+Criar inicialmente um continente com aproximadamente:
+
+4000 x 4000 STUDS.
+
+O continente precisa ser uma massa de terra contínua.
+
+IMPORTANTE:
+
+NÃO DIVIDIR AS CIDADES EM ILHAS.
+
+NÃO CRIAR UM ARQUIPÉLAGO.
+
+NÃO COLOCAR OCEANOS SEPARANDO AS CIDADES.
+
+AS QUATRO CIDADES DEVEM ESTAR NO MESMO CONTINENTE,
+CONECTADAS POR ESTRADAS TERRESTRES.
+
+Pode existir água nas extremidades do continente,
+rios, lagos e cachoeiras, mas os deslocamentos
+principais deverão ser realizados por terra.
+
+Criar:
+
+- Planícies.
+- Colinas.
+- Vales.
+- Montanhas.
+- Campos abertos.
+- Penhascos.
+- Lagos.
+- Rios.
+- Cachoeiras.
+- Pequenas cavernas.
+- Rochas.
+- Caminhos naturais.
+
+O relevo não pode ser completamente plano.
+
+Entretanto, evitar montanhas excessivamente altas
+que prejudiquem a exploração.
+
+Manter um relevo interessante e jogável.
+
+==================================================
+3. DISTRIBUIÇÃO GERAL DO MAPA
+==================================================
+
+ORGANIZAR O CONTINENTE ASSIM:
+
+CENTRO-SUL:
+CIDADE 1 - VILA INICIAL.
+
+NORTE:
+CIDADE 2 - CIDADE DO CASTELO.
+
+LESTE:
+CIDADE 3 - CIDADE ARCANA.
+
+OESTE:
+CIDADE 4 - CIDADE DOS FERREIROS.
+
+NORDESTE:
+FLORESTA 1 - FLORESTA ENCANTADA.
+
+SUDOESTE:
+FLORESTA 2 - FLORESTA SOMBRIA.
+
+NORTE DISTANTE:
+ENTRADA DA DUNGEON DEMONÍACA.
+
+As coordenadas podem ser ajustadas pelo algoritmo
+para melhorar a geografia.
+
+Todas as cidades precisam ser acessíveis por estradas.
+
+Criar caminhos secundários para:
+
+- Florestas.
+- Cavernas.
+- Pontes.
+- Ruínas.
+- Campos de treinamento.
+- Acampamentos de bandidos.
+- Entrada da dungeon.
+
+NÃO criar cidades encostadas umas nas outras.
+
+O jogador deve sentir que está explorando
+um continente relativamente grande.
+
+A distribuição deverá ser configurável.
+
+==================================================
+4. QUALIDADE VISUAL DO MAPA
+==================================================
+
+ESTA É UMA DAS PARTES MAIS IMPORTANTES.
+
+NÃO QUERO UM MAPA FORMADO APENAS POR BLOCOS SIMPLES.
+
+QUERO UM CENÁRIO MEDIEVAL VISUALMENTE BONITO.
+
+Criar construções com:
+
+- Telhados inclinados.
+- Madeiras aparentes.
+- Paredes de pedra.
+- Paredes de reboco.
+- Janelas.
+- Portas.
+- Chaminés.
+- Sacadas.
+- Varandas.
+- Escadas.
+- Cercas.
+- Jardins.
+- Lanternas.
+- Barris.
+- Caixas.
+- Carroças.
+- Poços.
+- Bancadas.
+- Bandeiras.
+- Placas.
+- Decorações.
+
+Utilizar combinações adequadas de:
+
+- Parts.
+- MeshParts, quando houver modelos próprios.
+- WedgeParts.
+- UnionOperations apenas quando adequado.
+- Roblox Terrain.
+- Materials.
+- SurfaceAppearance, quando houver assets válidos.
+- Luzes.
+- ParticleEmitters.
+- Beams.
+- Decals somente com recursos autorizados.
+
+Criar uma DIREÇÃO DE ARTE COERENTE.
+
+As construções devem parecer pertencer
+ao mesmo universo.
+
+Não quero uma cidade onde cada casa tem
+um estilo completamente aleatório.
+
+Criar uma biblioteca procedural reutilizável
+de construções medievais.
+
+VARIAR:
+
+- Tamanho.
+- Altura.
+- Formato do telhado.
+- Posição das janelas.
+- Cores.
+- Entradas.
+- Decorações.
+
+Evitar a aparência de casas duplicadas
+exatamente iguais.
+
+Usar variações determinísticas para
+produzir diversidade sem prejudicar desempenho.
+
+==================================================
+5. CIDADE 1 - VILA INICIAL
+==================================================
+
+NOME TEMPORÁRIO:
+VILA DE VALORIA.
+
+Esta será a primeira cidade do jogador.
+
+ESTILO:
+
+- Medieval.
+- Acolhedora.
+- Iluminada.
+- Colorida.
+- Relativamente pequena.
+- Cercada por campos verdes.
+- Casas de madeira e pedra.
+- Ruas de terra e pedra.
+
+O jogador deve sentir que começou
+sua aventura em um mundo de fantasia.
+
+CONSTRUIR:
+
+01 praça central.
+
+01 fonte ou poço principal.
+
+01 ponto de spawn.
+
+01 hospedaria funcional.
+
+01 ferreiro.
+
+01 loja de armas.
+
+01 loja de magias.
+
+01 loja de poções.
+
+01 mercador geral.
+
+01 casa de treinamento.
+
+01 área de treinamento com bonecos.
+
+01 área de escolha de equipamento inicial.
+
+01 pequena capela ou templo.
+
+01 quadro de avisos.
+
+01 área de comerciantes.
+
+01 pequeno mercado.
+
+01 celeiro.
+
+01 moinho.
+
+01 pequena fazenda.
+
+01 estábulo.
+
+01 posto de guardas.
+
+Diversas casas de moradores.
+
+Adicionar uma pequena guilda de aventureiros
+FORA DOS MUROS OU NA BORDA DA CIDADE.
+
+Esta guilda será essencial para o início
+da jornada do jogador.
+
+IMPORTANTE:
+
+O jogador começa:
+
+- Sem classe definida.
+- Sem rank de aventureiro.
+- Com equipamento inicial escolhido por ele.
+
+A guilda deve permitir o registro inicial
+como aventureiro de RANK F.
+
+==================================================
+6. SISTEMA INICIAL DE CLASSES
+==================================================
+
+Criar a estrutura básica das classes:
+
+1. ESPADACHIM.
+2. GUERREIRO.
+3. MAGO.
+4. ARQUEIRO.
+
+O jogador não escolhe diretamente
+uma classe definitiva ao entrar.
+
+Primeiro escolhe um equipamento inicial.
+
+EQUIPAMENTOS:
+
+- Katana.
+- Espada longa.
+- Cajado.
+- Arco.
+
+Cada equipamento deve ter um modelo
+visual básico funcional.
+
+Depois de uma missão inicial contra bandidos,
+o jogador pode desbloquear a classe
+correspondente ao equipamento.
+
+MAPEAMENTO INICIAL:
+
+Katana -> Espadachim.
+
+Espada longa -> Guerreiro.
+
+Cajado -> Mago.
+
+Arco -> Arqueiro.
+
+O cajado deve permitir duas magias básicas
+gratuitas de início.
+
+Não é necessário construir agora um sistema
+de combate extremamente complexo.
+
+Entretanto, criar a arquitetura preparada
+para futuras expansões.
+
+A troca de classe poderá usar futuramente
+um produto de 100 Robux, mas NÃO ativar
+cobranças reais sem configuração e testes.
+
+Novas armas iniciais poderão custar
+500 moedas do jogo.
+
+Tudo deve ser configurável.
+
+==================================================
+7. CIDADE 2 - CIDADE DO CASTELO
+==================================================
+
+NOME TEMPORÁRIO:
+REINO DE ARKHEIM.
+
+ESTILO:
+
+Grande cidade medieval fortificada.
+
+ARQUITETURA:
+
+- Pedra.
+- Madeira.
+- Torres.
+- Muralhas.
+- Portões enormes.
+- Bandeiras.
+- Castelos.
+- Ruas de pedra.
+
+CONSTRUIR:
+
+01 castelo principal.
+
+01 praça real.
+
+01 mercado central.
+
+01 quartel.
+
+01 área de treinamento.
+
+01 ferreiro avançado.
+
+01 loja de armaduras.
+
+01 loja de armas.
+
+01 hospedaria.
+
+01 loja de magia.
+
+01 biblioteca.
+
+01 torre de vigia.
+
+01 estábulo.
+
+01 área nobre.
+
+01 área comercial.
+
+01 bairro residencial.
+
+01 muralha ao redor das áreas principais.
+
+Portões de entrada e saída.
+
+Criar NPCs como:
+
+- Guarda real.
+- Capitão da guarda.
+- Ferreiro real.
+- Mercador.
+- Bibliotecário.
+- Mestre de armas.
+- Cidadãos.
+- Aventureiros.
+- Viajantes.
+
+Adicionar detalhes ambientais:
+
+- Bandeiras movimentando suavemente.
+- Tochas.
+- Luzes nas janelas.
+- Ruídos ambientes.
+- Folhas e vegetação.
+- Pequenos efeitos de fumaça.
+
+==================================================
+8. CIDADE 3 - CIDADE ARCANA
+==================================================
+
+NOME TEMPORÁRIO:
+ELDORIA.
+
+ESTILO:
+
+Cidade medieval de magia e conhecimento.
+
+AMBIENTAÇÃO:
+
+- Torres de magos.
+- Cristais mágicos.
+- Bibliotecas.
+- Árvores encantadas.
+- Pequenos efeitos luminosos.
+- Construções fantásticas.
+
+CONSTRUIR:
+
+01 grande torre arcana.
+
+01 escola de magia.
+
+01 biblioteca arcana.
+
+01 loja de magias.
+
+01 loja de cajados.
+
+01 loja de poções.
+
+01 mercado mágico.
+
+01 praça central.
+
+01 hospedaria.
+
+01 templo mágico.
+
+01 jardim encantado.
+
+01 laboratório de alquimia.
+
+01 área de treinamento mágico.
+
+Diversas casas medievais.
+
+NPCS:
+
+- Mestre Arcano.
+- Vendedor de Magias.
+- Alquimista.
+- Professor de Magia.
+- Bibliotecário Arcano.
+- Mercador de Cristais.
+- Guarda Arcano.
+- Aventureiros.
+- Cidadãos.
+
+Criar efeitos como:
+
+- Pequenos cristais brilhantes.
+- Partículas mágicas discretas.
+- Luzes suaves.
+- Runas brilhantes em pontos importantes.
+
+Evitar excesso de partículas que
+prejudique FPS.
+
+==================================================
+9. CIDADE 4 - CIDADE DOS FERREIROS
+==================================================
+
+NOME TEMPORÁRIO:
+DURAKH.
+
+ESTILO:
+
+Cidade medieval de artesãos e guerreiros.
+
+LOCALIZAÇÃO:
+
+Próxima das montanhas ocidentais.
+
+AMBIENTAÇÃO:
+
+- Rochas.
+- Pedreiras.
+- Minas.
+- Forjas.
+- Chaminés.
+- Oficinas.
+- Construções de pedra escura.
+
+CONSTRUIR:
+
+01 grande forja central.
+
+01 guilda de ferreiros.
+
+01 loja de armas.
+
+01 loja de armaduras.
+
+01 loja de materiais.
+
+01 hospedaria.
+
+01 praça central.
+
+01 mina acessível.
+
+01 mercado.
+
+01 oficina de ferramentas.
+
+01 pequeno quartel.
+
+Diversas casas medievais.
+
+NPCS:
+
+- Mestre Ferreiro.
+- Aprendiz de Ferreiro.
+- Minerador.
+- Comerciante de Minérios.
+- Vendedor de Armaduras.
+- Vendedor de Armas.
+- Guarda.
+- Moradores.
+
+Criar efeitos:
+
+- Fornalhas.
+- Brasas.
+- Fumaça.
+- Luz de fogo.
+- Sons ambientes opcionais.
+
+As forjas devem ser visualmente
+interessantes e identificáveis.
+
+==================================================
+10. FLORESTA 1 - FLORESTA ENCANTADA
+==================================================
+
+NOME TEMPORÁRIO:
+BOSQUE DE SYLVARIN.
+
+ESTILO:
+
+Floresta de fantasia medieval.
+
+CONSTRUIR:
+
+- Árvores altas.
+- Árvores variadas.
+- Clareiras.
+- Trilhas.
+- Rochas.
+- Cogumelos.
+- Pequenos lagos.
+- Riachos.
+- Ruínas antigas.
+- Árvores especiais.
+- Pequenos santuários.
+- Baús escondidos.
+
+CRIATURAS:
+
+- Lobos.
+- Slimes.
+- Criaturas mágicas.
+- Pequenos monstros florestais.
+
+NPCS:
+
+- Guarda-florestal.
+- Explorador.
+- Herbalista.
+- Aventureiro.
+- Espírito protetor, quando adequado.
+
+Criar algumas missões relacionadas
+a criaturas e exploração.
+
+Exemplo:
+
+"Derrote 5 lobos."
+
+"Encontre uma erva rara."
+
+"Investigue as ruínas."
+
+A floresta deve oferecer espaço
+suficiente para exploração e combate.
+
+==================================================
+11. FLORESTA 2 - FLORESTA SOMBRIA
+==================================================
+
+NOME TEMPORÁRIO:
+FLORESTA DE NOCTHAR.
+
+ESTILO:
+
+Floresta misteriosa e perigosa.
+
+AMBIENTAÇÃO:
+
+- Árvores escuras.
+- Vegetação densa.
+- Neblina localizada.
+- Pedras antigas.
+- Ruínas.
+- Altares abandonados.
+- Árvores retorcidas.
+- Caminhos estreitos.
+
+INIMIGOS:
+
+- Bandidos.
+- Lobos sombrios.
+- Esqueletos.
+- Criaturas corrompidas.
+
+CONSTRUIR:
+
+01 acampamento de bandidos.
+
+01 ruína abandonada.
+
+01 caverna secundária.
+
+01 altar misterioso.
+
+Vários pontos de esconderijo de baús.
+
+Adicionar uma história ambiental
+sobre corrupção demoníaca.
+
+Não revelar todos os mistérios
+do jogo imediatamente.
+
+O jogador deve descobrir parte
+da história explorando o mapa.
+
+==================================================
+12. DUNGEON DEMONÍACA
+==================================================
+
+NOME TEMPORÁRIO:
+ABISMO DE MALGORTH.
+
+IMPORTANTE:
+
+A entrada da dungeon fica
+no primeiro continente.
+
+PORÉM:
+
+O interior da dungeon deverá funcionar
+em um MAPA SEPARADO.
+
+Criar uma arquitetura compatível
+com múltiplos Places dentro
+da mesma Roblox Experience.
+
+NÃO colocar a dungeon como uma ilha
+no continente.
+
+A entrada poderá ser uma estrutura
+medieval em ruínas, semelhante
+a um castelo abandonado construído
+sobre uma caverna demoníaca.
+
+ENTRADA:
+
+- Portão monumental.
+- Escadarias antigas.
+- Estátuas.
+- Rochas.
+- Runas.
+- Tochas.
+- Energia demoníaca.
+- NPC responsável pela entrada.
+
+Criar NPC:
+
+GUARDIÃO DA DUNGEON.
+
+INTERAÇÃO:
+
+Ao pressionar E perto do NPC,
+abrir uma interface.
+
+OPÇÕES:
+
+1. Entrar sozinho.
+2. Criar grupo.
+3. Entrar com grupo existente.
+4. Cancelar.
+
+GRUPOS:
+
+Permitir grupos de até
+QUATRO JOGADORES.
+
+Validar no servidor:
+
+- Jogadores presentes.
+- Tamanho máximo.
+- Elegibilidade.
+- Confirmação.
+- Estado do grupo.
+
+Preparar TeleportService
+para transferir os jogadores
+ao Place da dungeon.
+
+O identificador do Place
+será configurável.
+
+NÃO INVENTAR PLACE IDS.
+
+Criar também um modo de teste
+local adequado às limitações
+do Roblox Studio.
+
+O MODO DE TESTE NÃO PODE
+FINGIR QUE UM TELEPORTE REAL
+FOI TESTADO COM SUCESSO.
+
+==================================================
+13. INTERIOR DA DUNGEON
+==================================================
+
+Criar um segundo gerador,
+específico para o Place da dungeon.
+
+ESTILO:
+
+Castelo subterrâneo demoníaco.
+
+CONSTRUIR:
+
+- Salão de entrada.
+- Corredores.
+- Salas de combate.
+- Salas com armadilhas.
+- Pontes sobre abismos.
+- Salas secretas.
+- Portões.
+- Altar demoníaco.
+- Sala do chefe.
+- Área de recompensa.
+- Portal de retorno.
+
+A dungeon deve ter
+uma sequência explorável
+de salas interligadas.
+
+CRIAR:
+
+INIMIGOS COMUNS:
+
+- Soldado Demoníaco.
+- Esqueleto Corrompido.
+- Guardião das Sombras.
+
+MINICHEFE:
+
+- Cavaleiro Corrompido.
+
+CHEFE FINAL:
+
+- LORDE MALGORTH.
+
+Criar modelos originais
+e visualmente distinguíveis.
+
+O chefe deve possuir:
+
+- Arena.
+- Barra de vida.
+- Ataques básicos funcionais.
+- Efeitos visuais básicos.
+- Condição de derrota.
+- Recompensa.
+- Mecanismo de retorno.
+
+Não é necessário implementar
+agora dezenas de habilidades
+avançadas.
+
+Criar a base funcional
+e expansível.
+
+==================================================
+14. NPCS - SISTEMA COMPLETO
+==================================================
+
+CRIAR UM GERADOR DE NPCS
+REUTILIZÁVEL.
+
+CADA NPC DEVE POSSUIR:
+
+- ID único.
+- Nome.
+- Tipo.
+- Cidade.
+- Posição.
+- Orientação.
+- Modelo.
+- Aparência.
+- Animação básica.
+- Interação.
+- Diálogo.
+- Comportamento.
+- Configurações.
+
+TIPOS PRINCIPAIS:
+
+1. FERREIRO.
+2. VENDEDOR DE ARMAS.
+3. VENDEDOR DE ARMADURAS.
+4. VENDEDOR DE MAGIAS.
+5. ALQUIMISTA.
+6. MERCADOR.
+7. HOSPEDEIRO.
+8. GUARDA.
+9. MESTRE DE CLASSES.
+10. MESTRE DE GUILDA.
+11. NPC DE MISSÕES.
+12. MORADOR.
+13. VIAJANTE.
+14. EXPLORADOR.
+15. GUARDIÃO DA DUNGEON.
+16. PROFESSOR DE MAGIAS.
+
+NPCS IMPORTANTES DEVEM
+UTILIZAR PROXIMITYPROMPT.
+
+EXEMPLO:
+
+Jogador se aproxima
+do ferreiro.
+
+Aparece:
+
+[E] Conversar.
+
+Ao interagir:
+
+Abre a interface do ferreiro.
+
+O FERREIRO DEVE OFERECER:
+
+- Ver armas.
+- Comprar armas.
+- Informações sobre melhorias.
+- Encerrar conversa.
+
+Criar uma loja básica
+funcional com moeda
+do jogo.
+
+VENDAS E COMPRAS DEVEM
+SER VALIDADAS NO SERVIDOR.
+
+O cliente não pode definir
+o próprio saldo ou preço.
+
+==================================================
+15. MODELOS VISUAIS DOS NPCS
+==================================================
+
+NÃO CRIAR SOMENTE BLOCOS
+COM NOMES FLUTUANDO.
+
+CRIAR NPCS QUE PAREÇAM
+PERSONAGENS DO ROBLOX.
+
+PREFERÊNCIA:
+
+R15 COMPATÍVEL.
+
+Usar rigs válidos e
+animações compatíveis.
+
+Se a geração automática
+de rigs completos depender
+de recursos indisponíveis,
+criar uma alternativa
+procedural válida e documentada,
+sem afirmar que ela possui
+qualidade equivalente a um
+modelo profissional.
+
+DIFERENCIAR VISUALMENTE:
+
+FERREIRO:
+- Avental.
+- Roupas de artesão.
+- Cores escuras.
+- Aparência robusta.
+
+MAGO:
+- Túnica.
+- Cajado.
+- Cores arcanas.
+- Ornamentos.
+
+GUARDA:
+- Armadura.
+- Capacete.
+- Espada ou lança.
+
+MERCADOR:
+- Roupas comuns.
+- Bolsa.
+- Mercadorias próximas.
+
+AVENTUREIRO:
+- Equipamentos.
+- Mochila.
+- Armas decorativas.
+
+MORADOR:
+- Roupas civis variadas.
+
+Não utilizar assets
+de procedência desconhecida.
+
+NÃO introduzir modelos
+com scripts externos
+não auditados.
+
+==================================================
+16. DIÁLOGOS DOS NPCS
+==================================================
+
+CRIAR SISTEMA REUTILIZÁVEL
+DE DIÁLOGOS.
+
+Características:
+
+- Interface medieval.
+- Nome do NPC.
+- Mensagem.
+- Botões de resposta.
+- Possibilidade de avançar.
+- Possibilidade de fechar.
+- Interação por ProximityPrompt.
+
+EXEMPLO:
+
+FERREIRO:
+
+"Bem-vindo à minha forja,
+aventureiro!
+
+Precisa de uma arma
+ou deseja melhorar
+seu equipamento?"
+
+RESPOSTAS:
+
+1. Mostrar armas.
+2. Como funciona a forja?
+3. Adeus.
+
+CRIAR DIÁLOGOS DIFERENTES
+PARA OS PRINCIPAIS NPCS.
+
+Evitar diálogos repetidos
+em todas as cidades.
+
+NPCS COMUNS podem ter
+diálogos ambientais simples.
+
+==================================================
+17. GUILDA DOS AVENTUREIROS
+==================================================
+
+A guilda deve ficar
+na região inicial.
+
+CRIAR:
+
+- Prédio da guilda.
+- Balcão.
+- Quadro de missões.
+- Mesas.
+- Bandeiras.
+- NPC recepcionista.
+- NPC mestre da guilda.
+
+O jogador começa
+sem registro.
+
+Ao interagir com
+a recepcionista:
+
+"Bem-vindo à Guilda
+dos Aventureiros!
+
+Deseja realizar seu
+registro?"
+
+OPÇÕES:
+
+1. Registrar-me.
+2. Informações.
+3. Sair.
+
+Após registrar-se:
+
+RANK F.
+
+CRIAR ESTRUTURA
+DE RANKS:
+
+F.
+E.
+D.
+C.
+B.
+A.
+S.
+
+Somente Rank F
+precisa estar totalmente
+funcional nesta primeira versão.
+
+Os demais devem existir
+como estrutura preparada
+para progressão futura.
+
+==================================================
+18. MISSÕES INICIAIS
+==================================================
+
+CRIAR SISTEMA BÁSICO
+DE MISSÕES.
+
+MISSÃO PRINCIPAL INICIAL:
+
+"PRIMEIROS PASSOS."
+
+OBJETIVOS:
+
+1. Conversar com a guilda.
+2. Registrar-se.
+3. Escolher equipamento.
+4. Derrotar bandidos.
+5. Retornar à guilda.
+
+RECOMPENSAS:
+
+- Moedas.
+- Experiência.
+- Desbloqueio inicial de classe.
+
+CRIAR TAMBÉM MISSÕES
+SECUNDÁRIAS SIMPLES:
+
+- Derrotar lobos.
+- Investigar ruínas.
+- Entregar suprimentos.
+- Encontrar uma erva.
+- Derrotar bandidos.
+- Conversar com um mago.
+
+Cada missão deve possuir:
+
+- ID.
+- Nome.
+- Descrição.
+- Objetivos.
+- Estado.
+- Recompensa.
+- NPC responsável.
+- Pré-requisitos.
+
+VALIDAR CONCLUSÕES NO SERVIDOR.
+
+NÃO confiar em um RemoteEvent
+que simplesmente declara
+que a missão foi concluída.
+
+==================================================
+19. SISTEMA DE MOEDAS
+==================================================
+
+CRIAR MOEDA INICIAL:
+
+GOLD.
+
+Estrutura:
+
+- Saldo.
+- Ganhos.
+- Gastos.
+- Inventário.
+- Compras.
+
+O sistema deve suportar
+salvamento por DataStoreService.
+
+Criar tratamento de:
+
+- Falhas de carregamento.
+- Falhas de salvamento.
+- Tentativas de duplicação.
+- Requisições inválidas.
+- Operações concorrentes.
+
+Durante testes locais,
+informar claramente
+quando o DataStore
+não estiver disponível.
+
+Nunca permitir que o cliente
+escolha quanto Gold receber.
+
+==================================================
+20. BAÚS
+==================================================
+
+ESPALHAR BAÚS PELO MAPA.
+
+CRIAR TIPOS:
+
+- Comum.
+- Incomum.
+- Raro.
+- Épico.
+- Lendário.
+
+Baús comuns devem aparecer
+em locais acessíveis.
+
+Baús raros podem ficar
+escondidos.
+
+EXEMPLOS DE LOCAIS:
+
+- Atrás de cachoeiras.
+- Ruínas.
+- Florestas.
+- Cavernas.
+- Perto de montanhas.
+- Dentro da dungeon.
+
+Os baús devem possuir:
+
+- Modelo visual.
+- Tampa ou indicação de abertura.
+- ProximityPrompt.
+- ID.
+- Configuração de recompensa.
+- Controle de saque por jogador.
+
+O servidor decide a recompensa.
+
+O cliente nunca deve
+escolher os itens obtidos.
+
+==================================================
+21. INIMIGOS
+==================================================
+
+CRIAR INIMIGOS BÁSICOS:
+
+- Bandido.
+- Lobo.
+- Slime.
+- Esqueleto.
+- Lobo Sombrio.
+- Soldado Demoníaco.
+
+Cada inimigo deve possuir:
+
+- Vida.
+- Dano.
+- Velocidade.
+- Alcance.
+- Estado.
+- Ponto de spawn.
+- Região permitida.
+- Tempo de respawn.
+- Recompensa.
+
+CRIAR COMPORTAMENTO BÁSICO:
+
+IDLE.
+PATROL.
+CHASE.
+ATTACK.
+RETURN.
+DEAD.
+
+Utilizar PathfindingService
+quando necessário.
+
+NÃO executar pathfinding
+pesado constantemente
+para centenas de NPCs.
+
+Criar otimizações:
+
+- Atualizações escalonadas.
+- Distância máxima de ativação.
+- Limites de inimigos ativos.
+- Reutilização de cálculos.
+- Redução de atividade longe de jogadores.
+
+Impedir que inimigos
+atravessem paredes.
+
+Impedir que persigam
+jogadores infinitamente
+para fora de suas regiões.
+
+==================================================
+22. ESTRADAS E PONTES
+==================================================
+
+CRIAR ESTRADAS PRINCIPAIS
+ENTRE TODAS AS CIDADES.
+
+CARACTERÍSTICAS:
+
+- Largura consistente.
+- Curvas naturais.
+- Terreno adaptado.
+- Pedras.
+- Trechos de terra.
+- Sinalização.
+- Cercas ocasionais.
+- Vegetação lateral.
+
+Não colocar estradas
+atravessando casas.
+
+Não colocar estradas
+terminando em paredes.
+
+Criar pontes onde
+o caminho cruza rios.
+
+TIPOS:
+
+- Ponte de madeira.
+- Ponte de pedra.
+
+CRIAR PLACAS INDICANDO:
+
+- Vila de Valoria.
+- Reino de Arkheim.
+- Eldoria.
+- Durakh.
+- Floresta Encantada.
+- Floresta Sombria.
+- Dungeon.
+
+As estradas devem
+servir como referência
+para exploração do mundo.
+
+==================================================
+23. TERRENO PROCEDURAL
+==================================================
+
+UTILIZAR ROBLOX TERRAIN
+PARA O SOLO PRINCIPAL.
+
+CRIAR:
+
+- Grass.
+- Ground.
+- Rock.
+- Mud.
+- Sand.
+- Water.
+
+Evitar construir
+o continente inteiro
+com milhares de Parts
+individuais de chão.
+
+Utilizar algoritmos
+de ruído procedural,
+como math.noise,
+quando apropriado.
+
+O algoritmo deve oferecer:
+
+- Seed configurável.
+- Altura base.
+- Frequência.
+- Amplitude.
+- Regiões.
+- Máscaras de relevo.
+- Áreas planas para cidades.
+- Corredores para estradas.
+- Limites do continente.
+
+As cidades devem
+ficar em terrenos
+adequados à construção.
+
+Evitar casas flutuando.
+
+Evitar casas enterradas.
+
+Evitar estradas
+com desníveis absurdos.
+
+O terreno deve ser gerado
+em etapas para evitar
+travamentos excessivos
+no Roblox Studio.
+
+==================================================
+24. VEGETAÇÃO PROCEDURAL
+==================================================
+
+CRIAR BIBLIOTECA DE ÁRVORES.
+
+TIPOS:
+
+- Carvalho medieval.
+- Pinheiro.
+- Árvore encantada.
+- Árvore sombria.
+- Arbustos.
+- Vegetação baixa.
+
+ÁRVORES DEVEM TER:
+
+- Tronco.
+- Galhos.
+- Copa.
+- Variações de tamanho.
+- Rotação.
+- Cores variadas.
+
+Criar versões
+visualmente diferentes.
+
+Distribuir por região.
+
+Não colocar árvores
+em cima de casas.
+
+Não bloquear estradas.
+
+Não colocar árvores
+dentro dos pontos de spawn.
+
+NÃO EXAGERAR NA QUANTIDADE
+DE PARTS POR ÁRVORE.
+
+Priorizar otimização.
+
+==================================================
+25. CLIMA E ILUMINAÇÃO
+==================================================
+
+CONFIGURAR:
+
+Lighting.
+
+Atmosphere.
+
+ColorCorrectionEffect.
+
+BloomEffect, de maneira sutil.
+
+SunRaysEffect, se adequado.
+
+Sky, quando houver um
+recurso válido.
+
+CRIAR CICLO:
+
+DIA.
+TARDE.
+NOITE.
+
+Configuração inicial:
+
+Ciclo configurável.
+
+CRIAR:
+
+- Luzes nas cidades.
+- Lanternas.
+- Tochas.
+- Iluminação mágica.
+- Ambiência noturna.
+
+Evitar efeitos intensos
+que comprometam o desempenho.
+
+A floresta sombria pode
+utilizar atmosferas locais
+por meio de técnicas
+compatíveis com Roblox.
+
+Não assumir que configurações
+globais de Lighting possam
+ser aplicadas apenas a uma
+região sem implementação
+específica.
+
+==================================================
+26. SPAAWNS E HOSPEDARIAS
+==================================================
+
+CRIAR:
+
+Spawn inicial na Vila de Valoria.
+
+O jogador poderá conversar
+com hospedeiros.
+
+OPÇÃO:
+
+"Definir esta hospedaria
+como meu ponto de retorno."
+
+Ao morrer:
+
+Retornar para o ponto
+registrado.
+
+Se não houver registro:
+
+Retornar para a vila inicial.
+
+Criar persistência
+quando o DataStore
+estiver disponível.
+
+==================================================
+27. SISTEMA DE NAVEGAÇÃO
+==================================================
+
+CRIAR UM MAPA
+OU MINIMAPA BÁSICO.
+
+O jogador deve conseguir
+identificar:
+
+- Cidade atual.
+- Região atual.
+- Entrada da dungeon.
+- Localização aproximada.
+- Objetivos principais.
+
+Criar nomes das regiões
+que aparecem na tela
+quando o jogador entra.
+
+Exemplo:
+
+"VILA DE VALORIA"
+
+"FLORESTA DE NOCTHAR"
+
+"REINO DE ARKHEIM"
+
+A apresentação deve
+ser estilizada e discreta.
+
+==================================================
+28. ORGANIZAÇÃO DO WORKSPACE
+==================================================
+
+CRIAR ESTRUTURA ORGANIZADA:
+
+Workspace
+    GeneratedWorld
+        TerrainMarkers
+        Roads
+        Bridges
+        Cities
+            Valoria
+            Arkheim
+            Eldoria
+            Durakh
+        Forests
+            Sylvarin
+            Nocthar
+        DungeonEntrance
+        Ruins
+        Decorations
+        Spawns
+        InteractiveObjects
+        TreasureChests
+        NPCSpawns
+        EnemySpawns
+
+NÃO espalhar milhares
+de objetos diretamente
+na raiz do Workspace.
+
+UTILIZAR:
+
+Folders.
+Models.
+Attributes.
+CollectionService Tags.
+
+Cada cidade deve ter
+sua própria organização.
+
+==================================================
+29. ESTRUTURA DOS SCRIPTS
+==================================================
+
+CRIAR ARQUITETURA MODULAR.
+
+EXEMPLO:
+
+src/
+    shared/
+        Config/
+            WorldConfig.luau
+            CityConfig.luau
+            NPCConfig.luau
+            EnemyConfig.luau
+            EconomyConfig.luau
+            QuestConfig.luau
+
+    server/
+        Services/
+            NPCService.luau
+            DialogueService.luau
+            ShopService.luau
+            QuestService.luau
+            EnemyService.luau
+            CombatService.luau
+            InventoryService.luau
+            CurrencyService.luau
+            DataService.luau
+            GuildService.luau
+            DungeonService.luau
+            SpawnService.luau
+            AntiExploitService.luau
+
+    client/
+        Controllers/
+            DialogueController.luau
+            ShopController.luau
+            HUDController.luau
+            QuestController.luau
+            RegionController.luau
+
+    worldgen/
+        WorldGenerator.luau
+        TerrainGenerator.luau
+        RoadGenerator.luau
+        BridgeGenerator.luau
+        CityGenerator.luau
+        BuildingGenerator.luau
+        ForestGenerator.luau
+        NPCGenerator.luau
+        EnemySpawnGenerator.luau
+        DungeonEntranceGenerator.luau
+        DungeonInteriorGenerator.luau
+        DecorationGenerator.luau
+        ValidationGenerator.luau
+
+Pode adaptar os nomes
+quando tecnicamente necessário.
+
+Separar claramente:
+
+- Código de geração do mapa.
+- Código executado durante o jogo.
+- Código de interface.
+- Configurações.
+- Testes.
+
+==================================================
+30. COMO QUERO EXECUTAR O PROJETO
+==================================================
+
+ESTA PARTE É EXTREMAMENTE IMPORTANTE.
+
+EU QUERO DESENVOLVER O PROJETO
+FORA DO ROBLOX STUDIO UTILIZANDO:
+
+- CODEX.
+- VS CODE.
+- GITHUB.
+- ROJO.
+- ROBLOX STUDIO.
+
+MAS TAMBÉM QUERO UM MÉTODO
+DE GERAR O MAPA AUTOMATICAMENTE
+COM O MÍNIMO DE TRABALHO MANUAL.
+
+CRIAR DUAS FORMAS DE USO:
+
+FORMA A - PROJETO MODULAR COM ROJO:
+
+Gerar todos os arquivos
+Luau necessários.
+
+Gerar o arquivo
+default.project.json.
+
+Gerar README.md.
+
+Gerar scripts de instalação
+e instruções de sincronização.
+
+FORMA B - GERADOR PELO COMMAND BAR:
+
+Criar um script
+GenerateWorld.server.luau
+ou equivalente apropriado
+para execução em modo de edição
+no Roblox Studio.
+
+Esse script deve iniciar
+a geração do continente.
+
+IMPORTANTE:
+
+NÃO EXECUTAR A GERAÇÃO
+MASSIVA DO MAPA A CADA
+ENTRADA DE UM JOGADOR.
+
+A GERAÇÃO DO MAPA DEVE
+ACONTECER NO EDITOR,
+PRODUZINDO OBJETOS
+PERSISTENTES NO PLACE.
+
+Separar o gerador de
+Editor dos scripts de
+runtime.
+
+Se o Command Bar precisar
+executar o código de forma
+diferente de um Script
+normal, criar um bootstrap
+compatível.
+
+O gerador precisa:
+
+1. Identificar o projeto.
+2. Verificar configurações.
+3. Criar pastas.
+4. Gerar o terreno.
+5. Gerar estradas.
+6. Gerar cidades.
+7. Gerar florestas.
+8. Gerar construções.
+9. Gerar decorações.
+10. Preparar spawns.
+11. Gerar entrada da dungeon.
+12. Criar marcadores de NPC.
+13. Criar marcadores de inimigos.
+14. Validar o mapa.
+15. Exibir relatório final.
+
+Os NPCs e sistemas de gameplay
+devem ser integrados
+ao projeto pelo Rojo.
+
+Se for tecnicamente possível,
+o bootstrap pode organizar
+também instâncias e configurações
+necessárias no Studio.
+
+NÃO DEPENDER DE COLAGEM MANUAL
+DE DEZENAS DE SCRIPTS.
+
+==================================================
+31. GERAÇÃO SEGURA
+==================================================
+
+O GERADOR NÃO PODE
+DESTRUIR MEUS OUTROS MAPAS.
+
+CRIAR TUDO DENTRO DE:
+
+Workspace.GeneratedWorld
+
+NÃO utilizar:
+
+Workspace:ClearAllChildren()
+
+NÃO apagar Terrain inteiro
+sem confirmação explícita.
+
+NÃO apagar objetos
+de outros projetos.
+
+Criar opções:
+
+GenerateNewWorld.
+
+RegenerateGeneratedWorld.
+
+RegenerateCity.
+
+RegenerateForest.
+
+RegenerateDecorations.
+
+RegenerateNPCMarkers.
+
+PreviewGeneration.
+
+Implementar verificações
+antes de substituir
+objetos gerados anteriormente.
+
+O mundo original deve
+permanecer preservado.
+
+==================================================
+32. OTIMIZAÇÃO DE DESEMPENHO
+==================================================
+
+ESTOU DESENVOLVENDO
+EM UM NOTEBOOK COM:
+
+AMD RYZEN 7 5700U.
+
+12 GB DE RAM.
+
+GRÁFICOS INTEGRADOS.
+
+PORTANTO:
+
+OTIMIZAÇÃO É OBRIGATÓRIA.
+
+NÃO gerar milhões
+de Parts desnecessárias.
+
+NÃO criar milhares
+de luzes dinâmicas.
+
+NÃO criar ParticleEmitters
+em todos os objetos.
+
+NÃO criar dezenas
+de loops infinitos
+independentes para NPCs.
+
+USAR:
+
+- StreamingEnabled.
+- Distâncias de ativação.
+- Modelos reutilizáveis.
+- Decorações econômicas.
+- Limites por região.
+- LOD quando aplicável.
+- Atualizações por lotes.
+- Controle de quantidade de NPCs.
+- Controle de quantidade de inimigos.
+- Colisões apenas quando necessárias.
+
+Criar configurações
+de qualidade:
+
+LOW.
+
+MEDIUM.
+
+HIGH.
+
+A configuração LOW
+deve continuar bonita,
+porém mais leve.
+
+Limitar a densidade
+de objetos por região.
+
+O mundo deve ser jogável
+em computadores modestos
+e celulares compatíveis.
+
+==================================================
+33. SEGURANÇA E ANTI-EXPLOIT
+==================================================
+
+CRIAR UMA ARQUITETURA
+SERVER-AUTHORITATIVE.
+
+NÃO confiar no cliente
+para operações importantes.
+
+VALIDAR NO SERVIDOR:
+
+- Compras.
+- Gold.
+- Inventário.
+- Dano.
+- Recompensas.
+- Missões.
+- Entrada na dungeon.
+- Distância até NPCs.
+- Solicitações de lojas.
+- Abertura de baús.
+
+CRIAR:
+
+- Validação de argumentos.
+- Rate limiting.
+- Verificação de distância.
+- Verificação de permissões.
+- Limites de recompensas.
+- Proteção contra duplicação.
+
+Não prometer
+anti-cheat infalível.
+
+O objetivo é criar
+uma base segura
+que possa ser fortalecida
+nas próximas versões.
+
+==================================================
+34. DUNGEON E FUTUROS CONTINENTES
+==================================================
+
+O PRIMEIRO CONTINENTE
+DEVE SER AUTÔNOMO.
+
+O SISTEMA PRECISA
+PERMITIR EXPANSÃO.
+
+FUTURAMENTE CRIAREI:
+
+CONTINENTE 2.
+
+CONTINENTE 3.
+
+Cada continente poderá
+existir em um Place separado
+dentro da mesma Experience.
+
+Cada continente poderá
+possuir suas próprias dungeons.
+
+CRIAR CONFIGURAÇÕES
+QUE PERMITAM EXPANDIR
+SEM REESCREVER
+TODOS OS SISTEMAS.
+
+==================================================
+35. PREPARAÇÃO PARA CÂMERAS CINEMATOGRÁFICAS
+==================================================
+
+PREPARAR O MAPA
+PARA GRAVAÇÕES FUTURAS.
+
+Criar pontos de câmera
+para trailers.
+
+REGIÕES IMPORTANTES:
+
+- Praça inicial.
+- Castelo.
+- Torre de magia.
+- Forja.
+- Floresta encantada.
+- Floresta sombria.
+- Entrada da dungeon.
+- Arena do chefe.
+
+CRIAR MARCADORES
+DE CAMERA SHOTS.
+
+Organizar em:
+
+Workspace.GeneratedWorld.CinematicMarkers
+
+CRIAR ATRIBUTOS:
+
+ShotName.
+
+RegionName.
+
+CameraPosition.
+
+LookAtPosition.
+
+Duration.
+
+Category.
+
+Deixar o sistema preparado
+para integração futura
+com meu aplicativo Auto Posts
+e com o OBS Studio.
+
+POR ENQUANTO:
+
+NÃO implementar
+publicação no Instagram.
+
+NÃO implementar
+controle complexo do OBS.
+
+APENAS PREPARAR
+OS PONTOS CINEMATOGRÁFICOS.
+
+==================================================
+36. QUALIDADE DAS CONSTRUÇÕES
+==================================================
+
+CRIAR UM SISTEMA
+DE BUILDING TEMPLATES.
+
+TIPOS:
+
+SmallHouse.
+
+MediumHouse.
+
+LargeHouse.
+
+Tavern.
+
+Blacksmith.
+
+MagicShop.
+
+PotionShop.
+
+WeaponShop.
+
+ArmorShop.
+
+GuildHall.
+
+Castle.
+
+GuardTower.
+
+WatchTower.
+
+Stable.
+
+Barn.
+
+Windmill.
+
+MarketStall.
+
+Library.
+
+Temple.
+
+ArcaneTower.
+
+Forge.
+
+DungeonGate.
+
+StoneBridge.
+
+WoodenBridge.
+
+RuinedTower.
+
+Cada template deve
+possuir características
+visuais próprias.
+
+NÃO criar todos
+os prédios com o
+mesmo formato básico.
+
+NÃO utilizar somente
+um bloco retangular
+com outro bloco como telhado.
+
+Adicionar detalhes
+arquitetônicos suficientes
+para formar silhuetas
+reconhecíveis.
+
+Entretanto, respeitar
+os limites de desempenho.
+
+==================================================
+37. POSICIONAMENTO INTELIGENTE
+==================================================
+
+ANTES DE GERAR
+AS CONSTRUÇÕES:
+
+1. Planejar as regiões.
+2. Reservar terrenos.
+3. Reservar estradas.
+4. Reservar praças.
+5. Reservar construções importantes.
+6. Calcular áreas disponíveis.
+7. Posicionar casas secundárias.
+
+CRIAR SISTEMA
+DE DETECÇÃO DE COLISÕES
+ENTRE LOTES.
+
+NÃO PERMITIR:
+
+- Casas sobrepostas.
+- Árvores dentro de casas.
+- NPCs dentro de paredes.
+- Portas bloqueadas.
+- Estradas inacessíveis.
+- Spawns dentro de objetos.
+- Lojas sem entrada acessível.
+
+TODOS OS PRÉDIOS
+IMPORTANTES DEVEM
+TER ENTRADAS ACESSÍVEIS.
+
+Lojas devem ter pelo menos
+uma área interna utilizável
+OU um balcão externo
+claramente funcional.
+
+==================================================
+38. SISTEMA DE TESTES
+==================================================
+
+CRIAR TESTES AUTOMÁTICOS
+E VALIDAÇÕES.
+
+VERIFICAR:
+
+- O continente existe.
+- As quatro cidades existem.
+- As duas florestas existem.
+- A entrada da dungeon existe.
+- Existe spawn inicial.
+- As estradas conectam as cidades.
+- NPCs importantes existem.
+- NPCs possuem interações.
+- As lojas possuem dados.
+- A guilda funciona.
+- As missões iniciais funcionam.
+- Os baús podem ser abertos.
+- Inimigos possuem spawns válidos.
+- A dungeon tem mapa próprio.
+- O jogador consegue retornar.
+- Não existem referências ausentes.
+- Não existem módulos circulares.
+- Os RemoteEvents possuem validação.
+
+CRIAR RELATÓRIO:
+
+PASSOU.
+FALHOU.
+NÃO TESTADO.
+
+NÃO declarar sucesso
+sem executar o teste
+correspondente.
+
+Se o teste real
+depender do Roblox Studio,
+informar que ainda
+precisa ser realizado.
+
+==================================================
+39. LOGS DE PROGRESSO
+==================================================
+
+DURANTE A GERAÇÃO
+MOSTRAR NO OUTPUT:
+
+[01/15] Inicializando mundo...
+
+[02/15] Gerando terreno...
+
+[03/15] Criando estradas...
+
+[04/15] Construindo Vila de Valoria...
+
+[05/15] Construindo Reino de Arkheim...
+
+[06/15] Construindo Eldoria...
+
+[07/15] Construindo Durakh...
+
+[08/15] Gerando Floresta Encantada...
+
+[09/15] Gerando Floresta Sombria...
+
+[10/15] Preparando dungeon...
+
+[11/15] Gerando decorações...
+
+[12/15] Configurando NPCs...
+
+[13/15] Configurando inimigos...
+
+[14/15] Validando mundo...
+
+[15/15] Finalizado.
+
+Exibir erros
+com mensagens claras.
+
+Não esconder falhas.
+
+==================================================
+40. SISTEMA DE CONFIGURAÇÃO
+==================================================
+
+CRIAR UM ARQUIVO
+CENTRAL DE CONFIGURAÇÕES.
+
+EXEMPLO:
+
+WORLD_SIZE = 4000.
+
+WORLD_SEED = 12345.
+
+CITY_COUNT = 4.
+
+FOREST_COUNT = 2.
+
+DUNGEON_COUNT = 1.
+
+GRAPHICS_QUALITY = "MEDIUM".
+
+GENERATE_NPCS = true.
+
+GENERATE_DECORATIONS = true.
+
+GENERATE_ENEMIES = true.
+
+GENERATE_CHEST_LOCATIONS = true.
+
+ENABLE_CINEMATIC_MARKERS = true.
+
+ENABLE_DAY_NIGHT = true.
+
+Todos os parâmetros
+precisam ser ajustáveis.
+
+==================================================
+41. DOCUMENTAÇÃO PARA INICIANTE
+==================================================
+
+LEMBRE-SE:
+
+EU SOU INICIANTE
+EM ROBLOX STUDIO.
+
+NÃO QUERO PRECISAR
+DESCOBRIR SOZINHO
+COMO INSTALAR O SISTEMA.
+
+GERAR README.md
+EM PORTUGUÊS BRASILEIRO.
+
+EXPLICAR:
+
+1. Como instalar o Rojo.
+2. Como abrir o projeto no VS Code.
+3. Como abrir o projeto no Roblox Studio.
+4. Como sincronizar os scripts.
+5. Como executar o gerador.
+6. Como aguardar a geração.
+7. Como testar o continente.
+8. Como testar NPCs.
+9. Como testar lojas.
+10. Como testar missões.
+11. Como criar o Place da dungeon.
+12. Como configurar o PlaceId.
+13. Como testar teleporte real.
+14. Como alterar cidades.
+15. Como regenerar partes do mapa.
+16. Como salvar tudo.
+17. Como exportar.
+18. Como publicar a experiência.
+
+NÃO PULAR ETAPAS.
+
+EXPLICAR COMANDOS
+E CAMINHOS EXATOS.
+
+==================================================
+42. CONTINUIDADE DO PROJETO
+==================================================
+
+O DESENVOLVIMENTO PODE
+DURAR VÁRIAS SESSÕES.
+
+PORTANTO:
+
+CRIAR E MANTER:
+
+PROJECT_PLAN.md
+
+PROGRESS.md
+
+NEXT_STEPS.md
+
+ARCHITECTURE.md
+
+MAP_LAYOUT.md
+
+CHANGELOG.md
+
+TODO.md
+
+TEST_RESULTS.md
+
+Em PROGRESS.md:
+
+Registrar exatamente
+o que foi implementado.
+
+Em NEXT_STEPS.md:
+
+Registrar o próximo
+trabalho necessário.
+
+Em TEST_RESULTS.md:
+
+Registrar quais testes
+foram realmente executados.
+
+Ao retomar o projeto,
+ler esses arquivos
+antes de continuar.
+
+NÃO RECOMEÇAR O PROJETO
+DO ZERO APÓS CADA SESSÃO.
+
+==================================================
+43. REGRAS DE IMPLEMENTAÇÃO
+==================================================
+
+NÃO ME ENTREGAR
+APENAS EXEMPLOS DE CÓDIGO.
+
+NÃO ME ENTREGAR
+APENAS PSEUDOCÓDIGO.
+
+NÃO ME ENTREGAR
+SOMENTE UM PLANEJAMENTO.
+
+EU QUERO ARQUIVOS REAIS.
+
+EU QUERO MÓDULOS REAIS.
+
+EU QUERO UM GERADOR
+QUE POSSA SER EXECUTADO.
+
+IMPLEMENTAR FUNCIONALIDADES
+REAIS SEM INVENTAR APIS.
+
+UTILIZAR LUALU/LUAU
+COMPATÍVEL COM ROBLOX.
+
+CONSULTAR A DOCUMENTAÇÃO
+OFICIAL DO ROBLOX QUANDO
+HOUVER DÚVIDAS SOBRE APIS.
+
+EVITAR:
+
+- Dependências obscuras.
+- Assets não autorizados.
+- Códigos incompletos.
+- Funções fictícias.
+- Serviços inexistentes.
+- Scripts que dependem de
+  variáveis não declaradas.
+
+SE UMA FUNCIONALIDADE
+NÃO PUDER SER IMPLEMENTADA
+COM AS FERRAMENTAS DISPONÍVEIS,
+REGISTRAR A LIMITAÇÃO
+E IMPLEMENTAR UMA ALTERNATIVA
+SEGURA E FUNCIONAL QUANDO POSSÍVEL.
+
+NÃO MARCAR COMO PRONTO
+ALGO QUE NÃO FOI CONSTRUÍDO.
+
+==================================================
+44. ORDEM DE DESENVOLVIMENTO
+==================================================
+
+DIVIDIR EM FASES.
+
+FASE 1:
+Estrutura do projeto,
+configurações e gerador de terreno.
+
+FASE 2:
+Estradas, rios, pontes
+e distribuição de regiões.
+
+FASE 3:
+Biblioteca de construções
+e quatro cidades.
+
+FASE 4:
+Duas florestas,
+vegetação e decoração.
+
+FASE 5:
+Entrada da dungeon
+e gerador do interior.
+
+FASE 6:
+Modelos de NPCs,
+posicionamento e diálogos.
+
+FASE 7:
+Lojas, economia,
+inventário e guilda.
+
+FASE 8:
+Missões iniciais,
+inimigos e baús.
+
+FASE 9:
+Sistema de dungeon
+solo/cooperativa.
+
+FASE 10:
+Otimização,
+validação e testes.
+
+FASE 11:
+Documentação,
+correções e integração final.
+
+ENTREGAR CADA FASE
+COM CÓDIGO FUNCIONAL.
+
+NÃO SACRIFICAR
+A QUALIDADE PARA
+CONCLUIR TUDO
+EM UMA ÚNICA RESPOSTA.
+
+SE A SESSÃO TERMINAR,
+REGISTRAR O ESTADO
+E CONTINUAR DEPOIS.
+
+==================================================
+45. CRITÉRIOS DE ACEITAÇÃO
+==================================================
+
+O SISTEMA SERÁ CONSIDERADO
+PRONTO SOMENTE QUANDO:
+
+1. O CONTINENTE DE 4000X4000
+FOR GERADO.
+
+2. EXISTIREM EXATAMENTE
+QUATRO CIDADES PRINCIPAIS.
+
+3. EXISTIREM DUAS
+FLORESTAS PRINCIPAIS.
+
+4. EXISTIR UMA ENTRADA
+DE DUNGEON NO CONTINENTE.
+
+5. O MAPA DA DUNGEON
+FOR GERADO SEPARADAMENTE.
+
+6. AS ESTRADAS CONECTAREM
+AS QUATRO CIDADES.
+
+7. AS CONSTRUÇÕES
+POSSUÍREM ESTILO
+MEDIEVAL COERENTE.
+
+8. EXISTIREM NPCS
+IMPORTANTES EM
+TODAS AS CIDADES.
+
+9. FERREIROS E
+MERCADORES POSSUÍREM
+INTERAÇÕES FUNCIONAIS.
+
+10. A GUILDA PERMITIR
+REGISTRO NO RANK F.
+
+11. A MISSÃO INICIAL
+FOR FUNCIONAL.
+
+12. EXISTIREM INIMIGOS
+E BAÚS NO CONTINENTE.
+
+13. NÃO EXISTIREM ERROS
+CRÍTICOS CONHECIDOS
+NA INICIALIZAÇÃO.
+
+14. O MAPA GERADO
+FOR PERSISTENTE
+NO ROBLOX STUDIO.
+
+15. OS SISTEMAS
+ESTIVEREM ORGANIZADOS
+E DOCUMENTADOS.
+
+16. O GERADOR NÃO
+APAGAR OUTROS MAPAS.
+
+17. OS TESTES AUTOMÁTICOS
+DISPONÍVEIS FOREM EXECUTADOS.
+
+18. OS TESTES NÃO
+EXECUTADOS FOREM
+IDENTIFICADOS CLARAMENTE.
+
+==================================================
+46. EXECUÇÃO IMEDIATA
+==================================================
+
+AGORA COMECE O DESENVOLVIMENTO.
+
+PRIMEIRO:
+
+ANALISE O REPOSITÓRIO ATUAL,
+SE ELE ESTIVER DISPONÍVEL.
+
+NÃO APAGUE ARQUIVOS EXISTENTES.
+
+NÃO SOBRESCREVA MEU MAPA ANTIGO.
+
+CRIE UM SISTEMA NOVO
+E ORGANIZADO PARA O
+PRIMEIRO CONTINENTE.
+
+DEPOIS:
+
+CRIE A ESTRUTURA DE PASTAS.
+
+IMPLEMENTE AS CONFIGURAÇÕES.
+
+IMPLEMENTE O GERADOR.
+
+COMECE PELA PRIMEIRA FASE.
+
+CONTINUE IMPLEMENTANDO
+AS FASES SEGUINTES
+NA MEDIDA EM QUE
+O AMBIENTE E O TEMPO
+PERMITIREM.
+
+NÃO PARE APÓS
+APENAS EXPLICAR
+O QUE VOCÊ FARIA.
+
+CRIE OS ARQUIVOS.
+
+ESCREVA O CÓDIGO.
+
+EXECUTE OS TESTES POSSÍVEIS.
+
+CORRIJA ERROS DETECTADOS.
+
+REGISTRE O PROGRESSO.
+
+AO FINAL DE CADA FASE,
+MOSTRE:
+
+- O QUE FOI CRIADO.
+- QUAIS ARQUIVOS FORAM MODIFICADOS.
+- O QUE JÁ FUNCIONA.
+- O QUE AINDA PRECISA SER TESTADO.
+- COMO EXECUTAR NO ROBLOX STUDIO.
+
+OBJETIVO FINAL:
+
+CONSTRUIR UM CONTINENTE
+MEDIEVAL DE FANTASIA
+GRANDE, BONITO, EXPLORÁVEL,
+OTIMIZADO E ORIGINAL,
+COM QUATRO CIDADES,
+DUAS FLORESTAS,
+UMA DUNGEON DEMONÍACA
+SEPARADA E NPCS FUNCIONAIS.
+
+QUERO QUE ESSE PROJETO
+SEJA A BASE DEFINITIVA
+DO MEU RPG MEDIEVAL
+NO ROBLOX.
+
+COMECE AGORA.
