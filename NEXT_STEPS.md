@@ -1,5 +1,7 @@
 # Próxima tarefa — continente
 
+**Prioridade atual:** nova detecção do Defender também no ZIP do mapa. Leia docs/MAP_DEFENDER_ALERT.md. Não produzir outro arquivo/formato ou alterar código apenas para mudar a detecção; preservar amostra/hash e encaminhar à Microsoft. Sem veredicto, não recomendar uso do artefato. Nenhum antivírus foi executado no Linux.
+
 A solicitação específica Tarefa 01 substituiu o escopo de desenvolvimento amplo durante esta sessão. Leia PROGRESSO_MAPA.md e COMO_ABRIR_MAPA.md. Trabalhe em `codex/eldravyn-map-20261027`, não amplie gameplay.
 
 O Place `delivery-map/task-01/Eldravyn-Continent.rbxlx` contém 20.001 peças de cenário, com `TerrainPending=true`. A próxima ação real é completar o Terrain no Studio, salvar/reabrir, caminhar e capturar dia/noite nas cinco cidades e três florestas, verificando ruas/portas/cavernas/portais. Sem isso a Tarefa 01 não está finalizada. Studio, FPS e Defender não foram executados aqui.

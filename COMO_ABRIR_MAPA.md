@@ -1,5 +1,7 @@
 # Abrir o continente — Tarefa 01
 
+**Uso não recomendado por enquanto:** o ZIP deste mapa também foi bloqueado pelo Defender como `Trojan:Script/Ulthar.A!ml`. Não execute o arquivo bloqueado. Aguarde a investigação descrita em [docs/MAP_DEFENDER_ALERT.md](docs/MAP_DEFENDER_ALERT.md); os passos abaixo são referência de preparação para depois da análise de segurança.
+
 A entrega é exclusiva do cenário. O Place contém cidades, florestas, estradas, pontes, entradas externas, iluminação e pontos de integração já serializados. O **Terrain nativo ainda precisa ser materializado no Studio**; o avatar de inspeção aguarda essa etapa. Não há combate, NPC funcional, missões, economia ou interiores de dungeon novos neste Place.
 
 1. Mantenha o Defender ativo. O alerta anterior continua sem veredicto; esta entrega não tem homologação de antivírus. Se houver bloqueio, não libere o arquivo: submeta à Microsoft conforme docs/SECURITY_REVIEW_0.6.1.md.

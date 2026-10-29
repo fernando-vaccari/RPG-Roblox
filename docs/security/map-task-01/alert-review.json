@@ -1,0 +1,62 @@
+{
+  "archive": "delivery-map/task-01/Eldravyn-Continent-Task01.zip",
+  "sha256": "a8405f31f653ab96655813af83268a2fc8e1f9b50e6ae6303e9e8733474b49c0",
+  "bytes": 1054706,
+  "antivirus_executed": false,
+  "new_detection_name": "Trojan:Script/Ulthar.A!ml",
+  "members": [
+    "Eldravyn-Continent.rbxlx"
+  ],
+  "place_sha256": "a08fd280bd8835943f3e29c0777196e277831cb39e1405560cc892779fc49dab",
+  "classes": {
+    "ReplicatedStorage": 1,
+    "Folder": 21,
+    "ModuleScript": 38,
+    "ServerScriptService": 1,
+    "Script": 1,
+    "ServerStorage": 1,
+    "StringValue": 1,
+    "StarterPlayer": 1,
+    "StarterPlayerScripts": 1,
+    "LocalScript": 1,
+    "Workspace": 1,
+    "Model": 987,
+    "Part": 19480,
+    "SurfaceGui": 151,
+    "TextLabel": 151,
+    "WedgePart": 520,
+    "PointLight": 16,
+    "SpawnLocation": 1,
+    "Lighting": 1,
+    "Atmosphere": 1,
+    "BloomEffect": 1,
+    "ColorCorrectionEffect": 1,
+    "SunRaysEffect": 1,
+    "Sky": 1
+  },
+  "embedded_source_count": 40,
+  "pattern_hits": [],
+  "binary_property_names": {
+    "AttributesSerialize": 2469
+  },
+  "external_content_properties": [],
+  "affected_item_scope": "webfile archive only; no internal member identified",
+  "source_comparison": "40 embedded Sources match current checkout",
+  "independent_attribute_review": {
+    "binary_strings": 2469,
+    "all_named": "AttributesSerialize",
+    "fully_decoded_without_unknown_types_or_trailing_data": true,
+    "defender_executed": false,
+    "attribute_type_counts": {
+      "Boolean": 157,
+      "String": 2780,
+      "Double": 3126,
+      "Vector3": 18
+    },
+    "finite_xml_numeric_values_checked": 300679,
+    "native_font_urls": {
+      "count": 151,
+      "value": "rbxasset://fonts/families/Guru.json"
+    }
+  }
+}

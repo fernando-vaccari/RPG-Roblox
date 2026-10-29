@@ -1,10 +1,12 @@
 # Continente — Tarefa 01
 
-[Baixar Eldravyn-Continent-Task01.zip](https://github.com/fernando-vaccari/RPG-Roblox/raw/refs/heads/codex/eldravyn-map-20261027/delivery-map/task-01/Eldravyn-Continent-Task01.zip)
+**Alerta reportado também nesta entrega: `Trojan:Script/Ulthar.A!ml`. Uso não recomendado enquanto a investigação estiver inconclusiva.** Consulte o [registro atualizado](../../docs/MAP_DEFENDER_ALERT.md). Não desative o Defender, não crie exclusões e não restaure o arquivo da quarentena para executá-lo. Os artefatos são mantidos para análise/histórico, sem recomendação de download ou uso.
 
-O ZIP contém somente `Eldravyn-Continent.rbxlx`. [Arquivo individual](https://github.com/fernando-vaccari/RPG-Roblox/raw/refs/heads/codex/eldravyn-map-20261027/delivery-map/task-01/Eldravyn-Continent.rbxlx). Inclui geometria já serializada: cinco cidades, três florestas, duas entradas externas, estradas/pontes, construções, vegetação, pontos de integração e iluminação. Os dois bootstraps são exclusivamente de apresentação do mapa.
+O ZIP preservado contém somente `Eldravyn-Continent.rbxlx`; retirar auxiliares não impediu a nova detecção. Inclui geometria já serializada: cinco cidades, três florestas, duas entradas externas, estradas/pontes, construções, vegetação, pontos de integração e iluminação. Os dois bootstraps são exclusivamente de apresentação do mapa.
 
 **Ainda não é o mapa final:** Terrain nativo, inspeção artística/física e desempenho precisam do Studio. O manifesto registra essas limitações. O avatar não inicia enquanto o Terrain estiver pendente. A tarefa não adiciona gameplay.
+
+O procedimento abaixo é histórico de preparação; aguarde a análise de segurança antes de usar o arquivo bloqueado.
 
 1. Abra o Place no Studio e salve uma cópia nova.
 2. Fora de Play, execute na Command Bar:
