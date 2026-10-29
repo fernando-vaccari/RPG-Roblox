@@ -1,0 +1,18 @@
+{
+  "file": "Eldravyn-Continent-SceneryOnly.rbxlx",
+  "bytes": 25690068,
+  "sha256": "3162d264fee1d46dbdc6fe0aaaafef17934e0dda648c8c992ce6c01db037317e",
+  "source_sha256": "a08fd280bd8835943f3e29c0777196e277831cb39e1405560cc892779fc49dab",
+  "purpose": "editor-only passive scenery inspection",
+  "base_parts": 20001,
+  "user_script_instances": 0,
+  "source_properties": 0,
+  "binary_string_properties": 0,
+  "retained_geometry_and_lighting_match_original": true,
+  "custom_integration_attributes_excluded": true,
+  "native_terrain_baked": false,
+  "terrain_generator_included": false,
+  "studio_executed": false,
+  "antivirus_scan_executed": false,
+  "defender_verdict": "unknown; no clearance claimed"
+}

@@ -1,5 +1,7 @@
 # Continente — progresso da Tarefa 01
 
+**28/10/2026 — cópia passiva separada:** gerada `delivery-map/passive-scene/Eldravyn-Continent-SceneryOnly.rbxlx` a pedido do usuário. Apenas Workspace e Lighting, 20.001 peças preservadas; zero código de projeto/blobs de metadados. Cópia exclusivamente visual, sem Terrain/PrepareStudio/gameplay. Comparação estrutural independente passou; fonte e original preservados. Antivírus não executado: base oficial ClamAV bloqueada pela rede (CONNECT 403). Não há veredicto do Defender ou promessa de ausência de alerta. Consulte docs/PASSIVE_SCENE_REVIEW.md.
+
 **28/10/2026 — uso da entrega não recomendado:** o usuário confirmou `Trojan:Script/Ulthar.A!ml` também no ZIP do continente, que contém apenas um `.rbxlx`. O registro `webfile` não aponta membro interno. A investigação estática não determinou a causa nem confirmou falso positivo. Arquivos/hashes preservados e links de uso retirados do README da entrega. Detalhes em [docs/MAP_DEFENDER_ALERT.md](docs/MAP_DEFENDER_ALERT.md). Não houve mudança de geometria/código ou novo empacotamento nesta investigação.
 
 Atualização: 27/10/2026. Branch: `codex/eldravyn-map-20261027`. Base preservada: `17b4f8e` (0.6.1 + investigação Defender). Último commit de código desta etapa: `3f7e4fa`; o commit de documentação/artefato da entrega aparece a seguir no log Git.

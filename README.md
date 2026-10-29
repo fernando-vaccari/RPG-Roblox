@@ -1,5 +1,7 @@
 # Eldravyn: Rise of Shadows
 
+**Cópia passiva para inspeção:** [somente geometria e iluminação, sem scripts de projeto](delivery-map/passive-scene/README.md). Ela preserva as 20.001 peças, mas não inclui Terrain/gerador ou gameplay. Não foi validada por antivírus e não há garantia de ausência de alerta. [Revisão e limitações](docs/PASSIVE_SCENE_REVIEW.md).
+
 **Novo alerta de segurança:** o Defender também bloqueou o ZIP do continente como `Trojan:Script/Ulthar.A!ml`. Seu uso não é recomendado enquanto a causa permanecer indeterminada. [Registro, verificações e encaminhamento à Microsoft](docs/MAP_DEFENDER_ALERT.md). Nenhum novo pacote foi gerado para tentar eliminar o bloqueio.
 
 **Tarefa atual: somente reconstrução do continente.** A branch `codex/eldravyn-map-20261027` contém o [Place do mapa com geometria materializada](delivery-map/task-01/README.md), [guia de abertura](COMO_ABRIR_MAPA.md) e [progresso específico](PROGRESSO_MAPA.md). Terrain nativo e inspeção no Studio ainda pendentes: não é uma declaração de mapa final. Os sistemas do RPG abaixo são histórico/preservação e não foram ampliados nesta tarefa.

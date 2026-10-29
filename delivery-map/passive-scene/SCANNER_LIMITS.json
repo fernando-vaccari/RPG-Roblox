@@ -1,0 +1,12 @@
+{
+  "engine_available": null,
+  "freshclam_available": null,
+  "defender_available": null,
+  "apt_package_lists_present": false,
+  "debian_metadata_http_status": 200,
+  "clamav_official_database_url": "https://database.clamav.net/daily.cvd",
+  "clamav_official_database_result": "Managed proxy CONNECT403 Forbidden",
+  "existing_signature_databases_found": [],
+  "antivirus_scan_executed": false,
+  "reason": "No installed engine/database; official signature feed blocked. No bypass or empty-database scan attempted."
+}
