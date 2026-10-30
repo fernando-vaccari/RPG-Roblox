@@ -62,7 +62,9 @@ for file,expr in paths.items():
 map_only='--map' in sys.argv
 if map_only:
     lines.append((ROOT/'tests/architecture.integration.luau').read_text())
+    lines.append((ROOT/'tests/monumental-forest.integration.luau').read_text())
     lines.append((ROOT/'tests/map.integration.luau').read_text())
+    lines.append((ROOT/'tests/monumental-city.integration.luau').read_text())
 else:
     lines.append((ROOT/'tests/voxel-guard.integration.luau').read_text())
     lines.append((ROOT/'tests/editor.integration.luau').read_text())

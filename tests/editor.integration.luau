@@ -7,7 +7,7 @@ terrain.writeChunk(workspace.Terrain,config,{X=0,Z=0,Width=32,Depth=32})
 assert(env.VoxelWrites==1)
 print('PASSOU MOCK: adaptador real WriteVoxels constrói matrizes válidas para um chunk 32x32.')
 local originalWriter=terrain.writeChunk
--- A orquestração inteira não repete 56 milhões de voxels no mock.
+-- A orquestração inteira não materializa o volume de voxels no mock.
 terrain.writeChunk=function()env.VoxelWrites+=1 end
 local world=require(game.ServerStorage.MedievalWorldgen.WorldGenerator)
 env.OccupiedParts=true
@@ -16,7 +16,7 @@ env.OccupiedParts=false;env.TerrainOccupied=true
 assert(not pcall(world.GenerateNewWorld));assert(not workspace:FindFirstChild('GeneratedWorld'))
 env.TerrainOccupied=false
 local report=world.GenerateNewWorld()
-assert(report.TerrainWritten and report.ChunksWritten==1024)
+assert(report.TerrainWritten and report.ChunksWritten==#mathTerrain.chunks(config))
 local root=workspace.GeneratedWorld
 assert(root:GetAttribute('Status')=='Complete')
 assert(#root.Cities:GetChildren()==5 and #root.NPCs:GetChildren()>=60)

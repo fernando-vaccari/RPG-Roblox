@@ -43,4 +43,20 @@ test('variações controladas alteram silhueta sem mudar identidade do lote',fun
  assert(Plan.build('SmallHouse','Valoria',5,{Variation=3}).Variant==3)
  assert(not pcall(Plan.build,'SmallHouse','Valoria',5,{Variant=-1}))
 end)
+test('residências densas mantêm portas, volume medieval e placas determinísticas distintas',function()
+ local names={}
+ for index=27,400 do
+  local name=Plan.residenceName(index)
+  assert(type(name)=='string' and name:find('Casa ',1,true)==1 and not names[name])
+  names[name]=true
+  assert(name==Plan.residenceName(index))
+  for city in Plan.Themes do
+   local p=Plan.build('SmallHouse',city,index,{Residential=true,Interior=false})
+   assert(p.Width>=22 and p.Width<=25 and p.Depth<=25 and p.Height>=19)
+   assert(p.DoorWidth==8 and p.DoorHeight==10 and p.Rise>=7)
+   assert(math.sqrt((p.Width/2+1.5)^2+(p.Depth/2+2.5)^2)<24,'Telhado excede lote residencial')
+   assert(not p.Interior)
+  end
+ end
+end)
 print(count..' testes de gramática arquitetônica; renderização/colisões reais não executadas.')

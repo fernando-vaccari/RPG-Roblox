@@ -26,7 +26,9 @@ function Mock.new(enums,classes)
         return make(V.new(),{cy*cz,-cy*sz,sy,cx*sz+sx*sy*cz,cx*cz-sx*sy*sz,-sx*cy,sx*sz-cx*sy*cz,sx*cz+cx*sy*sz,cx*cy})
     end
     function CF.lookAt(a,b)
-        local d=b-a;return CF.new(a)*CF.Angles(0,math.atan2(-d.X,-d.Z),0)
+        local d=b-a
+        local horizontal=math.sqrt(d.X*d.X+d.Z*d.Z)
+        return CF.new(a)*CF.Angles(0,math.atan2(-d.X,-d.Z),0)*CF.Angles(math.atan2(d.Y,horizontal),0,0)
     end
     cm.__mul=function(a,b)
         local r={}

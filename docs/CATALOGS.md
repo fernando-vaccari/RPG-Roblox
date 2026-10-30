@@ -4,16 +4,18 @@ Gerados das configurações do projeto. Implementação não equivale a homologa
 
 ## Eldravyn: Rise of Shadows — mundo
 
-Região | Tipo | X | Z | Edifícios
+Os totais abaixo contam os edifícios originais do catálogo. A revisão monumental acrescenta residências planejadas; consulte [o relatório do mapa](MONUMENTAL_MAP.md) para os totais materializados.
+
+Região | Tipo | X | Z | Edifícios originais
 --- | --- | --- | --- | ---
-Valoria • Cidade da Aurora | Cidade | 0 | 1000 | 26
-Arkheim • Vigília das Sombras | Cidade | 0 | -850 | 26
-Eldoria • Cidade das Raízes | Cidade | 1150 | -150 | 26
-Durakh • Coração das Montanhas | Cidade | -1150 | -150 | 26
-Asterion • Coroa Celeste | Cidade | 1150 | 1200 | 26
-Sylvarin • Bosque Esmeralda | Floresta | 1100 | -1100 | —
-Nocthar • Floresta dos Ancestrais | Floresta | -1000 | 1000 | —
-Véspera • Floresta Sombria | Floresta | -1080 | -1170 | —
+Valoria • Cidade da Aurora | Cidade | 0 | 1500 | 26
+Arkheim • Vigília das Sombras | Cidade | 0 | -1275 | 26
+Eldoria • Cidade das Raízes | Cidade | 1725 | -225 | 26
+Durakh • Coração das Montanhas | Cidade | -1725 | -225 | 26
+Asterion • Coroa Celeste | Cidade | 1725 | 1800 | 26
+Sylvarin • Bosque Esmeralda | Floresta | 1650 | -1650 | —
+Nocthar • Floresta dos Ancestrais | Floresta | -1500 | 1500 | —
+Véspera • Floresta Sombria | Floresta | -1620 | -1755 | —
 
 ## Expedições
 

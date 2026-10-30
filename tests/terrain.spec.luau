@@ -19,10 +19,10 @@ test("configuração padrão e limites de entrada", function()
         assert(not pcall(mathTerrain.validate, bad))
     end
 end)
-test("chunks cobrem 4000x4000 sem buracos e respeitam voxel grid", function()
+test("chunks cobrem 6144x6144 sem buracos e respeitam voxel grid", function()
     local area, seen = 0, {}
     local chunks = mathTerrain.chunks(c)
-    assert(#chunks == 1024)
+    assert(#chunks == 2304)
     for _, chunk in chunks do
         assert(chunk.Width % 4 == 0 and chunk.Depth % 4 == 0)
         for x=chunk.X, chunk.X+chunk.Width-1, 4 do
@@ -34,12 +34,12 @@ test("chunks cobrem 4000x4000 sem buracos e respeitam voxel grid", function()
             end
         end
     end
-    assert(area == 4000*4000)
+    assert(area == c.WorldSize*c.WorldSize)
 end)
-test("terreno contínuo, limitado e não plano em 10201 amostras", function()
+test("terreno contínuo, limitado e não plano em toda a extensão ampliada", function()
     local lo, hi = math.huge, -math.huge
-    for x=-2000,2000,40 do
-        for z=-2000,2000,40 do
+    for x=-c.WorldSize/2,c.WorldSize/2,60 do
+        for z=-c.WorldSize/2,c.WorldSize/2,60 do
             local h = mathTerrain.height(c,x,z)
             assert(h > c.MinY+4 and h < c.MaxY-4)
             lo,hi = math.min(lo,h), math.max(hi,h)

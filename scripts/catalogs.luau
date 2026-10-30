@@ -6,7 +6,7 @@ local world=require('../src/shared/Config/WorldConfig')
 local dungeon=require('../src/shared/Config/DungeonConfig')
 local function keys(map)local out={};for key in map do table.insert(out,key)end;table.sort(out);return out end
 print('# Catálogos atuais\n\nGerados das configurações do projeto. Implementação não equivale a homologação Roblox.\n')
-print('## Eldravyn: Rise of Shadows — mundo\n\nRegião | Tipo | X | Z | Edifícios\n--- | --- | --- | --- | ---')
+print('## Eldravyn: Rise of Shadows — mundo\n\nOs totais abaixo contam os edifícios originais do catálogo. A revisão monumental acrescenta residências planejadas; consulte [o relatório do mapa](MONUMENTAL_MAP.md) para os totais materializados.\n\nRegião | Tipo | X | Z | Edifícios originais\n--- | --- | --- | --- | ---')
 for _,r in world.Cities do print(r.Name..' | Cidade | '..r.X..' | '..r.Z..' | '..#catalog.CityBuildings[r.Id]) end
 for _,r in world.Forests do print(r.Name..' | Floresta | '..r.X..' | '..r.Z..' | —') end
 print('\n## Expedições\n\nDungeon | Andar | Ambiente | Encontro\n--- | --- | --- | ---')

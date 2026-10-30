@@ -1,0 +1,23 @@
+{
+  "file": "Eldravyn-Monumental.rbxlx",
+  "sha256": "4a890a3c9f215bc2ee88691004c797cd6f0f13f85c4df52a231e728606cca461",
+  "scene_instances_baked": 97846,
+  "geometry_baked": true,
+  "native_terrain_baked": false,
+  "compact_xml": true,
+  "studio_executed": false,
+  "visual_quality_validated": false,
+  "requires_editor_completion": true,
+  "prepare_command": "require(game.ServerStorage.MedievalWorldgen.WorldGenerator).PrepareStudio()",
+  "report": {
+    "Parts": 92702,
+    "SceneOnly": true,
+    "StudioVisualsValidated": false,
+    "TerrainPending": true
+  },
+  "antivirus_scan_executed": false,
+  "defender_verdict": "unknown",
+  "source_files_verified": 40,
+  "bytes": 71115751,
+  "previous_deliveries_preserved": true
+}

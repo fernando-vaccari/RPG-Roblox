@@ -1,3 +1,7 @@
+# Eldravyn: Rise of Shadows — atualização de 30/10/2026
+
+**Revisão monumental implementada:** 6.144 × 6.144 studs, cidades/muralhas/florestas ampliadas, casas identificadas. Entrega e testes em [docs/MONUMENTAL_MAP.md](docs/MONUMENTAL_MAP.md), progresso detalhado em [PROGRESSO_MAPA.md](PROGRESSO_MAPA.md). Branch `codex/eldravyn-monumental-20261029`; Studio/Defender continuam pendentes. O conteúdo abaixo é histórico.
+
 # Eldravyn: Rise of Shadows — estado de 27/10/2026
 
 **Escopo vigente: Tarefa 01, somente continente.** Estado atualizado em [PROGRESSO_MAPA.md](PROGRESSO_MAPA.md), branch `codex/eldravyn-map-20261027`. A nova geometria está serializada num Place de inspeção sem gameplay; Terrain/validação real pendentes. O conteúdo abaixo registra o RPG anterior e a investigação do Defender.

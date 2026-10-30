@@ -1,4 +1,16 @@
-# Próxima tarefa — continente
+# Próxima tarefa — revisão monumental de 30/10/2026
+
+Continue em `codex/eldravyn-monumental-20261029`, sem recomeçar o projeto. Leia [docs/MONUMENTAL_MAP.md](docs/MONUMENTAL_MAP.md) e [PROGRESSO_MAPA.md](PROGRESSO_MAPA.md). O usuário autorizou exceder 4.000 studs: a revisão implementada tem 6.144 × 6.144, 1.054 lotes, 1.440 árvores LOW, placas frontais, 28 portões e muralhas de 80–104 studs.
+
+Código e artefato: `delivery-map/monumental/Eldravyn-Monumental.rbxlx`, 92.702 BaseParts; geradores incluídos, Terrain nativo pendente. Execute PrepareStudio uma vez no editor, salve/reabra e teste os portões/escadas/placas/ruas/florestas. Registre aparência, FPS/memória e Output no Windows 11; esse teste real não ocorreu aqui. As quatro imagens são prévias geométricas offline do Blender, não capturas do Studio.
+
+Verificações concluídas: suíte geral, integração de mapa após correções finais, Sources/XML/SHA e renderização offline. Corrigidos conflito de estrada/torre em Eldoria, placa atrás da varanda e madeira coplanar. O mapa anterior permanece byte a byte igual. Use os comandos de reprodução do guia; **não execute package_map.py para sobrescrever task-01**.
+
+O alerta Defender anterior continua indeterminado. Não alegar liberação de antivírus, não desativar a proteção e não produzir variantes para escapar da detecção. Havendo novo bloqueio, encaminhar amostra/hash à Microsoft. Não publicar o jogo ou ativar produtos.
+
+---
+
+# Histórico — continente anterior
 
 **Prioridade atual:** nova detecção do Defender também no ZIP do mapa. Leia docs/MAP_DEFENDER_ALERT.md. Não produzir outro arquivo/formato ou alterar código apenas para mudar a detecção; preservar amostra/hash e encaminhar à Microsoft. Sem veredicto, não recomendar uso do artefato. Nenhum antivírus foi executado no Linux.
 
