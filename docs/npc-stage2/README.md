@@ -4,6 +4,8 @@ Implementação exclusiva dos NPCs e seus serviços. Combate, conjuração, inve
 
 A cópia `Eldravyn-Monumental(1).rbxlx` de aproximadamente 383 MB **não foi anexada**. Foi inspecionado o arquivo do repositório `delivery-map/monumental/Eldravyn-Monumental.rbxlx`, de 71.115.751 bytes: cinco cidades, três florestas, duas entradas de dungeon, 1.054 lotes, 92.702 BaseParts, 40 Sources, nenhum Humanoid ou ProximityPrompt. Essa base ainda tem `TerrainPending=true`; não contém o Terrain materializado no Studio. [Inspeção](MAP_INSPECTION.json) e [posições dos 66 NPCs](LOCATIONS.md).
 
+Para baixar pelo GitHub, use o botão **Download raw file** na página do arquivo. Se um link abrir texto XML no navegador, use **Salvar link como…** no link e conserve a extensão `.rbxlx` ou `.rbxmx`; não copie o XML nem salve com `.txt`. Os downloads foram conferidos por tamanho e SHA-256.
+
 ## Usar sua cópia já preparada no Windows 11
 
 1. Abra sua cópia no Roblox Studio e salve uma **nova cópia**, mantendo o original.

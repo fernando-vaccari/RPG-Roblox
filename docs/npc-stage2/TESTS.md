@@ -15,6 +15,7 @@
 | XML e empacotamento | 66 Humanoids R15, 66 ProximityPrompts, referências únicas/válidas, Sources novos iguais ao repositório, scripts do instalador desativados; round-trip Rojo/rbx-dom de 66 R15 e 990 motores aprovado |
 | Preservação do mapa | SHA do arquivo original permaneceu idêntico; subtree `GeneratedWorld` idêntica e os 40 Sources originais preservados; nenhuma operação de escrita de Terrain |
 | Posições | 66 candidatos exteriores confrontados com caixas de 34.798 Parts colidíveis do XML; sem colisões nesse modelo; alturas comparadas à função de terreno existente sem desvios acima de três studs. Não equivale a teste de caminhar no Studio |
+| Download GitHub | Ambos os arquivos baixados integralmente por HTTPS do commit `fb9d206d4c977d4039858f6dbee64891fca8f1aa`: HTTP 200 e bytes/SHA-256 iguais ao manifesto; evidência em `evidence/github-downloads.json` |
 | Segurança desta adição | Revisão das operações/receipts, nenhum ID real inventado, assets remotos ou código baixado para os NPCs. Não é resultado de antivírus |
 
 Comandos: `python3 scripts/check.py`, `python3 scripts/test_npc_stage2.py` e `python3 scripts/build_npc_stage2.py` e `python3 scripts/verify_npc_stage2.py`. O check geral já executa o teste NPC. Logs finais copiados para `docs/npc-stage2/evidence/`; hashes/manifesto estão na pasta de entrega. Rodadas específicas NPC foram repetidas após ajustes de persistência de evolução, textos de objetivos e colocação.
