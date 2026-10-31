@@ -1,10 +1,12 @@
 # Eldravyn: Rise of Shadows — atualização de 30/10/2026
 
+**Etapa vigente: NPCs (30/10/2026).** Implementação na branch `codex/eldravyn-npcs-20261030`: [entrega e instalação](delivery-npcs/stage-02/README.md), [serviços e limites](docs/npc-stage2/README.md), [progresso](PROGRESSO_NPCS.md). Mapa anterior preservado; Studio/Defender reais pendentes. As etapas abaixo são histórico.
+
 **Revisão monumental implementada:** 6.144 × 6.144 studs, cidades/muralhas/florestas ampliadas, casas identificadas. Entrega e testes em [docs/MONUMENTAL_MAP.md](docs/MONUMENTAL_MAP.md), progresso detalhado em [PROGRESSO_MAPA.md](PROGRESSO_MAPA.md). Branch `codex/eldravyn-monumental-20261029`; Studio/Defender continuam pendentes. O conteúdo abaixo é histórico.
 
 # Eldravyn: Rise of Shadows — estado de 27/10/2026
 
-**Escopo vigente: Tarefa 01, somente continente.** Estado atualizado em [PROGRESSO_MAPA.md](PROGRESSO_MAPA.md), branch `codex/eldravyn-map-20261027`. A nova geometria está serializada num Place de inspeção sem gameplay; Terrain/validação real pendentes. O conteúdo abaixo registra o RPG anterior e a investigação do Defender.
+**Histórico: Tarefa 01, somente continente.** Estado atualizado em [PROGRESSO_MAPA.md](PROGRESSO_MAPA.md), branch `codex/eldravyn-map-20261027`. A nova geometria está serializada num Place de inspeção sem gameplay; Terrain/validação real pendentes. O conteúdo abaixo registra o RPG anterior e a investigação do Defender.
 
 ## Alerta Defender — investigação e entrega mínima
 

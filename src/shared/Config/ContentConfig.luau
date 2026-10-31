@@ -81,6 +81,8 @@ local Catalog = {
 
 Catalog.Items.SupplyParcel={Name='Suprimentos da Guilda',Kind='Quest',Rarity='Common'}
 Catalog.Items.Ore={Name='Minério de Durakh',Price=20,Kind='Material',Rarity='Common'}
+-- Ownership-only collectible sold by the Stage 2 travelling merchant; no effects.
+Catalog.Items.TravelRelic={Name='Relíquia da Caravana',Price=250,Kind='Material',Rarity='Rare'}
 Catalog.Items.Potion.Rarity='Common';Catalog.Items.Armor.Rarity='Uncommon'
 for _,item in Catalog.Items do item.Rarity=item.Rarity or 'Common' end
 Catalog.Enemies.SylvarinBoss={Name='Cervo Ancestral de Sylvarin',Health=800,Damage=16,Speed=12,Reward=180,XP=300,Color={64,171,124},Boss=true}

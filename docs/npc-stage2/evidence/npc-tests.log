@@ -1,0 +1,30 @@
+PASSOU NPC MOCK: 66 R15, 15 motores, aparências, prompts e zero geometria de mapa
+PASSOU NPC MOCK: perfil novo sem sorteio racial; registro F e sem promoção automática
+PASSOU NPC MOCK: banco conserva moedas, rejeita negativos, NaN, infinito e frações
+PASSOU NPC MOCK: compra, venda, propriedade e ausência de equipar/consumir
+PASSOU NPC MOCK: ferreiro confirma recursos e persiste aprimoramento sem dano
+PASSOU NPC MOCK: missões: aceitar, progresso, abandono, entrega única e rank manual
+PASSOU NPC MOCK: 30 tickets e contratos exclusivos; sem entrada, consumo ou alias
+PASSOU NPC MOCK: admissão futura: consumo único, destino válido e devolução única
+PASSOU NPC MOCK: classes, requisitos, estudo de magia e serviços futuros
+PASSOU NPC MOCK: banco, rank, classe, tickets, melhorias e tutorial sobrevivem à recarga
+PASSOU NPC MOCK: recibo oficial único, preço 100 e produtos desativados por padrão
+MOCK WARN: Perfil indisponível para 801; nenhuma gravação de defaults será feita.
+PASSOU NPC MOCK: dois jogadores, lock concorrente e UpdateAsync repetido
+PASSOU NPC MOCK: resposta perdida após commit congela perfil e evita duplicação
+PASSOU NPC MOCK: falha de armazenamento não sobrescreve com defaults
+PASSOU NPC MOCK: combate futuro só progride com adaptador servidor e evento único
+PASSOU NPC MOCK: diálogo: token, distância, confirmação, rejeição de replay e preço forjado
+PASSOU NPC MOCK: cura Humanoid compatível, cobrança única e serviço sem feridas desativado
+PASSOU NPC MOCK: UI comum abre/fecha, confirma e tem alvos de toque >= 44px
+PASSOU NPC MOCK: menus de todos os NPCs e requisitos não inicializam serviços futuros
+PASSOU NPC MOCK TOTAL: 19
+PASSOU NPC MOCK: instalador aborta com obstáculo e preserva mapa/destinos
+MOCK WARN: [NPC] Equivalente existente preservado, sem duplicar: Valoria_Blacksmith. Integre o diálogo deste personagem manualmente.
+[NPC] Instalação concluída sem editar GeneratedWorld/Terrain. Salve outra cópia e teste Play. Prévia Studio pode ser volátil.
+[NPC] Versão 1 já instalada. Nenhum NPC duplicado.
+PASSOU NPC MOCK: instalador idempotente, equivalente preservado, scripts só ativam após instalação
+MOCK WARN: [NPC] Terrain pendente. Use PrepareStudio em Edit antes de testar. Nenhum terreno será gerado no runtime.
+[NPC] Etapa 2 iniciada. Combate, conjuração, fusões e interiores de dungeon permanecem fora desta etapa.
+PASSOU NPC MOCK: inicialização de 65 NPCs instalados, terreno pendente bloqueia, nenhum combate iniciado
+PASSOU NPC MOCK: nome de destino ocupado não é sobrescrito

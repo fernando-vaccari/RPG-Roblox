@@ -6,12 +6,20 @@ local Config=require(Shared.Config.IdentityConfig)
 local Rules=require(Shared.Core.IdentityRules)
 local Data=require(script.Parent.DataService)
 local Purchase={OnGrant=nil,OnPending=nil}
+local extensions={}
+function Purchase.registerProduct(key,product,grant)
+ assert(not extensions[key] and not Config.Products[key] and type(grant)=='function','Produto duplicado/inválido')
+ for _,p in Config.Products do assert(product.Id==0 or p.Id~=product.Id,'ID oficial já usado') end
+ for _,e in extensions do assert(product.Id==0 or e.Product.Id~=product.Id,'ID oficial já registrado') end
+ extensions[key]={Product=product,Grant=grant}
+end
+local function product(key)return extensions[key] and extensions[key].Product or Config.Products[key]end
 function Purchase.available(key)
- local p=Config.Products[key]
- return p~=nil and p.Id>0 and Data.Persistent and (key=='RacialRetry' or next(Config.Fusion.Recipes)~=nil)
+ local p=product(key)
+ return p~=nil and p.Id>0 and Data.Persistent and (extensions[key]~=nil or key=='RacialRetry' or next(Config.Fusion.Recipes)~=nil)
 end
 function Purchase.prompt(player,key)
- local profile=Data.get(player);local p=Config.Products[key]
+ local profile=Data.get(player);local p=product(key)
  if not profile or not Purchase.available(key) then return false,'Compra desativada: produto real e catálogo devem estar configurados.' end
  if key=='RacialRetry' then
   Rules.refresh(profile,Config,os.time())
@@ -29,10 +37,20 @@ function Purchase.process(receipt)
  if type(receipt)~='table' or type(receipt.PurchaseId)~='string' or #receipt.PurchaseId<1 or #receipt.PurchaseId>200 then return pending end
  local known=false
  for _,p in Config.Products do if p.Id>0 and p.Id==receipt.ProductId then known=true end end
+ local extension
+ for _,e in extensions do if e.Product.Id>0 and e.Product.Id==receipt.ProductId then known=true;extension=e end end
  if not known then return pending end
  local player=Players:GetPlayerByUserId(receipt.PlayerId)
  if not player then return pending end
- if not Data.receipt(player,receipt.PurchaseId,receipt.ProductId) then
+ local granted
+ if extension then
+    if not Data.Persistent then return pending end
+    granted=Data.changeIdentity(player,function(state)
+        if state.Identity.Receipts[receipt.PurchaseId] then return true end
+        return extension.Grant(state,receipt.PurchaseId)
+    end)
+ else granted=Data.receipt(player,receipt.PurchaseId,receipt.ProductId) end
+ if not granted then
     if Purchase.OnPending then Purchase.OnPending(player) end
     return pending
  end

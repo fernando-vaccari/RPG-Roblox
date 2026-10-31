@@ -1,0 +1,2 @@
+c2e74768a2df09e1e710c4cffdaae3036c81a52ff905f2a91f16fb2c37d99ad6  Eldravyn-Monumental-NPCs.rbxlx
+7d15f442b3efa605ec974b7d106869d5219ea1c4bd1c42ef639ac29483d5df51  Eldravyn-NPCs-Stage2.rbxmx

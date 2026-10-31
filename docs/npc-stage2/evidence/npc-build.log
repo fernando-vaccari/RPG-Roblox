@@ -1,0 +1,29 @@
+Building project 'EldravynNPCPackage'
+Built project to Eldravyn-NPCs-Stage2.rbxmx
+NPC placement: 66 exterior points; collision boxes tested against 34798 existing collidable parts.
+{
+  "stage": 2,
+  "source": "delivery-map/monumental/Eldravyn-Monumental.rbxlx",
+  "source_sha256": "4a890a3c9f215bc2ee88691004c797cd6f0f13f85c4df52a231e728606cca461",
+  "user_383MB_file_available": false,
+  "npcs": 66,
+  "original_scripts_preserved": 40,
+  "generated_world_subtree_sha256": "ef808be0276a0d66169417556211823c5960a9d90f578438a279a2a385875b92",
+  "terrain_subtree_sha256": null,
+  "terrain_written": false,
+  "terrain_pending_in_supplied_base": true,
+  "studio_executed": false,
+  "antivirus_executed": false,
+  "outputs": [
+    {
+      "file": "Eldravyn-Monumental-NPCs.rbxlx",
+      "bytes": 74126115,
+      "sha256": "c2e74768a2df09e1e710c4cffdaae3036c81a52ff905f2a91f16fb2c37d99ad6"
+    },
+    {
+      "file": "Eldravyn-NPCs-Stage2.rbxmx",
+      "bytes": 120087,
+      "sha256": "7d15f442b3efa605ec974b7d106869d5219ea1c4bd1c42ef639ac29483d5df51"
+    }
+  ]
+}

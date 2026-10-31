@@ -1,3 +1,13 @@
+# Continuidade — NPCs, etapa 2
+
+Continue em `codex/eldravyn-npcs-20261030`. Leia `PROGRESSO_NPCS.md` e `docs/npc-stage2/README.md`. Pedido vigente: SOMENTE NPCs; não retomar combate/continente/fusões. A cópia local de 383 MB não foi fornecida. Foram criados instalador `.rbxmx` e Place aditivo com 66 NPCs sobre o monumental de 71 MB; original intacto.
+
+A próxima validação indispensável é abrir uma cópia no Roblox Studio Windows 11: instalação, piso/R15, menus PC/celular, dois jogadores, DataStore real em Experience privada de teste, cura e retorno. Use `docs/npc-stage2/TESTS.md`. Nunca alegar testes do Studio/Defender sem realizá-los; nenhuma compra/teleporte real está ativado. Não sobrescrever entregas anteriores nem publicar no Roblox sem instrução do usuário.
+
+O builder NPC é `python3 scripts/build_npc_stage2.py`; não regenerar continente para alterar NPCs. A suíte `python3 scripts/check.py` inclui regras/integradores antigos e NPCs; dados usam o MESMO `MedievalRPG_v1`, com extensão NPC e sessão exclusiva. Scripts auxiliares ficam fora do `.rbxlx` e do `.rbxmx` (apenas Sources Luau nesses formatos).
+
+---
+
 # Próxima tarefa — revisão monumental de 30/10/2026
 
 Continue em `codex/eldravyn-monumental-20261029`, sem recomeçar o projeto. Leia [docs/MONUMENTAL_MAP.md](docs/MONUMENTAL_MAP.md) e [PROGRESSO_MAPA.md](PROGRESSO_MAPA.md). O usuário autorizou exceder 4.000 studs: a revisão implementada tem 6.144 × 6.144, 1.054 lotes, 1.440 árvores LOW, placas frontais, 28 portões e muralhas de 80–104 studs.
