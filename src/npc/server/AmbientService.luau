@@ -5,6 +5,7 @@ local Placement=require(script.Parent.Placement)
 local Ambient={}
 local mobile={Resident=true,Traveler=true,Farmer=true,Adventurer=true}
 function Ambient.start(npcs,folder)
+ if workspace:GetAttribute('EldravynNPCVisualVersion')==2 then return require(script.Parent.NPCBehaviorController).start(npcs,folder)end
  local homes={};for _,npc in npcs do
   if npc:GetAttribute('AmbientNPC') and mobile[npc:GetAttribute('NPCRole')] and npc.PrimaryPart then homes[npc]={Frame=npc.PrimaryPart.CFrame,Away=false}end
  end

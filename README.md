@@ -1,6 +1,8 @@
 # Eldravyn: Rise of Shadows
 
-**Etapa vigente: NPCs (30/10/2026).** Implementação na branch `codex/eldravyn-npcs-20261030`: [entrega e instalação](delivery-npcs/stage-02/README.md), [serviços e limites](docs/npc-stage2/README.md), [progresso](PROGRESSO_NPCS.md). Mapa anterior preservado; Studio/Defender reais pendentes. As etapas abaixo são histórico.
+**Etapa vigente: NPC Overhaul V2 (31/10/2026).** Atualização visual e de comportamento sobre os NPCs existentes: [pacote `.rbxmx`](delivery-npcs/visual-v2/README.md), [instalação, rollback e prévias](docs/npc-v2/README.md), [testes e limites](docs/npc-v2/TESTS.md), [progresso](PROGRESSO_NPC_V2.md). Mapa e sistemas anteriores preservados. Studio, FPS e Defender reais pendentes.
+
+**Base NPCs Stage 2 (30/10/2026):** [entrega e instalação original](delivery-npcs/stage-02/README.md), [serviços e limites](docs/npc-stage2/README.md), [progresso anterior](PROGRESSO_NPCS.md). As etapas abaixo são histórico.
 
 **Revisão monumental de 30/10/2026:** continente ampliado para 6.144 × 6.144 studs, bairros em anéis, muralhas de 80–104 studs, casas com placas e florestas monumentais. [Implementação, resultados e limites](docs/MONUMENTAL_MAP.md). A revisão preserva as entregas anteriores. [Entrega `.rbxlx` e instruções](delivery-map/monumental/README.md); Terrain e testes reais do Studio ainda pendentes.
 

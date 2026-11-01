@@ -1,4 +1,12 @@
-# Continuidade — NPCs, etapa 2
+# Continuidade vigente — NPC Overhaul V2
+
+Branch `codex/eldravyn-npc-overhaul-v2-20261031`, base `0f21f59`. Leia `PROGRESSO_NPC_V2.md`, `docs/npc-v2/README.md` e `docs/npc-v2/TESTS.md`. O pedido vigente é visual/animação/comportamento dos NPCs existentes; mapa e gameplay permanecem preservados. Não retomar reconstrução, combate ou progressão.
+
+Pacote separado em `delivery-npcs/visual-v2/`. Use `python3 scripts/build_npc_v2.py` para reconstruí-lo; **não execute `build_npc_stage2.py`** para atualizar essa entrega. A suíte geral inclui o V2. O próximo bloqueio de aceitação é validação manual no Roblox Studio Windows 11, especialmente importação, salvar/reabrir/rollback, física das patrulhas, interação multiplayer, aparência contínua e FPS/memória. Os renders são prévias offline da geometria real, não capturas do Studio. Não afirmar validação de engine ou antivírus sem execução real.
+
+---
+
+# Histórico — NPCs, etapa 2
 
 Continue em `codex/eldravyn-npcs-20261030`. Leia `PROGRESSO_NPCS.md` e `docs/npc-stage2/README.md`. Pedido vigente: SOMENTE NPCs; não retomar combate/continente/fusões. A cópia local de 383 MB não foi fornecida. Foram criados instalador `.rbxmx` e Place aditivo com 66 NPCs sobre o monumental de 71 MB; original intacto.
 

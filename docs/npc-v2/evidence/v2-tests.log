@@ -1,0 +1,35 @@
+PASSOU V2: 66 aparências construídas sem alterar rig/identidade/posição; 5467 adornos, máximo 100 por NPC.
+PASSOU V2 MIGRAÇÃO: preflight recusa scripts customizados antes de tocar NPCs
+PASSOU V2 MIGRAÇÃO: preflight recusa Animate ativo e IDs duplicados
+PASSOU V2 MIGRAÇÃO: dependência V1 ausente aborta antes de modificar aparência
+PASSOU V2 MIGRAÇÃO: falha no meio da migração reverte visuais, sem apagar NPC
+[NPC V2] 66 NPCs atualizados no lugar. Backup criado; mapa e economia não alterados. Salve a cópia e teste Play.
+PASSOU V2 MIGRAÇÃO: atualiza 66 instâncias no lugar, preservando atributos, rig, prompts e posições
+[NPC V2] Já aplicado; nenhum NPC duplicado.
+PASSOU V2 MIGRAÇÃO: segunda aplicação idempotente e sem novos NPCs/controladores
+[NPC V2] Já aplicado; nenhum NPC duplicado.
+PASSOU V2 MIGRAÇÃO: instalação incompleta é detectada sem recriar dependências ou NPCs
+PASSOU V2 MIGRAÇÃO: serviços existentes operam com os mesmos modelos atualizados
+[NPC V2] Visual/controle V1 restaurados. NPCs, posições, serviços e mapa preservados.
+PASSOU V2 MIGRAÇÃO: rollback conserva alterações externas e restaura os objetos V1 originais
+[NPC V2] 66 NPCs atualizados no lugar. Backup criado; mapa e economia não alterados. Salve a cópia e teste Play.
+[NPC V2] Já aplicado; nenhum NPC duplicado.
+PASSOU V2 MIGRAÇÃO: reaplicação após rollback funciona; mapa e NPCs originais conservados
+PASSOU V2 MIGRAÇÃO TOTAL: 10
+[NPC V2] 66 NPCs atualizados no lugar. Backup criado; mapa e economia não alterados. Salve a cópia e teste Play.
+PASSOU V2 CONTROLE: 15 poses finitas, distintas, curvas de locomoção e estados profissionais
+PASSOU V2 CONTROLE: atenção: distância, campo de visão, limites e prioridade do interlocutor
+PASSOU V2 CONTROLE: fallback procedural sem assets; transições, Humanoid e Animate respeitados
+PASSOU V2 CONTROLE: AnimationTracks: cache, prioridade, transição e atenção sem acumular
+MOCK WARN: [NPC V2] Animação indisponível; fallback procedural: Forge
+PASSOU V2 CONTROLE: falha de asset cai em pose procedural e não repete LoadAnimation a cada frame
+MOCK WARN: [NPC V2] Piso incompatível em Valoria_GuildMaster; posição preservada e patrulha bloqueada. Revise a cópia manualmente.
+PASSOU V2 CONTROLE: adaptador mantém posição e bloqueia patrulha quando piso é incompatível
+PASSOU V2 CONTROLE: um scheduler; patrulha limitada e cancelamento imediato por sessão real de diálogo
+PASSOU V2 CONTROLE: obstáculo novo, ausência de piso, distância e morte cancelam deslocamento
+PASSOU V2 CONTROLE: trabalho interrompido no diálogo e retomado sem alterar serviços
+PASSOU V2 CONTROLE: limite global de quatro patrulhas e limpeza completa do servidor
+PASSOU V2 CONTROLE: 120 NPCs simulados: limites desktop/mobile, distância, efeitos e limpeza
+[NPC] Etapa 2 iniciada. Combate, conjuração, fusões e interiores de dungeon permanecem fora desta etapa.
+PASSOU V2 CONTROLE: bootstrap V1 adaptado preserva posições e usa diálogos/prompts originais
+PASSOU V2 CONTROLE TOTAL: 12 (host simulado; sem física, rede, FPS ou renderização Roblox)

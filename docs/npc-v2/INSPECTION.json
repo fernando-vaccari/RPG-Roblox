@@ -1,0 +1,1987 @@
+{
+  "source": "delivery-npcs/stage-02/Eldravyn-Monumental-NPCs.rbxlx",
+  "sha256": "c2e74768a2df09e1e710c4cffdaae3036c81a52ff905f2a91f16fb2c37d99ad6",
+  "generated_world_xml_sha256": "26c51457cca42c43eccad07c1f2255be6e20dab5b912f661aeb1fc34201198e8",
+  "npcs": [
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_GuildMaster",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_GuildMaster",
+        "NPCRole": "GuildMaster",
+        "NPCVersion": 1.0
+      },
+      "parts": 24,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        25.0,
+        47.12,
+        2545.0,
+        6.123233995736766e-17,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        6.123233995736766e-17
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Reception",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Reception",
+        "NPCRole": "Reception",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        25.0,
+        47.12,
+        2525.0,
+        6.123233995736766e-17,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        6.123233995736766e-17
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Blacksmith",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Blacksmith",
+        "NPCRole": "Blacksmith",
+        "NPCVersion": 1.0
+      },
+      "parts": 24,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        175.5067684,
+        47.12,
+        1707.2737572,
+        0.7186611977457036,
+        0.0,
+        0.6953603978187934,
+        0.0,
+        1.0,
+        0.0,
+        -0.6953603978187934,
+        0.0,
+        0.7186611977457036
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Weapons",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Weapons",
+        "NPCRole": "Weapons",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -200.41861075999998,
+        47.12,
+        1315.8359976,
+        -0.7032124861868299,
+        0.0,
+        -0.7109797460342577,
+        0.0,
+        1.0,
+        0.0,
+        0.7109797460342577,
+        0.0,
+        -0.7032124861868299
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Armor",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Armor",
+        "NPCRole": "Armor",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -264.7578734,
+        47.12,
+        1302.7608083,
+        -0.6214357091664836,
+        0.0,
+        -0.783465161556498,
+        0.0,
+        1.0,
+        0.0,
+        0.783465161556498,
+        0.0,
+        -0.6214357091664836
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_General",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_General",
+        "NPCRole": "General",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -114.78053969999999,
+        47.12,
+        1395.35572875,
+        -0.7199034695595338,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Classes",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Classes",
+        "NPCRole": "Classes",
+        "NPCVersion": 1.0
+      },
+      "parts": 24,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -169.06474939999998,
+        47.12,
+        1368.4207282,
+        -0.5766803040615305,
+        0.0,
+        -0.8169699057538783,
+        0.0,
+        1.0,
+        0.0,
+        0.8169699057538783,
+        0.0,
+        -0.5766803040615305
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Magic",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Magic",
+        "NPCRole": "Magic",
+        "NPCVersion": 1.0
+      },
+      "parts": 25,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        185.64338099999998,
+        47.12,
+        1302.3196148999998,
+        -0.7032124861868299,
+        0.0,
+        0.7109797460342577,
+        0.0,
+        1.0,
+        0.0,
+        -0.7109797460342577,
+        0.0,
+        -0.7032124861868299
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Skills",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Skills",
+        "NPCRole": "Skills",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -180.5983554,
+        47.12,
+        1384.7601262,
+        -0.5766803040615305,
+        0.0,
+        -0.8169699057538783,
+        0.0,
+        1.0,
+        0.0,
+        0.8169699057538783,
+        0.0,
+        -0.5766803040615305
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Races",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Races",
+        "NPCRole": "Races",
+        "NPCVersion": 1.0
+      },
+      "parts": 25,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -176.582296,
+        47.12,
+        1619.5311559,
+        0.5987805068735705,
+        0.0,
+        -0.8009131691939083,
+        0.0,
+        1.0,
+        0.0,
+        0.8009131691939083,
+        0.0,
+        0.5987805068735705
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Fusions",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Fusions",
+        "NPCRole": "Fusions",
+        "NPCVersion": 1.0
+      },
+      "parts": 25,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -247.3576738,
+        47.12,
+        1280.8237841,
+        -0.6214357091664836,
+        0.0,
+        -0.783465161556498,
+        0.0,
+        1.0,
+        0.0,
+        0.783465161556498,
+        0.0,
+        -0.6214357091664836
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Inn",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Inn",
+        "NPCRole": "Inn",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        115.4746139,
+        47.12,
+        1394.63582528,
+        -0.7199034695595338,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Healer",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Healer",
+        "NPCRole": "Healer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -164.606686,
+        47.12,
+        1635.5494191,
+        0.5987805068735705,
+        0.0,
+        -0.8009131691939083,
+        0.0,
+        1.0,
+        0.0,
+        0.8009131691939083,
+        0.0,
+        0.5987805068735705
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Bank",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Bank",
+        "NPCRole": "Bank",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -94.62324253999999,
+        47.12,
+        1375.9216511500001,
+        -0.7199034695595338,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Guide",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Guide",
+        "NPCRole": "Guide",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -107.74479636000001,
+        47.12,
+        1314.8323156,
+        -0.8399082894351383,
+        0.0,
+        -0.5427283531732426,
+        0.0,
+        1.0,
+        0.0,
+        0.5427283531732426,
+        0.0,
+        -0.8399082894351383
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Tutorial",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Tutorial",
+        "NPCRole": "Tutorial",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        16.0,
+        47.5,
+        1508.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_TravelShop",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_TravelShop",
+        "NPCRole": "TravelShop",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -126.29899522,
+        47.12,
+        1406.46091595,
+        -0.7199034695595338,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Ambient_Guard",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Ambient_Guard",
+        "NPCRole": "Guard",
+        "NPCVersion": 1.0
+      },
+      "parts": 24,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        46.4885545,
+        47.12,
+        1702.9847495,
+        0.9629172889835532,
+        0.0,
+        0.26979676531894203,
+        0.0,
+        1.0,
+        0.0,
+        -0.26979676531894203,
+        0.0,
+        0.9629172889835532
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Ambient_Resident",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Ambient_Resident",
+        "NPCRole": "Resident",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -199.97712589,
+        47.12,
+        1236.67624435,
+        -0.7777237063567722,
+        0.0,
+        -0.6286062651379519,
+        0.0,
+        1.0,
+        0.0,
+        0.6286062651379519,
+        0.0,
+        -0.7777237063567722
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Ambient_Traveler",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Ambient_Traveler",
+        "NPCRole": "Traveler",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -124.54296236000002,
+        47.12,
+        1325.6868828,
+        -0.8399082894351383,
+        0.0,
+        -0.5427283531732426,
+        0.0,
+        1.0,
+        0.0,
+        0.5427283531732426,
+        0.0,
+        -0.8399082894351383
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Ambient_Artisan",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Ambient_Artisan",
+        "NPCRole": "Artisan",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        199.0342165,
+        47.12,
+        1237.8428299,
+        -0.7777237063567722,
+        0.0,
+        0.6286062651379519,
+        0.0,
+        1.0,
+        0.0,
+        -0.6286062651379519,
+        0.0,
+        -0.7777237063567722
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Ambient_Employee",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Ambient_Employee",
+        "NPCRole": "Employee",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -148.34480649999998,
+        47.12,
+        1453.9694335,
+        -0.3572309016121794,
+        0.0,
+        -0.9340161042152054,
+        0.0,
+        1.0,
+        0.0,
+        0.9340161042152054,
+        0.0,
+        -0.3572309016121794
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Ambient_Adventurer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Ambient_Adventurer",
+        "NPCRole": "Adventurer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -159.8378646,
+        47.12,
+        1355.3492098,
+        -0.5766803040615305,
+        0.0,
+        -0.8169699057538783,
+        0.0,
+        1.0,
+        0.0,
+        0.8169699057538783,
+        0.0,
+        -0.5766803040615305
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Valoria/Valoria_Ambient_Farmer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Valoria",
+        "EldravynNPCId": "Valoria_Ambient_Farmer",
+        "NPCRole": "Farmer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -129.2578068,
+        47.12,
+        1670.8461324,
+        0.8247703812146177,
+        0.0,
+        -0.5654677871206231,
+        0.0,
+        1.0,
+        0.0,
+        0.5654677871206231,
+        0.0,
+        0.8247703812146177
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_Guide",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_Guide",
+        "NPCRole": "Guide",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        112.196931,
+        51.12,
+        -1093.669282,
+        0.8247703812146177,
+        0.0,
+        0.5654677871206231,
+        0.0,
+        1.0,
+        0.0,
+        -0.5654677871206231,
+        0.0,
+        0.8247703812146177
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_General",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_General",
+        "NPCRole": "General",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -122.8576452,
+        51.12,
+        -1371.6540268,
+        -0.6673187964210759,
+        0.0,
+        -0.7447721960056825,
+        0.0,
+        1.0,
+        0.0,
+        0.7447721960056825,
+        0.0,
+        -0.6673187964210759
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_Inn",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_Inn",
+        "NPCRole": "Inn",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        114.78053969999999,
+        51.12,
+        -1379.64427125,
+        -0.7199034695595338,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_Ambient_Guard",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_Ambient_Guard",
+        "NPCRole": "Guard",
+        "NPCVersion": 1.0
+      },
+      "parts": 24,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        46.4885545,
+        51.12,
+        -1072.0152505,
+        0.9629172889835532,
+        0.0,
+        0.26979676531894203,
+        0.0,
+        1.0,
+        0.0,
+        -0.26979676531894203,
+        0.0,
+        0.9629172889835532
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_Ambient_Resident",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_Ambient_Resident",
+        "NPCRole": "Resident",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        215.21729676,
+        51.12,
+        -1525.3627686,
+        -0.7777237063567722,
+        0.0,
+        0.6286062651379519,
+        0.0,
+        1.0,
+        0.0,
+        -0.6286062651379519,
+        0.0,
+        -0.7777237063567722
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_Ambient_Traveler",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_Ambient_Traveler",
+        "NPCRole": "Traveler",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        128.692339,
+        51.12,
+        -1104.978638,
+        0.8247703812146177,
+        0.0,
+        0.5654677871206231,
+        0.0,
+        1.0,
+        0.0,
+        -0.5654677871206231,
+        0.0,
+        0.8247703812146177
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_Ambient_Artisan",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_Ambient_Artisan",
+        "NPCRole": "Artisan",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        251.54569425,
+        51.12,
+        -1487.287059,
+        -0.6214357091664836,
+        0.0,
+        0.783465161556498,
+        0.0,
+        1.0,
+        0.0,
+        -0.783465161556498,
+        0.0,
+        -0.6214357091664836
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_Ambient_Employee",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_Ambient_Employee",
+        "NPCRole": "Employee",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -69.82469375,
+        51.12,
+        -1413.7426977,
+        -0.9203461826593836,
+        0.0,
+        -0.39110472263103707,
+        0.0,
+        1.0,
+        0.0,
+        0.39110472263103707,
+        0.0,
+        -0.9203461826593836
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_Ambient_Adventurer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_Ambient_Adventurer",
+        "NPCRole": "Adventurer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        181.256058,
+        51.12,
+        -1073.2891260000001,
+        0.7186611977457036,
+        0.0,
+        0.6953603978187934,
+        0.0,
+        1.0,
+        0.0,
+        -0.6953603978187934,
+        0.0,
+        0.7186611977457036
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Arkheim/Arkheim_Ambient_Farmer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Arkheim",
+        "EldravynNPCId": "Arkheim_Ambient_Farmer",
+        "NPCRole": "Farmer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -44.05500015,
+        51.12,
+        -1424.6936301399999,
+        -0.9203461826593836,
+        0.0,
+        -0.39110472263103707,
+        0.0,
+        1.0,
+        0.0,
+        0.39110472263103707,
+        0.0,
+        -0.9203461826593836
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_Guide",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_Guide",
+        "NPCRole": "Guide",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1610.2195203,
+        51.12,
+        -329.64427125000003,
+        -0.7199034695595338,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_General",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_General",
+        "NPCRole": "General",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1630.37681746,
+        51.12,
+        -349.07834885,
+        -0.7199034695595338,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_Inn",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_Inn",
+        "NPCRole": "Inn",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1832.4754193,
+        51.12,
+        -338.51221888,
+        -0.7686471463774738,
+        0.0,
+        0.6396730136294374,
+        0.0,
+        1.0,
+        0.0,
+        -0.6396730136294374,
+        0.0,
+        -0.7686471463774738
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_Ambient_Guard",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_Ambient_Guard",
+        "NPCRole": "Guard",
+        "NPCVersion": 1.0
+      },
+      "parts": 24,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1576.6551935,
+        51.12,
+        -271.0306365,
+        -0.3572309016121794,
+        0.0,
+        -0.9340161042152054,
+        0.0,
+        1.0,
+        0.0,
+        0.9340161042152054,
+        0.0,
+        -0.3572309016121794
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_Ambient_Resident",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_Ambient_Resident",
+        "NPCRole": "Resident",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1616.98389946,
+        51.12,
+        -410.58759855,
+        -0.8399082894351383,
+        0.0,
+        -0.5427283531732426,
+        0.0,
+        1.0,
+        0.0,
+        0.5427283531732426,
+        0.0,
+        -0.8399082894351383
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_Ambient_Traveler",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_Ambient_Traveler",
+        "NPCRole": "Traveler",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1586.6576587,
+        51.12,
+        -297.1830873,
+        -0.3572309016121794,
+        0.0,
+        -0.9340161042152054,
+        0.0,
+        1.0,
+        0.0,
+        0.9340161042152054,
+        0.0,
+        -0.3572309016121794
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_Ambient_Artisan",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_Ambient_Artisan",
+        "NPCRole": "Artisan",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1509.78271324,
+        51.12,
+        -475.36276860000004,
+        -0.7777237063567722,
+        0.0,
+        -0.6286062651379519,
+        0.0,
+        1.0,
+        0.0,
+        0.6286062651379519,
+        0.0,
+        -0.7777237063567722
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_Ambient_Employee",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_Ambient_Employee",
+        "NPCRole": "Employee",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1570.9394991,
+        51.12,
+        -256.0863789,
+        -0.3572309016121794,
+        0.0,
+        -0.9340161042152054,
+        0.0,
+        1.0,
+        0.0,
+        0.9340161042152054,
+        0.0,
+        -0.3572309016121794
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_Ambient_Adventurer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_Ambient_Adventurer",
+        "NPCRole": "Adventurer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1889.606666,
+        51.12,
+        -89.4506149,
+        0.5987805068735705,
+        0.0,
+        0.8009131691939083,
+        0.0,
+        1.0,
+        0.0,
+        -0.8009131691939083,
+        0.0,
+        0.5987805068735705
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Eldoria/Eldoria_Ambient_Farmer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Eldoria",
+        "EldravynNPCId": "Eldoria_Ambient_Farmer",
+        "NPCRole": "Farmer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1589.4039080999999,
+        51.12,
+        -287.5675731,
+        -0.3572309016121794,
+        0.0,
+        -0.9340161042152054,
+        0.0,
+        1.0,
+        0.0,
+        0.9340161042152054,
+        0.0,
+        -0.3572309016121794
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_Guide",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_Guide",
+        "NPCRole": "Guide",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1823.90288328,
+        55.12,
+        -346.05460646,
+        -0.8132897404234646,
+        0.0,
+        -0.5818589159941897,
+        0.0,
+        1.0,
+        0.0,
+        0.5818589159941897,
+        0.0,
+        -0.8132897404234646
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_General",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_General",
+        "NPCRole": "General",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1801.13077,
+        55.12,
+        -362.3466565,
+        -0.8132897404234646,
+        0.0,
+        -0.5818589159941897,
+        0.0,
+        1.0,
+        0.0,
+        0.5818589159941897,
+        0.0,
+        -0.8132897404234646
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_Inn",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_Inn",
+        "NPCRole": "Inn",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1609.5254461000002,
+        55.12,
+        -330.36417472,
+        -0.7199034695595338,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_Ambient_Guard",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_Ambient_Guard",
+        "NPCRole": "Guard",
+        "NPCVersion": 1.0
+      },
+      "parts": 24,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1829.7903876799999,
+        55.12,
+        -411.85552243999996,
+        -0.894086267489315,
+        0.0,
+        -0.4478947937708421,
+        0.0,
+        1.0,
+        0.0,
+        0.4478947937708421,
+        0.0,
+        -0.894086267489315
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_Ambient_Resident",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_Ambient_Resident",
+        "NPCRole": "Resident",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1915.16881095,
+        55.12,
+        -495.49228191,
+        -0.8002909322901197,
+        0.0,
+        -0.599611894223431,
+        0.0,
+        1.0,
+        0.0,
+        0.599611894223431,
+        0.0,
+        -0.8002909322901197
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_Ambient_Traveler",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_Ambient_Traveler",
+        "NPCRole": "Traveler",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1804.75597296,
+        55.12,
+        -424.39657628,
+        -0.894086267489315,
+        0.0,
+        -0.4478947937708421,
+        0.0,
+        1.0,
+        0.0,
+        0.4478947937708421,
+        0.0,
+        -0.894086267489315
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_Ambient_Artisan",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_Ambient_Artisan",
+        "NPCRole": "Artisan",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1464.6821773000001,
+        55.12,
+        -23.566053385,
+        0.6357237861796242,
+        0.0,
+        0.771916619645829,
+        0.0,
+        1.0,
+        0.0,
+        -0.771916619645829,
+        0.0,
+        0.6357237861796242
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_Ambient_Employee",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_Ambient_Employee",
+        "NPCRole": "Employee",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1844.09576752,
+        55.12,
+        -404.68920596,
+        -0.894086267489315,
+        0.0,
+        -0.4478947937708421,
+        0.0,
+        1.0,
+        0.0,
+        0.4478947937708421,
+        0.0,
+        -0.894086267489315
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_Ambient_Adventurer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_Ambient_Adventurer",
+        "NPCRole": "Adventurer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1809.2212941999999,
+        55.12,
+        -415.4489006,
+        -0.894086267489315,
+        0.0,
+        -0.4478947937708421,
+        0.0,
+        1.0,
+        0.0,
+        0.4478947937708421,
+        0.0,
+        -0.894086267489315
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Durakh/Durakh_Ambient_Farmer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Durakh",
+        "EldravynNPCId": "Durakh_Ambient_Farmer",
+        "NPCRole": "Farmer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1834.25570892,
+        55.12,
+        -402.90784676,
+        -0.894086267489315,
+        0.0,
+        -0.4478947937708421,
+        0.0,
+        1.0,
+        0.0,
+        0.4478947937708421,
+        0.0,
+        -0.894086267489315
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_Guide",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_Guide",
+        "NPCRole": "Guide",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1609.5254461000002,
+        67.12,
+        1694.63582528,
+        -0.7199034695595338,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_General",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_General",
+        "NPCRole": "General",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1629.68274326,
+        67.12,
+        1675.2017476800002,
+        -0.7199034695595338,
+        0.0,
+        -0.6940741995753374,
+        0.0,
+        1.0,
+        0.0,
+        0.6940741995753374,
+        0.0,
+        -0.7199034695595338
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_Inn",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_Inn",
+        "NPCRole": "Inn",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1832.4754193,
+        67.12,
+        1686.4878611200002,
+        -0.7686471463774738,
+        0.0,
+        0.6396730136294374,
+        0.0,
+        1.0,
+        0.0,
+        -0.6396730136294374,
+        0.0,
+        -0.7686471463774738
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_Ambient_Guard",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_Ambient_Guard",
+        "NPCRole": "Guard",
+        "NPCVersion": 1.0
+      },
+      "parts": 24,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1771.4886245,
+        67.12,
+        2002.9847495,
+        0.9629172889835532,
+        0.0,
+        0.26979676531894203,
+        0.0,
+        1.0,
+        0.0,
+        -0.26979676531894203,
+        0.0,
+        0.9629172889835532
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_Ambient_Resident",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_Ambient_Resident",
+        "NPCRole": "Resident",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1521.3175885,
+        67.12,
+        1867.99790848,
+        0.36049231377649277,
+        0.0,
+        -0.9327621838968766,
+        0.0,
+        1.0,
+        0.0,
+        0.9327621838968766,
+        0.0,
+        0.36049231377649277
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_Ambient_Traveler",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_Ambient_Traveler",
+        "NPCRole": "Traveler",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1600.999826,
+        67.12,
+        1626.5267910999999,
+        -0.8399082894351383,
+        0.0,
+        -0.5427283531732426,
+        0.0,
+        1.0,
+        0.0,
+        0.5427283531732426,
+        0.0,
+        -0.8399082894351383
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_Ambient_Artisan",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_Ambient_Artisan",
+        "NPCRole": "Artisan",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1820.1661709,
+        67.12,
+        1546.0622380000002,
+        -0.9228251457267395,
+        0.0,
+        0.38521909404184784,
+        0.0,
+        1.0,
+        0.0,
+        -0.38521909404184784,
+        0.0,
+        -0.9228251457267395
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_Ambient_Employee",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_Ambient_Employee",
+        "NPCRole": "Employee",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1624.5172584,
+        67.12,
+        1611.33039702,
+        -0.8399082894351383,
+        0.0,
+        -0.5427283531732426,
+        0.0,
+        1.0,
+        0.0,
+        0.5427283531732426,
+        0.0,
+        -0.8399082894351383
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_Ambient_Adventurer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_Ambient_Adventurer",
+        "NPCRole": "Adventurer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1839.341934,
+        67.12,
+        1620.0141405,
+        -0.8682929223699828,
+        0.0,
+        0.49605181277986976,
+        0.0,
+        1.0,
+        0.0,
+        -0.49605181277986976,
+        0.0,
+        -0.8682929223699828
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/Asterion/Asterion_Ambient_Farmer",
+      "attributes": {
+        "AmbientNPC": true,
+        "City": "Asterion",
+        "EldravynNPCId": "Asterion_Ambient_Farmer",
+        "NPCRole": "Farmer",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        1587.5612932,
+        67.12,
+        1635.2104448599998,
+        -0.8399082894351383,
+        0.0,
+        -0.5427283531732426,
+        0.0,
+        1.0,
+        0.0,
+        0.5427283531732426,
+        0.0,
+        -0.8399082894351383
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/MalgorthDepths/MalgorthDepths_Administrator",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "MalgorthDepths",
+        "DungeonId": "MalgorthDepths",
+        "EldravynNPCId": "MalgorthDepths_Administrator",
+        "NPCRole": "Dungeon",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -16.0,
+        52.12,
+        -2566.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "path": "Workspace/EldravynNPCs/FallenSanctum/FallenSanctum_Administrator",
+      "attributes": {
+        "AmbientNPC": false,
+        "City": "FallenSanctum",
+        "DungeonId": "FallenSanctum",
+        "EldravynNPCId": "FallenSanctum_Administrator",
+        "NPCRole": "Dungeon",
+        "NPCVersion": 1.0
+      },
+      "parts": 23,
+      "motors": 15,
+      "humanoids": 1,
+      "prompts": 1,
+      "animators": 1,
+      "root_frame": [
+        -1366.0,
+        68.12,
+        -2536.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  ],
+  "protected_sources": {
+    "src/npc/shared/DialogueConfig.luau": "f8334185d439e1add6483a3caad067c9f8ef6b38c11bf59bb0bdca79a3948882",
+    "src/npc/shared/DungeonTicketConfig.luau": "7d41f87df13aa679726e9e52233a8b129be23ce3a21be967f39828c89e096cad",
+    "src/npc/shared/NPCConfig.luau": "fb77f82c5941a7997a40c241dd800c61d33dff3b2f245399c075b22ebb5e3d57",
+    "src/npc/shared/PlacementConfig.luau": "08498fbbbebcf75c5db40806d2693d042a6fbb54a11b9fcb19cc663091a194b2",
+    "src/npc/shared/QuestConfig.luau": "08592e17baa2a1349c42ef65421c4510b1ef33abec2ef807d93991b1e45793ba",
+    "src/npc/shared/Registry.luau": "4868c2b2489be0a5c25992c75a898edc73f15e2f1d24ed28d03a86d92ce96637",
+    "src/npc/shared/Rules.luau": "5fb31889a4b67678e00084c5f8a050f77f42b47aa10a1a017cfe0c6d64c98eed",
+    "src/npc/shared/ShopConfig.luau": "327dadaf3e50ac62508c0d15f4f2452a27f28e17ac51500c69c4494d4fb9f712",
+    "src/shared/Config/AbilityConfig.luau": "91797b95bb7673638106eac2bea9c03adc55315f7d8963c4ff01faf423aa491a",
+    "src/shared/Config/AdventureConfig.luau": "5ca92874d5f90bf2d603b5ecafd15fef364d02a50230407f8229cea492295377",
+    "src/shared/Config/ContentConfig.luau": "f5d6bf0df4c6a1ebc94e47b9818d4106fa2cb222ad2af18e32d1cee5e44ed671",
+    "src/shared/Config/DungeonConfig.luau": "e0c216afbbc48a430582f2b4bde3ab7b4ac5d819611ac65f50073e02b0aa261d",
+    "src/shared/Config/IdentityConfig.luau": "47f1746e90afb04e76ed003b553c086a4ebc15b9a8988a7da0dd887aa425805a",
+    "src/shared/Config/MapVisualConfig.luau": "14cf560d56f0138aadc2afdc5d52094272dd43c0dbc135ce4a8c0247670e86d5",
+    "src/shared/Config/WorldConfig.luau": "3e6c8053720c36eb44f8401313ba07c8374e338338b6735aac2b2713822dcdef",
+    "src/shared/Core/ActionMath.luau": "0cd3b7c5fd0e482d2aabc3104cffc61f13ae1ce5f4b23f2fa6fee06da270e77d",
+    "src/shared/Core/AdventureRules.luau": "34f809e8d3b6b39b9c99e237da24b6d1d8874cb7ced24a7cf6abf6635d873f34",
+    "src/shared/Core/BenefitPreview.luau": "e81374688099f494a8c65ec2996691a087e4df3ddd0019afea7461a344830ffb",
+    "src/shared/Core/CombatRules.luau": "6eeb0085e07ae313b788c3a1445bf6c9ce656df919639c93993982ff6cbb48e2",
+    "src/shared/Core/DefenseRules.luau": "9ab2bea3b4ebe02f23720a0cb3aa23a17ddf6f299bfcd89c97676d703b35dd41",
+    "src/shared/Core/DungeonRules.luau": "c9d8c939be644b42f4c4a4363992b4a6c9b360a325a009c84027b061ed6a9ddf",
+    "src/shared/Core/EnvironmentRules.luau": "e19791912a3a140af309599178a1271886f9c7b55cce1ef503ac6b409f748bf2",
+    "src/shared/Core/IdentityRules.luau": "2b57eba87b12916d0b2e00f22a086b67254266e967c9a8c7edf3d42bd987b25d",
+    "src/shared/Core/InteriorPlan.luau": "760a7a194cd0c63f4918ee192911a69288ecf4388e4be31823204a069c547bb6",
+    "src/shared/Core/MapVisualRules.luau": "e650fb4d58b655a9642b5bca746d4e7bab40771791e339913d0098899070fe56",
+    "src/shared/Core/Party.luau": "fbd3b07ef19906eaaaa30dc988b2b3930749acae487e71cecac451d9277ce53c",
+    "src/shared/Core/Progression.luau": "836a3add35c52fc7785fd5c33a9daf7bbc851aa65e2ed84aa05380105675b321",
+    "src/shared/RigFactory.luau": "7d5484c770bcd21d419070998d15c09a70490d5561e71539ac77740dc9dcf458",
+    "src/server/Services/AntiExploitService.luau": "c8b219a5d0375fe5038697ac5430685c38add020125ee0c36614f7ab4cf273db",
+    "src/server/Services/CombatService.luau": "8558b81e4f89e77303d4158fcc23ceee8f144c8eab6cbd7fae558824d229f34f",
+    "src/server/Services/DataService.luau": "cdc38d185c458aa8dcd7e2bfe3366ac3672e2e29b36f3a5f9e30ef202c4ae38d",
+    "src/server/Services/DungeonService.luau": "7ea2173d19413ad4c5707bd7337f7367fd39ea5f1cd92cdb2995998db58af096",
+    "src/server/Services/EnemyService.luau": "103e480630e821817ad796154e479f239dbc90bf33bd5550842e70235f68068a",
+    "src/server/Services/ExpeditionService.luau": "9420f3acf16068a7ade3c21207ad08c5830bab4d6976f214b0b6f283744f6a3d",
+    "src/server/Services/GameService.luau": "516359c0cc2da271bdf0c2844599e9a67de9a336be8eafcca4105a754dcacfe9",
+    "src/server/Services/IdentityService.luau": "432f0e33b044097abaf7b0234cb5b1d40b1570fd28615d75b3463d81ab1667b5",
+    "src/server/Services/InventoryService.luau": "ca48476e6267252a10083cfb39d83817a5802deb7d77a272d3fca255a94b75c3",
+    "src/server/Services/ProjectileService.luau": "d858c522908287e21d0b30bf7513fc162e1d348f934f40c5272ae8e17c644527",
+    "src/server/Services/PurchaseService.luau": "279c92eda58381346ba035cc6bd178ce641f977d4260a034d6806165f3788888",
+    "src/server/Services/SiegeService.luau": "683c09d76ef6a641d186455744aa23df159a338d71fcda731c7c2cef9d5cc387",
+    "src/server/Services/TesterService.luau": "24a8b1d7ce2b588e8274a773930354b2367af09aa792674db24415c98353449e",
+    "src/server/Services/TutorialService.luau": "e9c4e2ed21940b841596fd055e2e9d6064faf0ad81f964d2090cc3c58d5cd1ae",
+    "src/npc/server/DialogueService.luau": "a7eb5a2aae75e2ac1526ee0bc2fe49b0e3e5f84045168c9548e88d2dd12d267c",
+    "src/npc/server/NPCActionService.luau": "d4108130d114780c41dcf04b029c2e13e41a6270ae9e40c51a7e3192d0b1a0f6",
+    "src/npc/server/NPCDataService.luau": "5212b46ecfe51816bbb4291353d5db8d8a5119378460b11334b2c184ff3c2361",
+    "src/npc/server/QuestService.luau": "33b19b4c9cf7aa74353ffddb472e054b4046ff5a53f2ac1cbc004cc48e2ac55c",
+    "src/npc/client/NPCDialogueClient.luau": "0d4c874ec7d87a7babfcc6769512985caa5c562789a0c8467b588335f1a14fce",
+    "src/npc/install/Installer.luau": "f67af58d08c9da72897fcd38d16965d41c698de81530e8a926dfa4c03d960fa3",
+    "src/npc/install/R15Factory.luau": "6e272ca8cb8fd758db17da486f41b83d9efd50e2d54ec94bbfd5769e0c67af02",
+    "src/npc/install/Placement.luau": "94f4dab9d1b260ccc767d1610a7277a046ecf1e5f93cd81064d7c0e0a2e3c26b"
+  },
+  "roots": [
+    "ReplicatedStorage/MedievalRPG",
+    "ReplicatedStorage/EldravynNPC",
+    "ServerScriptService/EldravynNPC",
+    "ServerStorage/EldravynNPCPackage",
+    "StarterPlayer/StarterPlayerScripts/EldravynNPCClient",
+    "Workspace/GeneratedWorld",
+    "Workspace/EldravynNPCs"
+  ],
+  "published_npc_meshes_found": false,
+  "published_npc_animation_ids_found": false,
+  "studio_executed": false
+}

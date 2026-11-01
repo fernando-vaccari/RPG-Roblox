@@ -26,9 +26,10 @@ function Service.start()
    assert(not Actions.NPCs[id],'NPC duplicado: '..id);Actions.NPCs[id]=npc
    local root=npc:FindFirstChild('HumanoidRootPart');local prompt=npc:FindFirstChild('NPCInteraction',true)
    local entry=require(Shared.PlacementConfig).NPCs[id]
-   local frame=entry and Placement.frame(world,entry,folder,true)
+   local visualV2=workspace:GetAttribute('EldravynNPCVisualVersion')==2 and npc:GetAttribute('NPCVisualVersion')==2
+   local frame=if visualV2 then require(script.Parent.NPCPositionAdapter).frame(npc,world,entry,folder,Placement) else entry and Placement.frame(world,entry,folder,true)
    if root and prompt and frame then
-    npc:PivotTo(frame*CFrame.new(0,3,0));prompt.Enabled=true
+    if not visualV2 then npc:PivotTo(frame*CFrame.new(0,3,0))end;prompt.Enabled=true
     prompt.Triggered:Connect(function(player)Dialogue.open(player,npc)end)
     if not npc:GetAttribute('AmbientNPC') then Actions.Locations[id]={Name=C.Roles[npc:GetAttribute('NPCRole')].Title..' • '..npc:GetAttribute('City'),Position=frame.Position}end
    else

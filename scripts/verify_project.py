@@ -6,7 +6,7 @@ import re
 import hashlib
 import json
 ROOT=Path(__file__).resolve().parents[1]
-expected={p.stem for p in (ROOT/'src').rglob('*.luau') if 'npc' not in p.relative_to(ROOT/'src').parts and not p.name.endswith(('.server.luau','.client.luau'))}
+expected={p.stem for p in (ROOT/'src').rglob('*.luau') if not {'npc','npc-v2'}.intersection(p.relative_to(ROOT/'src').parts) and not p.name.endswith(('.server.luau','.client.luau'))}
 manifest={'title':'Eldravyn: Rise of Shadows','scenes_baked':False,'prepare_command':'require(game.ServerStorage.MedievalWorldgen.WorldGenerator).PrepareStudio()','studio_tested':False,'places':[]}
 for name in ['ProjectMedievalRPG.rbxlx','ProjectMedievalRPG_Dungeon.rbxlx']:
     root=ET.parse(ROOT/'build'/name).getroot()

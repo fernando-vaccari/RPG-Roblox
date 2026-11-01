@@ -14,6 +14,12 @@ remotes:WaitForChild('View').OnClientEvent:Connect(function(payload)
  end
 end)
 game:GetService('UserInputService').InputBegan:Connect(function(input,processed)if not processed and input.KeyCode==Enum.KeyCode.Escape then ui:hide()end end)
+-- V2 owns animation motors only; the existing dialogue, shop UI and marker above stay intact.
+if workspace:GetAttribute('EldravynNPCVisualVersion')==2 then
+ local manager=require(script.Parent.NPCPerformanceManager).start(workspace:WaitForChild('EldravynNPCs'),player,game:GetService('UserInputService').TouchEnabled)
+ script.Destroying:Connect(function()manager:destroy()end)
+ return
+end
 -- Bounded local idle poses; no external Animation IDs or server frame loop.
 local joints={};local elapsed=0
 local function refresh()

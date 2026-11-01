@@ -1,0 +1,15 @@
+{
+  "renderer": "Blender offline, native generated geometry",
+  "roblox_studio": false,
+  "frames": 8,
+  "files": {
+    "src/npc-v2/install/NPCVisualFactory.luau": "62dc8b260c3467b2c8928b0eea700ec6616272313957e6ecd4dec8b389d71894",
+    "src/npc-v2/shared/NPCAppearanceConfig.luau": "4bc6bbde74db4873fa404a97c686f91caf8132a548a8e73e79980261a893f27c",
+    "src/npc-v2/shared/NPCMotion.luau": "8bb04ddb666b62c45f0754d5103b56a58291409c891cc9db4584517e18394802",
+    "scripts/export_npc_v2_preview.luau": "176d2ae3f58f6acb65339084e413882441bd4942231e3ac8d50d0284201a9399",
+    "scripts/render_npc_v2_preview.py": "c57ac409e9938f72c42dabb9988cbdf0be67c1b950cccd8bcc42814435ea8661",
+    "build/npc-v2-preview.json": "ba5ebded3427eb871c032e91bad78cd0a2d146be6ab2d4152db5d74d444a9830",
+    "docs/npc-v2/previews/guilda-antes-depois.png": "a132bec824efd5273b30f07f1255b3d1d2c71c90e5038734a4c566d0623e55c9",
+    "docs/npc-v2/previews/profissoes.png": "948e89fd2e51ea7d42c7763e814ebb48de025d976f7a61c2f1b82dda0942cbea"
+  }
+}

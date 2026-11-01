@@ -1,0 +1,1401 @@
+<roblox version="4">
+  <Item class="Model" referent="0">
+    <Properties>
+      <string name="Name">EldravynNPCVisualUpgradeV2</string>
+      <bool name="NeedsPivotMigration">false</bool>
+    </Properties>
+    <Item class="Folder" referent="1">
+      <Properties>
+        <string name="Name">Authoring</string>
+      </Properties>
+      <Item class="ModuleScript" referent="2">
+        <Properties>
+          <string name="Name">NPCRigAdapter</string>
+          <string name="Source"><![CDATA[-- Inspect and retain the installed R15 bodies, joints, Humanoid and prompt.
+local R={}
+R.BodyNames={'HumanoidRootPart','LowerTorso','UpperTorso','Head','LeftUpperArm','LeftLowerArm','LeftHand','RightUpperArm','RightLowerArm','RightHand','LeftUpperLeg','LeftLowerLeg','LeftFoot','RightUpperLeg','RightLowerLeg','RightFoot'}
+R.Joints={Root={'HumanoidRootPart','LowerTorso'},Waist={'LowerTorso','UpperTorso'},Neck={'UpperTorso','Head'}}
+for _,side in {'Left','Right'}do
+ R.Joints[side..'Shoulder']={'UpperTorso',side..'UpperArm'};R.Joints[side..'Elbow']={side..'UpperArm',side..'LowerArm'}
+ R.Joints[side..'Wrist']={side..'LowerArm',side..'Hand'};R.Joints[side..'Hip']={'LowerTorso',side..'UpperLeg'}
+ R.Joints[side..'Knee']={side..'UpperLeg',side..'LowerLeg'};R.Joints[side..'Ankle']={side..'LowerLeg',side..'Foot'}
+end
+R.LegacyDecor={Hair=true,Mouth=true,Belt=true,Robe=true,HatBrim=true,HatCrown=true,DecorativeStaff=true,Breastplate=true,Apron=true,HammerHandle=true,HammerHead=true,VestTrim=true,Satchel=true,['Eye-0.3']=true,['Eye0.3']=true,['Pauldron-1']=true,['Pauldron1']=true}
+function R.inspect(npc)
+ assert(npc:IsA('Model') and type(npc:GetAttribute('EldravynNPCId'))=='string','NPC V2: modelo sem identificador')
+ local bodies,motors={},{}
+ for _,name in R.BodyNames do local p=npc:FindFirstChild(name);assert(p and p:IsA('BasePart'),'Corpo R15 ausente: '..npc.Name..'/'..name);bodies[name]=p end
+ local hum=npc:FindFirstChildOfClass('Humanoid');assert(hum and hum.RigType==Enum.HumanoidRigType.R15,'Humanoid R15 obrigatório')
+ assert(hum:FindFirstChildOfClass('Animator'),'Animator original ausente')
+ local prompt=npc:FindFirstChild('NPCInteraction',true);assert(prompt and prompt:IsA('ProximityPrompt') and prompt.Parent==bodies.Head,'Prompt original incompatível')
+ assert(npc.PrimaryPart==bodies.HumanoidRootPart and bodies.HumanoidRootPart.Anchored,'Rig V1 exige root ancorado; nenhuma alteração automática')
+ for _,node in npc:GetDescendants()do
+  if node:IsA('BaseScript') then assert(node.Disabled,'Script de animação/comportamento ativo no NPC: '..node.Name)end
+  if node:IsA('Motor6D') and R.Joints[node.Name] then assert(not motors[node.Name],'Motor duplicado');motors[node.Name]=node end
+ end
+ for name,pair in R.Joints do local j=motors[name];assert(j and j.Part0==bodies[pair[1]] and j.Part1==bodies[pair[2]],'Junta R15 incompatível: '..name)end
+ return {Bodies=bodies,Motors=motors,Humanoid=hum,Prompt=prompt}
+end
+return R
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="3">
+        <Properties>
+          <string name="Name">NPCVisualFactory</string>
+          <string name="Source"><![CDATA[-- Native geometry only. Builds off-scene; caller owns commit/backup/rollback.
+local F={}
+local function build(rig,style,folder)
+ local count=0
+ local color=function(rgb)return Color3.fromRGB(table.unpack(rgb))end
+ local palette={Skin=color(style.Skin),Hair=color(style.HairColor),Eyes=color(style.Eyes),Cloth=color(style.Cloth),Accent=color(style.Accent),Metal=color(style.Metal),Leather=color(style.Leather),Linen=color(style.Linen),Dark=Color3.fromRGB(29,28,33),White=Color3.fromRGB(246,240,220)}
+ local function part(name,body,size,offset,tone,material,shape,rotation,detail)
+  local p=if shape=='Wedge' then Instance.new('WedgePart') else Instance.new('Part')
+  p.Name=name;p.Size=Vector3.new(table.unpack(size));p.CFrame=rig.Bodies[body].CFrame*CFrame.new(table.unpack(offset))*(rotation or CFrame.new())
+  p.Color=palette[tone];p.Material=material or Enum.Material.Fabric
+  if shape and shape~='Wedge' then p.Shape=if shape=='Ball' then Enum.PartType.Ball else Enum.PartType.Cylinder end
+  p.Anchored=false;p.CanCollide=false;p.CanTouch=false;p.CanQuery=false;p.Massless=true;p.CastShadow=false
+  p.TopSurface=Enum.SurfaceType.Smooth;p.BottomSurface=Enum.SurfaceType.Smooth
+  p:SetAttribute('NPCVisualOwner',2);p:SetAttribute('VisualDetail',detail or 1);p:SetAttribute('VisualBody',body);p.Parent=folder
+  local weld=Instance.new('WeldConstraint');weld.Name='VisualWeld';weld.Part0=rig.Bodies[body];weld.Part1=p;weld.Parent=p
+  count+=1;return p
+ end
+ local function plate(name,body,size,offset,tone,rotation,detail)return part(name,body,size,offset,tone,Enum.Material.Metal,'Ball',rotation,detail)end
+ local function trim(name,body,size,offset,tone,rotation)return part(name,body,size,offset,tone,Enum.Material.Metal,nil,rotation,2)end
+ local function disc(name,body,diameter,offset,tone,depth)
+  return part(name,body,{depth or .07,diameter,diameter},offset,tone,Enum.Material.Metal,'Cylinder',CFrame.Angles(0,math.pi/2,0),2)
+ end
+ -- Expressive original face: layered eyes, iris, catchlight, eyelids, brows and smile.
+ for _,side in {-1,1}do
+  part('Ear'..side,'Head',{.25,.38,.27},{side*.68,-.03,.03},'Skin',Enum.Material.SmoothPlastic,'Ball')
+  part('EyeWhite'..side,'Head',{.28,.36,.065},{side*.27,.045,-.555},'White',Enum.Material.SmoothPlastic,'Ball')
+  part('Iris'..side,'Head',{.13,.26,.042},{side*.27,.035,-.594},'Eyes',Enum.Material.SmoothPlastic,'Ball',nil,2)
+  part('Pupil'..side,'Head',{.057,.18,.025},{side*.27,.035,-.618},'Dark',Enum.Material.SmoothPlastic,'Ball',nil,2)
+  part('Catchlight'..side,'Head',{.045,.06,.02},{side*.27-.025,.105,-.635},'White',Enum.Material.SmoothPlastic,'Ball',nil,2)
+  part('UpperLid'..side,'Head',{.30,.055,.07},{side*.27,.215,-.556},'Hair',Enum.Material.SmoothPlastic,nil,CFrame.Angles(0,0,side*.10),2)
+  part('Brow'..side,'Head',{.29,.05,.06},{side*.27,.31,-.525},'Hair',Enum.Material.SmoothPlastic,nil,CFrame.Angles(0,0,-side*.10),2)
+ end
+ part('Nose','Head',{.12,.17,.13},{0,-.065,-.58},'Skin',Enum.Material.SmoothPlastic,'Ball',nil,2)
+ part('Smile','Head',{.20,.028,.035},{0,-.29,-.526},'Leather',Enum.Material.SmoothPlastic,nil,nil,2)
+ for _,s in {-1,1}do part('SmileCorner'..s,'Head',{.075,.025,.035},{s*.123,-.275,-.52},'Leather',Enum.Material.SmoothPlastic,nil,CFrame.Angles(0,0,s*.30),2)end
+ -- Curved cap, swept wedge locks and rear layers instead of the V1 hair block.
+ part('HairCrown','Head',{1.43,.65,1.19},{0,.48,.09},'Hair',Enum.Material.SmoothPlastic,'Ball')
+ for i=1,7 do
+  local x=(i-4)*.19;local len=.42+((i+style.Variant)%3)*.12
+  part('Fringe'..i,'Head',{.20,len,.29},{x,.34-(i%2)*.06,-.48},'Hair',Enum.Material.SmoothPlastic,'Wedge',CFrame.Angles(0,0,math.pi-.25+x*.3)*CFrame.Angles(0,math.pi/2,0))
+ end
+ for _,s in {-1,1}do
+  for i=1,3 do
+   local length=if style.Hair=='Long' then .9+i*.12 elseif style.Hair=='Braided' then .7+i*.1 else .42+i*.12
+   part('SideLock'..s..'_'..i,'Head',{.23,length,.32},{s*(.57+(i%2)*.055),.13-length*.18,.02+(i-2)*.22},'Hair',Enum.Material.SmoothPlastic,'Wedge',CFrame.Angles(0,0,math.pi-s*.16)*CFrame.Angles(0,math.pi/2,0))
+  end
+ end
+ if style.Hair=='Braided' then
+  for i=1,4 do part('Braid'..i,'Head',{.30,.32,.30},{.44,-.20-i*.23,.39},'Hair',Enum.Material.SmoothPlastic,'Ball',nil,2)end
+  disc('BraidClasp','Head',.20,{.44,-1.18,.24},'Accent')
+ elseif style.Hair=='Long' then
+  for i=-1,1 do part('BackHair'..i,'Head',{.42,1.05,.32},{i*.38,-.12,.47},'Hair',Enum.Material.SmoothPlastic,'Wedge',CFrame.Angles(math.pi,0,i*.10))end
+ end
+ -- Tailored layers, collar, cuffs, boot wraps and buckles.
+ part('Doublet','UpperTorso',{1.91,1.25,.20},{0,-.02,-.49},'Cloth',Enum.Material.Fabric,'Ball')
+ for _,s in {-1,1}do
+  part('Collar'..s,'UpperTorso',{.41,.41,.19},{s*.34,.57,-.43},'Linen',Enum.Material.Fabric,'Wedge',CFrame.Angles(0,0,s*.33))
+  part('Lapel'..s,'UpperTorso',{.23,.91,.10},{s*.71,.03,-.62},'Leather',Enum.Material.SmoothPlastic,nil,CFrame.Angles(0,0,-s*.13))
+  local side=if s==-1 then 'Left' else 'Right'
+  part('Cuff'..side,side..'LowerArm',{.22,.66,.72},{0,-.34,0},'Leather',Enum.Material.SmoothPlastic,'Cylinder',CFrame.Angles(0,0,math.pi/2))
+  part('CuffEdge'..side,side..'LowerArm',{.065,.68,.74},{0,-.28,0},'Accent',Enum.Material.Metal,'Cylinder',CFrame.Angles(0,0,math.pi/2),2)
+  part('Boot'..side,side..'LowerLeg',{.61,.76,.81},{0,-.16,0},'Leather',Enum.Material.SmoothPlastic,'Cylinder',CFrame.Angles(0,0,math.pi/2))
+  part('BootToe'..side,side..'Foot',{.88,.48,1.27},{0,0,-.03},'Leather',Enum.Material.SmoothPlastic,'Ball')
+  for i=1,2 do part('BootStrap'..side..i,side..'LowerLeg',{.11,.80,.84},{0,.03-(i-1)*.23,0},'Dark',Enum.Material.SmoothPlastic,'Cylinder',CFrame.Angles(0,0,math.pi/2),2)end
+  disc('BootClasp'..side,side..'LowerLeg',.14,{s*.21,.03,-.44},'Accent')
+ end
+ part('Belt','LowerTorso',{1.91,.23,1.01},{0,.08,0},'Leather',Enum.Material.SmoothPlastic)
+ trim('Buckle','LowerTorso',{.29,.24,.10},{0,.08,-.58},'Accent')
+ trim('BuckleInset','LowerTorso',{.17,.12,.11},{0,.08,-.60},'Dark')
+ part('BeltPouch','LowerTorso',{.48,.55,.30},{.65,-.30,-.47},'Leather',Enum.Material.SmoothPlastic)
+ disc('PouchClasp','LowerTorso',.12,{.65,-.20,-.64},'Accent')
+ if style.Robe then
+  -- Split skirts follow the legs: no rigid robe spanning both knees.
+  for _,s in {-1,1}do local side=if s==-1 then 'Left' else 'Right'
+   part('RobePanel'..side,side..'UpperLeg',{.94,1.53,.14},{0,-.12,-.48},'Cloth')
+   trim('RobeHem'..side,side..'UpperLeg',{.94,.09,.16},{0,-.83,-.50},'Accent')
+   for i=-1,1,2 do part('RobeFold'..side..i,side..'UpperLeg',{.06,1.34,.05},{i*.27,-.13,-.57},'Linen',Enum.Material.Fabric,nil,nil,2)end
+  end
+ else
+  for _,s in {-1,1}do part('CoatTail'..s,'LowerTorso',{.78,.77,.16},{s*.49,-.64,.47},'Cloth',Enum.Material.Fabric,'Wedge',CFrame.Angles(0,math.pi,0))end
+ end
+ if style.Cape then
+  local length=if style.Style=='Commander' or style.Robe then 2.35 else 1.55
+  part('CapeMantle','UpperTorso',{2.02,.31,1.02},{0,.50,.17},'Cloth',Enum.Material.Fabric,'Ball')
+  for i=-1,1 do part('CapeFold'..i,'UpperTorso',{.64,length,.13},{i*.60,.20-length/2,.68},'Cloth',Enum.Material.Fabric,'Wedge',CFrame.Angles(.10,0,i*.045))end
+  for _,s in {-1,1}do disc('CapeClasp'..s,'UpperTorso',.23,{s*.70,.46,-.60},'Accent')end
+ end
+ if style.Armor then
+  plate('ForgedBreastplate','UpperTorso',{1.72,1.16,.30},{0,-.04,-.56},'Metal')
+  for _,s in {-1,1}do
+   trim('BreastplateEdge'..s,'UpperTorso',{.07,.99,.10},{s*.65,-.03,-.73},'Accent',CFrame.Angles(0,0,s*.20))
+   local side=if s==-1 then 'Left' else 'Right'
+   for layer=1,2 do plate('Pauldron'..side..layer,side..'UpperArm',{.83,.35,.97},{s*.03,.42-(layer-1)*.25,0},if layer==1 then 'Metal' else 'Accent')end
+   plate('Vambrace'..side,side..'LowerArm',{.59,.59,.19},{0,-.02,-.36},'Metal')
+   plate('KneeGuard'..side,side..'UpperLeg',{.69,.45,.18},{0,-.44,-.44},'Metal')
+  end
+  disc('GuildSeal','UpperTorso',.39,{0,.23,-.79},'Accent',.08)
+  for _,a in {0,math.pi/2}do trim('CompassRay'..a,'UpperTorso',{.055,.26,.04},{0,.23,-.86},'Dark',CFrame.Angles(0,0,a))end
+ else
+  disc('Pendant','UpperTorso',.22,{0,.31,-.66},'Accent')
+  for i=1,3 do disc('CoatButton'..i,'UpperTorso',.09,{.10,.08-i*.20,-.63},'Accent')end
+ end
+ if style.Apron then
+  part('ApronBib','UpperTorso',{1.24,1.11,.08},{0,-.08,-.70},if style.Style=='Host' then 'Linen' else 'Leather',if style.Style=='Host' then Enum.Material.Fabric else Enum.Material.SmoothPlastic)
+  part('ApronSkirt','LowerTorso',{1.32,.77,.09},{0,-.50,-.59},if style.Style=='Host' then 'Linen' else 'Leather',Enum.Material.SmoothPlastic)
+  part('ApronPocket','LowerTorso',{.56,.28,.06},{-.28,-.38,-.67},'Cloth')
+  for i=1,3 do part('WorkWear'..i,'UpperTorso',{.14,.035,.02},{(i-2)*.25,-.30+(i%2)*.12,-.75},'Dark',Enum.Material.Fabric,nil,CFrame.Angles(0,0,.35),2)end
+ end
+ if style.Helmet then
+  plate('HelmetCap','Head',{1.52,.62,1.30},{0,.49,.09},'Metal')
+  trim('HelmetBrow','Head',{1.37,.13,.17},{0,.38,-.51},'Accent')
+  for _,s in {-1,1}do plate('CheekGuard'..s,'Head',{.26,.65,.39},{s*.68,-.06,.05},'Metal')end
+  if style.Variant==1 then part('HelmetCrest','Head',{.17,.48,.85},{0,.92,.12},'Cloth',Enum.Material.Fabric,'Wedge')end
+ elseif style.Hat then
+  part('StrawBrim','Head',{.13,1.92,1.92},{0,.67,.05},'Linen',Enum.Material.Fabric,'Cylinder',CFrame.Angles(0,0,math.pi/2))
+  part('StrawCrown','Head',{.58,1.10,1.10},{0,.93,.05},'Linen',Enum.Material.Fabric,'Cylinder',CFrame.Angles(0,0,math.pi/2))
+ elseif style.Style=='Mage' then
+  part('MageCowl','Head',{1.55,.53,1.20},{0,.53,.20},'Cloth',Enum.Material.Fabric,'Ball')
+  disc('CowlGem','Head',.17,{0,.58,-.45},'Accent')
+ end
+ if style.Monocle then
+  for i=0,7 do local a=i*math.pi/4;trim('LensRim'..i,'Head',{.14,.035,.035},{.27+math.cos(a)*.185,.045+math.sin(a)*.185,-.655},'Accent',CFrame.Angles(0,0,a+math.pi/2))end
+  local glass=disc('Lens','Head',.32,{.27,.045,-.680},'White',.03);glass.Transparency=.70;glass.Material=Enum.Material.Glass
+  trim('LensChain','Head',{.025,.41,.025},{.53,-.18,-.47},'Accent',CFrame.Angles(0,0,-.20))
+ end
+ if style.Sword then
+  local tilt=CFrame.Angles(0,0,-.27)
+  part('SwordSheath','LowerTorso',{.27,1.65,.24},{-.98,-.65,.35},'Leather',Enum.Material.SmoothPlastic,nil,tilt)
+  trim('SheathTip','LowerTorso',{.30,.19,.27},{-1.20,-1.43,.35},'Metal',tilt)
+  part('SwordGrip','LowerTorso',{.18,.46,.19},{-.67,.50,.35},'Dark',Enum.Material.SmoothPlastic,nil,tilt)
+  trim('SwordGuard','LowerTorso',{.64,.10,.21},{-.73,.25,.35},'Accent',tilt)
+ end
+ if style.Shield then
+  plate('Shield','LeftLowerArm',{.74,1.08,.16},{-.31,.02,.12},'Metal',CFrame.Angles(0,math.pi/2,0))
+  part('ShieldEmblem','LeftLowerArm',{.045,.56,.40},{-.41,.04,.12},'Cloth',Enum.Material.Fabric)
+ end
+ if style.Book then
+  part('BookCover','LeftHand',{.68,.10,.76},{0,.10,-.37},'Leather',Enum.Material.SmoothPlastic)
+  part('BookPages','LeftHand',{.60,.09,.67},{0,.18,-.37},'Linen',Enum.Material.SmoothPlastic)
+  for i=1,3 do part('BookWriting'..i,'LeftHand',{.40,.015,.025},{0,.235,-.57+i*.11},'Dark',Enum.Material.SmoothPlastic,nil,nil,2)end
+ end
+ if style.Hammer then
+  part('HammerGrip','RightHand',{.15,1.05,.15},{0,-.22,-.12},'Leather',Enum.Material.Wood)
+  part('HammerHead','RightHand',{.67,.31,.31},{0,.35,-.12},'Metal',Enum.Material.Metal)
+  trim('HammerBand','RightHand',{.14,.33,.33},{0,.35,-.12},'Accent')
+  -- An unfinished, blunt weapon blank for forging/inspection; decorative only.
+  part('BlankTang','LeftHand',{.09,.32,.10},{0,-.18,-.22},'Dark',Enum.Material.Metal)
+  part('ForgingBlank','LeftHand',{.16,1.0,.06},{0,-.80,-.22},'Metal',Enum.Material.Metal)
+  part('ForgingTip','LeftHand',{.06,.35,.16},{0,-1.45,-.22},'Metal',Enum.Material.Metal,'Wedge',CFrame.Angles(0,0,math.pi)*CFrame.Angles(0,math.pi/2,0))
+ end
+ if style.Staff then
+  part('StaffShaft','RightHand',{.15,3.9,.15},{.10,.35,-.11},'Leather',Enum.Material.Wood)
+  disc('StaffBinding','RightHand',.34,{.10,2.13,-.11},'Accent')
+  local orb=part('ArcaneOrb','RightHand',{.30,.30,.30},{.10,2.42,-.11},'Eyes',Enum.Material.Neon,'Ball');orb.Transparency=.25;orb:SetAttribute('NPCVisualEffect',true)
+  for i=1,3 do part('StaffRune'..i,'RightHand',{.03,.15,.03},{.18,1.2+i*.23,-.20},'Accent',Enum.Material.Metal,nil,CFrame.Angles(0,0,.7),2)end
+ end
+ if style.Cup then
+  part('Tankard','RightHand',{.43,.52,.43},{0,-.05,-.28},'Leather',Enum.Material.Wood,'Cylinder',CFrame.Angles(0,0,math.pi/2))
+  trim('TankardRim','RightHand',{.46,.06,.46},{0,.20,-.28},'Metal')
+ end
+ if style.Backpack then
+  part('TravelPack','UpperTorso',{1.05,1.35,.58},{0,-.13,.89},'Leather',Enum.Material.SmoothPlastic)
+  part('Bedroll','UpperTorso',{1.28,.46,.46},{0,.71,.91},'Linen',Enum.Material.Fabric,'Cylinder')
+  for _,s in {-1,1}do part('PackStrap'..s,'UpperTorso',{.12,1.27,.08},{s*.43,0,-.66},'Leather',Enum.Material.SmoothPlastic)end
+ end
+ if style.Style=='Warden' then for i=1,3 do disc('WardenKey'..i,'LowerTorso',.17,{.87,-.17-i*.15,-.32},'Accent')end end
+ local changes={}
+ for name,p in rig.Bodies do if name~='HumanoidRootPart' then
+  local gloves=name:find('Hand') and (style.Armor or style.Hammer)
+  local skin=name=='Head' or (name:find('Hand') and not gloves)
+  changes[p]={Color=if skin then palette.Skin else if name:find('Leg') or name:find('Foot') then palette.Dark else palette.Cloth,Material=if skin then Enum.Material.SmoothPlastic else Enum.Material.Fabric}
+  if gloves then changes[p].Color=palette.Leather;changes[p].Material=Enum.Material.SmoothPlastic end
+  if p:IsA('Part') then
+   if name=='Head' or name:find('Hand') or name:find('Foot') then changes[p].Shape=Enum.PartType.Ball
+   else
+    -- Continuous sleeves/trousers rather than disconnected ellipsoids. The
+    -- original rig body and its coordinate frame stay intact under this shell.
+    local shell=part('Tailored'..name,name,{p.Size.Y,p.Size.X,p.Size.Z},{0,0,0},if name:find('Leg') then 'Dark' else 'Cloth',Enum.Material.Fabric,'Cylinder',CFrame.Angles(0,0,math.pi/2))
+    shell.CastShadow=true;changes[p].Transparency=1
+   end
+  end
+ end end
+ if rig.Bodies.Head:IsA('Part') then changes[rig.Bodies.Head].Shape=Enum.PartType.Ball;changes[rig.Bodies.Head].Size=Vector3.new(1.38,1.30,1.18)end
+ assert(count<=style.MaxParts,'Orçamento visual excedido: '..style.Id..' '..count)
+ folder:SetAttribute('VisualPartCount',count);folder:SetAttribute('VisualStyle',style.Style)
+ return {Folder=folder,Changes=changes,Count=count}
+end
+function F.build(rig,style)
+ local folder=Instance.new('Folder');folder.Name='NPCV2Visuals';folder:SetAttribute('NPCVisualOwner',2)
+ local ok,result=pcall(build,rig,style,folder)
+ if not ok then folder:Destroy();error(result)end
+ return result
+end
+return F
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Folder" referent="4">
+      <Properties>
+        <string name="Name">Baselines</string>
+      </Properties>
+      <Item class="ModuleScript" referent="5">
+        <Properties>
+          <string name="Name">AmbientService</string>
+          <string name="Source"><![CDATA[-- Small, bounded patrols for ambient residents only. No pathfinding or combat AI.
+local Players=game:GetService('Players')
+local TweenService=game:GetService('TweenService')
+local Placement=require(script.Parent.Placement)
+local Ambient={}
+local mobile={Resident=true,Traveler=true,Farmer=true,Adventurer=true}
+function Ambient.start(npcs,folder)
+ local homes={};for _,npc in npcs do
+  if npc:GetAttribute('AmbientNPC') and mobile[npc:GetAttribute('NPCRole')] and npc.PrimaryPart then homes[npc]={Frame=npc.PrimaryPart.CFrame,Away=false}end
+ end
+ task.spawn(function()
+  while folder.Parent do
+   task.wait(10);local active=0
+   for npc,home in homes do
+    if active>=4 then break end
+    local root=npc.PrimaryPart;local nearby=false
+    if not root or (npc:GetAttribute('NPCSpeakingUntil') or 0)>os.clock() then continue end
+    for _,player in Players:GetPlayers()do local p=player.Character and player.Character:FindFirstChild('HumanoidRootPart');if p and (p.Position-root.Position).Magnitude<75 then nearby=true;break end end
+    if not nearby then continue end
+    local target=home.Frame*(if home.Away then CFrame.new() else CFrame.new(2.5,0,0))
+    local delta=target.Position-root.Position;local valid=true;local feet
+    for step=0,4 do
+     local point=root.Position+delta*(step/4)-Vector3.new(0,3,0)
+     feet=Placement.safe(point,{folder},point.Y)
+     if not feet or math.abs(feet.Y-point.Y)>0.7 then valid=false;break end
+    end
+    for other in homes do if other~=npc and other.PrimaryPart and (other.PrimaryPart.Position-target.Position).Magnitude<6 then valid=false;break end end
+    if valid and feet then
+     active+=1;home.Away=not home.Away
+     local destination=target+Vector3.new(0,feet.Y+3-target.Position.Y,0)
+     TweenService:Create(root,TweenInfo.new(2,Enum.EasingStyle.Linear),{CFrame=destination}):Play()
+    end
+   end
+  end
+ end)
+end
+return Ambient
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="6">
+        <Properties>
+          <string name="Name">NPCInteractionClient</string>
+          <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local player=Players.LocalPlayer
+local remotes=game.ReplicatedStorage:WaitForChild('EldravynNPC'):WaitForChild('RemoteEvents')
+local ui=require(script.Parent.NPCDialogueClient).new(player:WaitForChild('PlayerGui'),remotes:WaitForChild('Action'))
+local marker
+remotes:WaitForChild('View').OnClientEvent:Connect(function(payload)
+ ui:receive(payload)
+ if payload.Marker then
+  if marker then marker:Destroy()end
+  marker=Instance.new('Part');marker.Name='NPCDestination';marker.Size=Vector3.new(0.5,0.5,0.5);marker.Transparency=1;marker.Anchored=true;marker.CanCollide=false;marker.CanTouch=false;marker.CanQuery=false;marker.Position=payload.Marker.Position+Vector3.new(0,10,0);marker.Parent=workspace
+  local billboard=Instance.new('BillboardGui');billboard.Size=UDim2.fromOffset(240,64);billboard.AlwaysOnTop=true;billboard.Adornee=marker;billboard.Parent=marker
+  local label=Instance.new('TextLabel');label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=0.2;label.BackgroundColor3=Color3.fromRGB(42,34,24);label.TextColor3=Color3.fromRGB(255,226,145);label.Font=Enum.Font.SourceSansBold;label.TextSize=18;label.TextWrapped=true;label.Text='◆ '..payload.Marker.Name;label.Parent=billboard
+  local this=marker;task.delay(payload.Marker.Seconds,function()if this then this:Destroy()end;if marker==this then marker=nil end end)
+ end
+end)
+game:GetService('UserInputService').InputBegan:Connect(function(input,processed)if not processed and input.KeyCode==Enum.KeyCode.Escape then ui:hide()end end)
+-- Bounded local idle poses; no external Animation IDs or server frame loop.
+local joints={};local elapsed=0
+local function refresh()
+ joints={};local folder=workspace:FindFirstChild('EldravynNPCs');local root=player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+ if not folder or not root then return end
+ local nearest={}
+ for _,npc in folder:GetDescendants()do if npc:IsA('Model') and npc:GetAttribute('EldravynNPCId') and npc.PrimaryPart then
+  local distance=(npc.PrimaryPart.Position-root.Position).Magnitude;if distance<90 then table.insert(nearest,{NPC=npc,Distance=distance})end
+ end end
+ table.sort(nearest,function(a,b)return a.Distance<b.Distance end)
+ for index=1,math.min(#nearest,12)do
+  local npc=nearest[index].NPC;local torso=npc:FindFirstChild('UpperTorso');local neck=torso and torso:FindFirstChild('Neck')
+  if neck then table.insert(joints,neck)end
+ end
+end
+task.spawn(function()while true do refresh();task.wait(2)end end)
+game:GetService('RunService').Heartbeat:Connect(function(dt)
+ elapsed+=dt;for index,joint in joints do if joint.Parent then joint.Transform=CFrame.Angles(math.sin(elapsed*1.3+index)*0.025,math.sin(elapsed*0.8+index)*0.07,0)end end
+end)
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="7">
+        <Properties>
+          <string name="Name">NPCService</string>
+          <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Shared=game.ReplicatedStorage:WaitForChild('EldravynNPC')
+local C=require(Shared.Registry)
+local Data=require(script.Parent.NPCDataService)
+local Actions=require(script.Parent.NPCActionService)
+local Dialogue=require(script.Parent.DialogueService)
+local Purchase=require(script.Parent.PurchaseService)
+local Placement=require(script.Parent.Placement)
+local Service={Started=false}
+local function remote(parent,name)
+ local value=parent:FindFirstChild(name)
+ if not value then value=Instance.new('RemoteEvent');value.Name=name;value.Parent=parent end
+ assert(value:IsA('RemoteEvent'));return value
+end
+function Service.start()
+ if Service.Started then return end
+ local world=workspace:FindFirstChild('GeneratedWorld');local folder=workspace:FindFirstChild('EldravynNPCs')
+ assert(world and folder,'Instale os NPCs no mapa antes de iniciar.')
+ if world:GetAttribute('TerrainPending')==true then warn('[NPC] Terrain pendente. Use PrepareStudio em Edit antes de testar. Nenhum terreno será gerado no runtime.');return end
+ Service.Started=true
+ local remotes=Shared:FindFirstChild('RemoteEvents') or Instance.new('Folder');remotes.Name='RemoteEvents';remotes.Parent=Shared
+ local view,action=remote(remotes,'View'),remote(remotes,'Action');Dialogue.start(view,action)
+ for _,npc in folder:GetDescendants()do
+  local id=npc:GetAttribute('EldravynNPCId')
+  if npc:IsA('Model') and id then
+   assert(not Actions.NPCs[id],'NPC duplicado: '..id);Actions.NPCs[id]=npc
+   local root=npc:FindFirstChild('HumanoidRootPart');local prompt=npc:FindFirstChild('NPCInteraction',true)
+   local entry=require(Shared.PlacementConfig).NPCs[id]
+   local frame=entry and Placement.frame(world,entry,folder,true)
+   if root and prompt and frame then
+    npc:PivotTo(frame*CFrame.new(0,3,0));prompt.Enabled=true
+    prompt.Triggered:Connect(function(player)Dialogue.open(player,npc)end)
+    if not npc:GetAttribute('AmbientNPC') then Actions.Locations[id]={Name=C.Roles[npc:GetAttribute('NPCRole')].Title..' • '..npc:GetAttribute('City'),Position=frame.Position}end
+   else
+    if prompt then prompt.Enabled=false end
+    warn('[NPC] Posição não validada; interação desativada: '..id)
+   end
+  end
+ end
+ local regions={}
+ for id,entry in require(Shared.PlacementConfig).Regions do
+  local anchor=Placement.resolve(world,entry.Anchor)
+  if anchor and anchor:IsA('BasePart') then
+   local record={Name=entry.Name,Position=anchor.Position,Radius=entry.Radius}
+   regions[id]=record;Actions.Locations[id]=record
+  end
+ end
+ Purchase.registerProduct('NPCClassChange',C.ClassChangeProduct,require(Shared.Rules).classReceipt)
+ Purchase.OnGrant=function(p)Dialogue.close(p);view:FireClient(p,{Notice='Crédito oficial registrado. Converse novamente com o mestre de classes.'})end
+ Purchase.start();Data.start()
+ require(script.Parent.AmbientService).start(Actions.NPCs,folder)
+ local function onCharacter(player,character)
+  local root=character:WaitForChild('HumanoidRootPart',10);if not root then return end
+  local state=Data.get(player);local id=state and state.NPC.ReturnNPC;local npc=id and Actions.NPCs[id]
+  if not npc or not npc.PrimaryPart then return end
+  -- Return beside the inn only if a fresh floor/clearance query succeeds.
+  local position=npc.PrimaryPart.Position+npc.PrimaryPart.CFrame.LookVector*5-Vector3.new(0,3,0)
+  local safe=Placement.safe(position,{folder,character},position.Y)
+  if safe then root.CFrame=CFrame.new(safe+Vector3.new(0,3,0))end
+ end
+ local function joined(player)
+  local ok,message=Data.load(player)
+  if player.Parent~=Players then return end
+  if not ok then view:FireClient(player,{Notice=message});return end
+  local state=Data.get(player)
+  if state and state.NPC.PendingHeal then
+   Data.change(player,function(s)s.Gold=math.min(C.MaxGold,s.Gold+s.NPC.PendingHeal);s.NPC.PendingHeal=nil;return true end)
+  end
+  player.CharacterAdded:Connect(function(character)onCharacter(player,character)end)
+  if player.Character then onCharacter(player,player.Character)end
+  view:FireClient(player,{Notice=if Data.Persistent then 'Perfil NPC carregado.' else 'Prévia Studio: progresso temporário, sem persistência ou compras Robux.'})
+ end
+ Players.PlayerAdded:Connect(joined);Players.PlayerRemoving:Connect(Data.remove)
+ for _,player in Players:GetPlayers()do task.spawn(joined,player)end
+ -- A single low-frequency scheduler. Only meaningful progress writes to the profile.
+ task.spawn(function()
+  local visits={}
+  while Service.Started do
+   task.wait(2)
+   for _,player in Players:GetPlayers()do
+    local character=player.Character;local root=character and character:FindFirstChild('HumanoidRootPart')
+    local hum=character and character:FindFirstChildOfClass('Humanoid')
+    if root and hum and hum.Health>0 and Data.get(player) then
+     local previous=visits[player] or {};local current={}
+     for id,region in regions do
+      if (root.Position-region.Position).Magnitude<region.Radius then
+       current[id]=true;if previous[id] then Data.event(player,'Visit:'..id,'Exploration')end
+      end
+     end
+     visits[player]=current
+    end
+    local session=Dialogue.Sessions[player]
+    if session and not session.Busy and (os.clock()>session.Expires or not Dialogue.near(player,session.NPC)) then Dialogue.close(player)end
+   end
+   for player in visits do if player.Parent~=Players then visits[player]=nil end end
+  end
+ end)
+ print('[NPC] Etapa 2 iniciada. Combate, conjuração, fusões e interiores de dungeon permanecem fora desta etapa.')
+end
+return Service
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="ModuleScript" referent="8">
+      <Properties>
+        <string name="Name">NPCVisualUpgrade</string>
+        <string name="Source"><![CDATA[-- Editor-only additive visual migration. Original NPC instances and services survive.
+local Upgrade={Version=2}
+local Http=game:GetService('HttpService')
+local function source(node)
+ local ok,value=pcall(function()return node.Source end)
+ assert(ok and type(value)=='string','Execute pela Command Bar do Studio em Edit; leitura de Source não autorizada.')
+ return (value:gsub('\r\n','\n'))
+end
+local function folder(name,parent)local n=Instance.new('Folder');n.Name=name;n.Parent=parent;return n end
+local function ref(name,value,parent)local n=Instance.new('ObjectValue');n.Name=name;n.Value=value;n.Parent=parent;return n end
+local function enumName(value)return tostring(value):match('([^%.]+)$')end
+local visualAttributes={'NPCVisualVersion','NPCVisualStyle','NPCV2State','NPCV2Speaker','NPCV2PatrolFloorValid'}
+local function matchingTree(installed,template)
+ if not installed or installed.ClassName~=template.ClassName then return false end
+ if template:IsA('LuaSourceContainer') and source(installed)~=source(template) then return false end
+ if #installed:GetChildren()~=#template:GetChildren() then return false end
+ for _,child in template:GetChildren()do if not matchingTree(installed:FindFirstChild(child.Name),child) then return false end end
+ return true
+end
+local function editor()assert(game:GetService('RunService'):IsStudio() and not game:GetService('RunService'):IsRunning(),'Pare Play/Run. Atualize uma cópia salva no editor do Studio.')end
+local function context()
+ local package=script.Parent
+ local npcs=workspace:FindFirstChild('EldravynNPCs');assert(npcs and npcs:GetAttribute('NPCInstallVersion')==1,'Instalação NPC V1 compatível não encontrada; nada será criado do zero.')
+ local rs=game:GetService('ReplicatedStorage');local ss=game:GetService('ServerScriptService')
+ local shared=rs:FindFirstChild('EldravynNPC');local server=ss:FindFirstChild('EldravynNPC')
+ local starter=game:GetService('StarterPlayer'):FindFirstChild('StarterPlayerScripts');local client=starter and starter:FindFirstChild('EldravynNPCClient')
+ assert(shared and server and client and shared:FindFirstChild('NPCConfig') and shared:FindFirstChild('PlacementConfig'),'Dependências NPC V1 ausentes')
+ assert(server:FindFirstChild('DialogueService') and server:FindFirstChild('NPCDataService') and client:FindFirstChild('NPCDialogueClient'),'Serviços originais ausentes')
+ for _,pair in {{shared,{'NPCConfig','PlacementConfig','Registry','Rules','DialogueConfig','ShopConfig','QuestConfig','DungeonTicketConfig'}},{server,{'NPCService','AmbientService','DataService','NPCDataService','NPCActionService','DialogueService','QuestService','PurchaseService','Placement'}},{client,{'NPCDialogueClient'}}}do
+  for _,name in pair[2]do local dependency=pair[1]:FindFirstChild(name);assert(dependency and dependency:IsA('ModuleScript'),'Dependência V1 ausente/incompatível: '..name)end
+ end
+ local bootstrap=server:FindFirstChild('Bootstrap');assert(bootstrap and bootstrap:IsA('Script'),'Bootstrap original ausente; V2 não cria outro servidor')
+ assert(package:FindFirstChild('Runtime') and package:FindFirstChild('Baselines') and package:FindFirstChild('Authoring'),'Pacote V2 incompleto')
+ local replacements={{Parent=server,Name='NPCService',Template=package.Runtime.Replacements.NPCService},{Parent=server,Name='AmbientService',Template=package.Runtime.Replacements.AmbientService},{Parent=client,Name='NPCInteractionClient',Template=package.Runtime.Replacements.NPCInteractionClient}}
+ return {Package=package,NPCs=npcs,Shared=shared,Server=server,Client=client,RS=rs,SS=ss,Replacements=replacements}
+end
+function Upgrade.Plan()
+ editor();local ctx=context();local rig=require(ctx.Package.Authoring.NPCRigAdapter);local appearance=require(ctx.Package.Runtime.Shared.NPCAppearanceConfig)
+ local list,seen={},{}
+ for _,npc in ctx.NPCs:GetDescendants()do if npc:IsA('Model') and npc:GetAttribute('EldravynNPCId') then
+  local id=npc:GetAttribute('EldravynNPCId');assert(not seen[id],'NPC duplicado antes da atualização: '..id);seen[id]=true
+  local structure=rig.inspect(npc);local style=appearance.forNPC(id,npc:GetAttribute('NPCRole'),npc:GetAttribute('City'))
+  table.insert(list,{NPC=npc,Id=id,Rig=structure,Style=style,Position=structure.Bodies.HumanoidRootPart.CFrame})
+ end end
+ assert(#list>0,'Nenhum NPC identificado; mapa preservado');table.sort(list,function(a,b)return a.Id<b.Id end)
+ local version=workspace:GetAttribute('EldravynNPCVisualVersion')
+ assert(version==nil or version==2,'Versão visual desconhecida; migração interrompida')
+ if version==2 then
+  local backup=ctx.SS:FindFirstChild('EldravynNPCVisualBackupV2')
+  assert(backup and backup:GetAttribute('State')=='Applied','Backup V2 ausente/incompleto; não repetir uma migração parcial')
+  for _,row in list do assert(row.NPC:GetAttribute('NPCVisualVersion')==2 and row.NPC:FindFirstChild('NPCV2Visuals'),'Instalação mista; reverta/inspecione antes de atualizar novamente')end
+  assert(ctx.RS:FindFirstChild('EldravynNPCVisualV2'),'Dependência visual ausente')
+  for _,row in ctx.Replacements do assert(row.Parent:FindFirstChild(row.Name),'Adaptador ausente: '..row.Name)end
+  for _,pair in {{ctx.Package.Runtime.Shared,ctx.RS.EldravynNPCVisualV2},{ctx.Package.Runtime.Server,ctx.Server},{ctx.Package.Runtime.Client,ctx.Client}}do
+   for _,module in pair[1]:GetChildren()do assert(pair[2]:FindFirstChild(module.Name),'Dependência V2 ausente: '..module.Name)end
+  end
+  return {Already=true,Count=#list,Context=ctx,List=list}
+ end
+ assert(not ctx.SS:FindFirstChild('EldravynNPCVisualBackupV2'),'Backup anterior existe; inspecione ou reverta antes de continuar')
+ assert(not ctx.RS:FindFirstChild('EldravynNPCVisualV2'),'Nome da biblioteca visual já ocupado')
+ for _,row in list do assert(row.NPC:GetAttribute('NPCVisualVersion')==nil and not row.NPC:FindFirstChild('NPCV2Visuals'),'Camada visual preexistente não será sobrescrita')end
+ for _,row in ctx.Replacements do
+  local old=row.Parent:FindFirstChild(row.Name);assert(old,'Adaptador original ausente: '..row.Name)
+  assert(old.ClassName==row.Template.ClassName,'Tipo do adaptador incompatível: '..row.Name)
+  local baseline=ctx.Package.Baselines:FindFirstChild(row.Name);assert(baseline,'Baseline ausente')
+  local current=source(old)
+  assert(current==source(baseline) or current==source(row.Template),'Script customizado: '..row.Name..'. Revise a adaptação; nenhuma mudança aplicada.')
+  row.Original=old;row.Replace=current~=source(row.Template)
+ end
+ for _,pair in {{ctx.Package.Runtime.Server,ctx.Server},{ctx.Package.Runtime.Client,ctx.Client}}do
+  for _,module in pair[1]:GetChildren()do assert(not pair[2]:FindFirstChild(module.Name),'Nome V2 já ocupado: '..module.Name)end
+ end
+ -- Return plain facts from Report(); Apply keeps these object references private in this module.
+ return {Already=false,Count=#list,Context=ctx,List=list}
+end
+function Upgrade.Report()
+ local plan=Upgrade.Plan();local ids={};for _,row in plan.List do table.insert(ids,row.Id)end
+ local report={Version=2,Already=plan.Already,Count=plan.Count,NPCs=ids,MapChanges=0,DataStoreChanges=0,PublishedAssetsRequired=0}
+ print('[NPC V2] '..Http:JSONEncode(report));return report
+end
+local function rollback(backup,strict)
+ if strict then
+  assert(backup:GetAttribute('State')=='Applied','Backup não está em estado reversível')
+  for _,record in backup.Modules:GetChildren()do
+   local installed=record.Installed.Value;local parent=record.TargetParent.Value
+   assert(installed and installed.Parent==parent and source(installed)==record.Source.Value,'Módulo V2 foi alterado após upgrade; rollback automático interrompido: '..record.Name)
+  end
+  for _,record in backup.Additions:GetChildren()do
+   assert(record.Value and record.Value.Parent==record.TargetParent.Value and matchingTree(record.Value,record.Snapshot),'Biblioteca V2 foi alterada; salve sua customização antes do rollback: '..record.Name)
+  end
+ end
+ for _,record in backup.Models:GetChildren()do
+  local npc=record.NPC.Value
+  if npc then
+   local visuals=record:FindFirstChild('InstalledVisuals');if visuals and visuals.Value then visuals.Value:Destroy()end
+   for _,bodyRecord in record.Bodies:GetChildren()do
+    local part=bodyRecord.Target.Value
+    if part then
+     part.Color=bodyRecord:GetAttribute('Color');part.Material=Enum.Material[bodyRecord:GetAttribute('Material')]
+     if bodyRecord:GetAttribute('Size') then part.Size=bodyRecord:GetAttribute('Size')end
+     if bodyRecord:GetAttribute('Shape') then part.Shape=Enum.PartType[bodyRecord:GetAttribute('Shape')]end
+     if bodyRecord:GetAttribute('Transparency')~=nil then part.Transparency=bodyRecord:GetAttribute('Transparency')end
+    end
+   end
+   for _,item in record.Decor:GetChildren()do item.Parent=npc end
+   for _,key in visualAttributes do npc:SetAttribute(key,record.Attributes:GetAttribute(key))end
+  end
+ end
+ for _,record in backup.Modules:GetChildren()do
+  if record.Installed.Value then record.Installed.Value:Destroy()end
+  local original=record:FindFirstChild('Original');local parent=record.TargetParent.Value
+  if original and parent then
+   original.Name=record:GetAttribute('OriginalName');original.Parent=parent
+   if original:IsA('BaseScript') then original.Disabled=record:GetAttribute('OriginalDisabled')end
+  end
+ end
+ for _,record in backup.Additions:GetChildren()do if record.Value then record.Value:Destroy()end end
+ workspace:SetAttribute('EldravynNPCVisualVersion',nil)
+ backup:SetAttribute('State','RolledBack')
+ -- Keep the audit record, now empty of live original objects; never delete a NPC.
+ backup.Name='EldravynNPCVisualRollback_'..Http:GenerateGUID(false)
+ return true
+end
+function Upgrade.Rollback()
+ editor();local ctx=context();local backup=ctx.SS:FindFirstChild('EldravynNPCVisualBackupV2');assert(backup,'Backup V2 não encontrado')
+ rollback(backup,true);print('[NPC V2] Visual/controle V1 restaurados. NPCs, posições, serviços e mapa preservados.');return {Restored=true}
+end
+function Upgrade.Apply()
+ local plan=Upgrade.Plan();if plan.Already then print('[NPC V2] Já aplicado; nenhum NPC duplicado.');return {Already=true,Count=plan.Count}end
+ local ctx=plan.Context;local factory=require(ctx.Package.Authoring.NPCVisualFactory);local rig=require(ctx.Package.Authoring.NPCRigAdapter)
+ local prepared={}
+ local ready,prepareError=pcall(function()for _,row in plan.List do row.Visual=factory.build(row.Rig,row.Style);table.insert(prepared,row.Visual.Folder)end end)
+ if not ready then for _,f in prepared do f:Destroy()end;error(prepareError)end
+ local backup=folder('EldravynNPCVisualBackupV2',ctx.SS);backup:SetAttribute('State','Preparing');backup:SetAttribute('Version',2)
+ folder('Models',backup);folder('Modules',backup);folder('Additions',backup)
+ local ok,err=pcall(function()
+  for _,row in plan.List do
+   local record=folder(row.Id,backup.Models);ref('NPC',row.NPC,record);folder('Bodies',record);folder('Decor',record)
+   local attributes=folder('Attributes',record);for _,key in visualAttributes do attributes:SetAttribute(key,row.NPC:GetAttribute(key))end
+   for part,change in row.Visual.Changes do
+    local body=folder(part.Name,record.Bodies);ref('Target',part,body)
+    body:SetAttribute('Color',part.Color);body:SetAttribute('Material',enumName(part.Material))
+    if change.Size then body:SetAttribute('Size',part.Size)end
+    if change.Shape then body:SetAttribute('Shape',enumName(part.Shape or Enum.PartType.Block))end
+    if change.Transparency~=nil then body:SetAttribute('Transparency',part.Transparency)end
+    for key,value in change do part[key]=value end
+   end
+   for _,child in row.NPC:GetChildren()do if child:IsA('BasePart') and rig.LegacyDecor[child.Name] then child.Parent=record.Decor end end
+   ref('InstalledVisuals',row.Visual.Folder,record);row.Visual.Folder.Parent=row.NPC
+   row.NPC:SetAttribute('NPCVisualVersion',2);row.NPC:SetAttribute('NPCVisualStyle',row.Style.Style)
+   assert(row.Rig.Bodies.HumanoidRootPart.CFrame==row.Position,'Root foi movido durante migração')
+  end
+  local function addition(name,clone,parent)
+   local record=ref(name,clone,backup.Additions);ref('TargetParent',parent,record)
+   local snapshot=clone:Clone();snapshot.Name='Snapshot';snapshot.Parent=record
+   clone:SetAttribute('NPCVisualOwner',2);clone.Parent=parent
+  end
+  local shared=ctx.Package.Runtime.Shared:Clone();shared.Name='EldravynNPCVisualV2';addition('Shared',shared,ctx.RS)
+  for _,pair in {{ctx.Package.Runtime.Server,ctx.Server},{ctx.Package.Runtime.Client,ctx.Client}}do
+   for _,template in pair[1]:GetChildren()do addition(template.Name,template:Clone(),pair[2])end
+  end
+  for _,row in ctx.Replacements do if row.Replace then
+   local record=folder(row.Name,backup.Modules);ref('TargetParent',row.Parent,record)
+   record:SetAttribute('OriginalName',row.Original.Name)
+   local disabled=if row.Original:IsA('BaseScript') then row.Original.Disabled else nil
+   record:SetAttribute('OriginalDisabled',disabled)
+   local replacement=row.Template:Clone();replacement.Name=row.Name;replacement:SetAttribute('NPCVisualOwner',2)
+   ref('Installed',replacement,record);local text=Instance.new('StringValue');text.Name='Source';text.Value=source(replacement);text.Parent=record
+   row.Original.Name='Original';row.Original.Parent=record
+   if row.Original:IsA('BaseScript') then row.Original.Disabled=true;replacement.Disabled=disabled end
+   replacement.Parent=row.Parent
+  end end
+  workspace:SetAttribute('EldravynNPCVisualVersion',2);backup:SetAttribute('State','Applied');backup:SetAttribute('Count',plan.Count)
+ end)
+ if not ok then
+  local restored,reason=pcall(rollback,backup,false)
+  for _,f in prepared do if not f.Parent then f:Destroy()end end
+  if not restored then error(tostring(err)..' | Falha de reversão: '..tostring(reason)..'. Backup preservado para recuperação.')end
+  error('Migração cancelada e revertida: '..tostring(err))
+ end
+ print('[NPC V2] '..plan.Count..' NPCs atualizados no lugar. Backup criado; mapa e economia não alterados. Salve a cópia e teste Play.')
+ return {Updated=plan.Count,Version=2,Backup=backup.Name}
+end
+return Upgrade
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="Folder" referent="9">
+      <Properties>
+        <string name="Name">Runtime</string>
+      </Properties>
+      <Item class="Folder" referent="10">
+        <Properties>
+          <string name="Name">Client</string>
+        </Properties>
+        <Item class="ModuleScript" referent="11">
+          <Properties>
+            <string name="Name">NPCAnimationController</string>
+            <string name="Source"><![CDATA[local Shared=game.ReplicatedStorage.EldravynNPCVisualV2
+local Config=require(Shared.NPCVisualConfig)
+local Motion=require(Shared.NPCMotion)
+local Policy=require(Shared.NPCVisualPolicy)
+local Animation={}
+local function playable(hum)
+ if not hum or hum.Health<=0 then return false end
+ local state=hum:GetState()
+ return state~=Enum.HumanoidStateType.Dead and state~=Enum.HumanoidStateType.Ragdoll and state~=Enum.HumanoidStateType.Seated and state~=Enum.HumanoidStateType.FallingDown
+end
+function Animation.new(npc)
+ local hum=npc:FindFirstChildOfClass('Humanoid');local self={NPC=npc,Humanoid=hum,Animator=hum and hum:FindFirstChildOfClass('Animator'),Joints={},Tracks={},Failed={},Assets={},Connections={},NativeOffsets={},NativeAttention={},State=nil,Current=nil,Owns=false,Released=false,External=false,CheckAt=0}
+ for _,node in npc:GetDescendants()do if node:IsA('Motor6D') then self.Joints[node.Name]=node end end
+ return setmetatable(self,{__index=Animation})
+end
+-- Remove our previous additive offsets BEFORE Animator samples the next frame.
+-- Tracks may omit Neck/Waist; without this, attention would accumulate on them.
+function Animation:beforeAnimation()
+ for joint,offset in self.NativeOffsets do
+  if joint.Parent and joint.Transform==offset.Applied then joint.Transform=offset.Base end
+ end
+ table.clear(self.NativeOffsets)
+end
+function Animation:afterAnimation()
+ if not self.Current or not self.Current.IsPlaying or self.Current.Length<=0 or not self.Owns or self.External or not playable(self.Humanoid) then return end
+ self:beforeAnimation()
+ -- Reapply only these two cached offsets even on frames between budgeted pose
+ -- updates, otherwise PreAnimation removal would make native attention flicker.
+ for joint,desired in self.NativeAttention do if joint.Parent then
+  local base=joint.Transform;local applied=base*desired
+  self.NativeOffsets[joint]={Base=base,Applied=applied};joint.Transform=applied
+ end end
+end
+function Animation:stop(reset)
+ self:beforeAnimation()
+ table.clear(self.NativeAttention)
+ if self.Current then self.Current:Stop(Config.FadeSeconds);self.Current=nil end
+ if reset and self.Owns then for _,joint in self.Joints do if joint.Parent then joint.Transform=CFrame.new()end end end
+ self.Owns=false;self.State=nil
+end
+function Animation:destroy()
+ if self.Released then return end;self:stop(true);self.Released=true
+ for _,connection in self.Connections do connection:Disconnect()end
+ for _,track in self.Tracks do track:Destroy()end
+ for _,asset in self.Assets do asset:Destroy()end
+ table.clear(self.Joints);table.clear(self.Tracks);table.clear(self.Assets)
+end
+function Animation:track(state)
+ local def=Config.Animations[state]
+ if not def or not Policy.clipId(def.Id) or self.Failed[state] or not self.Animator then return nil end
+ if self.Tracks[state] then return self.Tracks[state]end
+ local asset=Instance.new('Animation');asset.AnimationId=def.Id;table.insert(self.Assets,asset)
+ local ok,track=pcall(function()return self.Animator:LoadAnimation(asset)end)
+ if not ok then self.Failed[state]=true;warn('[NPC V2] Animação indisponível; fallback procedural: '..state);return nil end
+ track.Priority=Enum.AnimationPriority[def.Priority];track.Looped=def.Looped;self.Tracks[state]=track;return track
+end
+function Animation:update(state,now,dt,phase,attention,reduced)
+ self:beforeAnimation()
+ if self.Released or not self.NPC.Parent or not playable(self.Humanoid) then self:stop(true);return end
+ if now>=self.CheckAt then
+  self.CheckAt=now+1;self.External=false
+  local animate=self.NPC:FindFirstChild('Animate')
+  if animate and animate:IsA('BaseScript') and not animate.Disabled then self.External=true end
+  if self.Animator then for _,track in self.Animator:GetPlayingAnimationTracks()do
+   local ours=false;for _,own in self.Tracks do if own==track then ours=true;break end end
+   if not ours then self.External=true;break end
+  end end
+ end
+ if self.External then self:stop(false);return end
+ if self.State~=state then
+  if self.Current then self.Current:Stop(Config.FadeSeconds)end
+  self.State=state;self.Current=self:track(state)
+  if self.Current then self.Current:Play(Config.FadeSeconds,1,1)end
+ end
+ local native=self.Current and self.Current.IsPlaying and self.Current.Length>0
+ table.clear(self.NativeAttention)
+ local pose=if native then {} else Motion.pose(state,now,phase,reduced)
+ local alpha=1-math.exp(-10*math.min(dt,.25))
+ for name,joint in self.Joints do
+  if not joint.Parent then continue end
+  local angles=pose[name] or {0,0,0};local desired=CFrame.Angles(angles[1],angles[2],angles[3])
+  if name=='Neck' and attention then desired*=CFrame.Angles(attention.Pitch,attention.Yaw,0)
+  elseif name=='Waist' and attention then desired*=CFrame.Angles(0,attention.Torso,0)end
+  if native then
+   if name=='Neck' or name=='Waist' then
+    self.NativeAttention[joint]=desired
+   end
+  else joint.Transform=joint.Transform:Lerp(desired,alpha)end
+ end
+ self.Owns=true;if native then self:afterAnimation()end
+end
+return Animation
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="12">
+          <Properties>
+            <string name="Name">NPCAttentionController</string>
+            <string name="Source"><![CDATA[local Shared=game.ReplicatedStorage.EldravynNPCVisualV2
+local Policy=require(Shared.NPCVisualPolicy)
+local Config=require(Shared.NPCVisualConfig).Attention
+local A={}
+function A.new(npc)
+ return {NPC=npc,Head=npc:FindFirstChild('Head'),Root=npc:FindFirstChild('HumanoidRootPart'),Target=nil,LastGreeting=-math.huge,Yaw=0,Pitch=0,Torso=0}
+end
+function A.update(self,people,now,dt)
+ local target,nearest=nil,Config.Distance;local activeId=self.NPC:GetAttribute('NPCV2Speaker')
+ if not self.Head or not self.Root then return self end
+ for _,record in people do
+  local distance=(record.Position-self.Head.Position).Magnitude
+  if record.Id==activeId and distance<=Config.Distance then target=record;break end
+  if not activeId and distance<nearest then
+   local localPoint=self.Root.CFrame:PointToObjectSpace(record.Position)
+   local _,_,_,visible=Policy.attention(localPoint.X,localPoint.Y-2.25,localPoint.Z,false,Config)
+   if visible then target=record;nearest=distance end
+  end
+ end
+ local yaw,pitch,torso=0,0,0
+ if target then
+  local localPoint=self.Root.CFrame:PointToObjectSpace(target.Position)
+  yaw,pitch,torso=Policy.attention(localPoint.X,localPoint.Y-2.25,localPoint.Z,target.Id==activeId,Config)
+ end
+ self.Greeting=false
+ if target and not activeId and self.Target~=target.Id and now-self.LastGreeting>=Config.GreetingCooldown then self.Greeting=true;self.LastGreeting=now end
+ self.Target=target and target.Id
+ local alpha=1-math.exp(-Config.Response*math.min(dt,.25))
+ self.Yaw+=(yaw-self.Yaw)*alpha;self.Pitch+=(pitch-self.Pitch)*alpha;self.Torso+=(torso-self.Torso)*alpha
+ return self
+end
+return A
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="13">
+          <Properties>
+            <string name="Name">NPCPerformanceManager</string>
+            <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Run=game:GetService('RunService')
+local Shared=game.ReplicatedStorage.EldravynNPCVisualV2
+local Config=require(Shared.NPCVisualConfig)
+local Appearance=require(Shared.NPCAppearanceConfig)
+local Motion=require(Shared.NPCMotion)
+local Policy=require(Shared.NPCVisualPolicy)
+local Animation=require(script.Parent.NPCAnimationController)
+local Attention=require(script.Parent.NPCAttentionController)
+local Manager={Current=nil}
+function Manager.start(folder,localPlayer,mobile)
+ if Manager.Current and not Manager.Current.Stopped then return Manager.Current end
+ local self={Entries={},Connections={},Stopped=false,Scan=0,People={},Selected={},EffectSelection={},Effects=0};Manager.Current=self
+ function self:remove(npc)
+  local e=self.Entries[npc];if not e then return end;e.Animation:destroy()
+  for _,p in e.Details do if p.Part.Parent then p.Part.LocalTransparencyModifier=p.Original end end
+  for _,p in e.Effects do if p.Part.Parent then p.Part.Transparency=p.Transparency;p.Part.Size=p.Size end end
+  self.Entries[npc]=nil;self.Selected[npc]=nil;self.EffectSelection[npc]=nil
+ end
+ function self:add(npc)
+  if self.Stopped or self.Entries[npc] or not npc:IsA('Model') or npc:GetAttribute('NPCVisualVersion')~=2 or not npc.PrimaryPart then return end
+  local hum=npc:FindFirstChildOfClass('Humanoid');if not hum or not hum:FindFirstChildOfClass('Animator') then return end
+  local id=npc:GetAttribute('EldravynNPCId');if type(id)~='string' then return end
+  local style=Appearance.forNPC(id,npc:GetAttribute('NPCRole'),npc:GetAttribute('City'))
+  local e={NPC=npc,Root=npc.PrimaryPart,Style=style,Phase=(Appearance.hash(id)%1000)/79,Animation=Animation.new(npc),Attention=Attention.new(npc),Details={},Effects={},Accum=0,GreetUntil=0,LastPosition=npc.PrimaryPart.Position,Speed=0,WasSelected=false}
+  for _,p in npc:GetDescendants()do if p:IsA('BasePart') then
+   if p:GetAttribute('VisualDetail')==2 then table.insert(e.Details,{Part=p,Original=p.LocalTransparencyModifier})end
+   if p:GetAttribute('NPCVisualEffect') then table.insert(e.Effects,{Part=p,Transparency=p.Transparency,Size=p.Size})end
+  end end
+  self.Entries[npc]=e
+ end
+ function self:scan(now)
+  local character=localPlayer.Character;local origin=character and character:FindFirstChild('HumanoidRootPart')
+  local camera=workspace.CurrentCamera;local position=origin and origin.Position or camera and camera.CFrame.Position
+  self.People={}
+  for _,p in Players:GetPlayers()do local c=p.Character;local root=c and c:FindFirstChild('HumanoidRootPart');local h=c and c:FindFirstChildOfClass('Humanoid')
+   if root and h and h.Health>0 then table.insert(self.People,{Id=p.UserId,Position=root.Position+Vector3.new(0,1.5,0)})end
+  end
+  local candidates={}
+  for npc,e in self.Entries do
+   if not npc:IsDescendantOf(folder) then self:remove(npc);continue end
+   local distance=if position then (e.Root.Position-position).Magnitude else math.huge;e.Distance=distance
+   table.insert(candidates,{Key=npc,Id=npc:GetAttribute('EldravynNPCId'),Distance=distance,Active=npc:GetAttribute('NPCV2Speaker')==localPlayer.UserId})
+  end
+  self.Selected=Policy.select(candidates,mobile,Config.Performance)
+  self.EffectSelection={};local effectCount=0
+  for _,candidate in candidates do
+   local e=self.Entries[candidate.Key]
+   if self.Selected[candidate.Key]=='Full' and #e.Effects>0 and effectCount<Config.Performance.Effects then self.EffectSelection[candidate.Key]=true;effectCount+=1 end
+  end
+  for npc,e in self.Entries do
+   local selected=self.Selected[npc];local detailed=selected=='Full' and e.Distance<Appearance.DetailDistance
+   if detailed~=e.Detailed then e.Detailed=detailed;for _,p in e.Details do if p.Part.Parent then p.Part.LocalTransparencyModifier=if detailed then p.Original else 1 end end end
+   if not selected and e.WasSelected then e.Animation:stop(true)end
+   if selected and not e.WasSelected then e.LastPosition=e.Root.Position;e.Accum=0 end
+   e.WasSelected=selected~=nil
+   if not self.EffectSelection[npc] then for _,p in e.Effects do if p.Part.Parent then p.Part.Transparency=.65;p.Part.Size=p.Size end end end
+  end
+ end
+ function self:step(dt,now)
+  if self.Stopped then return end
+  self.Scan+=dt;if self.Scan>=Config.Performance.ScanSeconds then self.Scan=0;self:scan(now)end
+  local effects=0
+  for npc,tier in self.Selected do
+   local e=self.Entries[npc];if not e then continue end
+   local full=tier=='Full';local hz=if not full then Config.Performance.ReducedHz elseif mobile then Config.Performance.MobileHz else Config.Performance.DesktopHz
+   e.Accum+=dt;if e.Accum<1/hz then e.Animation:afterAnimation();continue end
+   local elapsed=math.min(e.Accum,.25);e.Accum=0
+   local speed=(e.Root.Position-e.LastPosition).Magnitude/elapsed;e.LastPosition=e.Root.Position;e.Speed=speed
+   local attention=Attention.update(e.Attention,self.People,now,elapsed)
+   if attention.Greeting then e.GreetUntil=now+1.4 end
+   local state=npc:GetAttribute('NPCV2State') or 'Idle'
+   if state=='Talk' or npc:GetAttribute('NPCV2Speaker') then state='Talk'
+   elseif speed>.22 then state=if speed>4.5 then 'Run' else 'Walk'
+   elseif now<e.GreetUntil then state='Greet'
+   elseif state=='Work' then state=Motion.work(e.Style.Work,now,e.Phase,Config.Behavior.WorkCycle)
+   elseif state~='Observe' then state='Idle'end
+   if not full and state~='Walk' and state~='Run' then state='Idle'end
+   e.Animation:update(state,now,elapsed,e.Phase,attention,not full)
+   local effect=self.EffectSelection[npc]==true
+   if effect then effects+=1 end
+   for _,p in e.Effects do if p.Part.Parent then
+    p.Part.Transparency=if effect and state=='Arcane' then .28+.12*math.sin(now*3) else .65
+    p.Part.Size=p.Size*(if effect and state=='Arcane' then 1+.09*math.sin(now*3) else 1)
+   end end
+  end
+  self.Effects=effects
+ end
+ function self:destroy()
+  if self.Stopped then return end;self.Stopped=true
+  for _,connection in self.Connections do connection:Disconnect()end
+  local npcs={};for npc in self.Entries do table.insert(npcs,npc)end;for _,npc in npcs do self:remove(npc)end
+  table.clear(self.Connections);table.clear(self.People);table.clear(self.Selected);table.clear(self.EffectSelection)
+  if Manager.Current==self then Manager.Current=nil end
+ end
+ local function discover(node)
+  if node:IsA('Model') then self:add(node)else local npc=node:FindFirstAncestorOfClass('Model');if npc and npc:IsDescendantOf(folder) then self:add(npc)end end
+ end
+ for _,node in folder:GetDescendants()do if node:IsA('Model') then self:add(node)end end
+ table.insert(self.Connections,folder.DescendantAdded:Connect(discover))
+ table.insert(self.Connections,folder.DescendantRemoving:Connect(function(node)if self.Entries[node] then self:remove(node)end end))
+ table.insert(self.Connections,folder.Destroying:Connect(function()self:destroy()end))
+ table.insert(self.Connections,Run.PreAnimation:Connect(function()for npc in self.Selected do local e=self.Entries[npc];if e then e.Animation:beforeAnimation()end end end))
+ table.insert(self.Connections,Run.PreSimulation:Connect(function(dt)self:step(dt,workspace:GetServerTimeNow())end))
+ self:scan(workspace:GetServerTimeNow());return self
+end
+return Manager
+]]></string>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Folder" referent="14">
+        <Properties>
+          <string name="Name">Replacements</string>
+        </Properties>
+        <Item class="ModuleScript" referent="15">
+          <Properties>
+            <string name="Name">AmbientService</string>
+            <string name="Source"><![CDATA[-- Small, bounded patrols for ambient residents only. No pathfinding or combat AI.
+local Players=game:GetService('Players')
+local TweenService=game:GetService('TweenService')
+local Placement=require(script.Parent.Placement)
+local Ambient={}
+local mobile={Resident=true,Traveler=true,Farmer=true,Adventurer=true}
+function Ambient.start(npcs,folder)
+ if workspace:GetAttribute('EldravynNPCVisualVersion')==2 then return require(script.Parent.NPCBehaviorController).start(npcs,folder)end
+ local homes={};for _,npc in npcs do
+  if npc:GetAttribute('AmbientNPC') and mobile[npc:GetAttribute('NPCRole')] and npc.PrimaryPart then homes[npc]={Frame=npc.PrimaryPart.CFrame,Away=false}end
+ end
+ task.spawn(function()
+  while folder.Parent do
+   task.wait(10);local active=0
+   for npc,home in homes do
+    if active>=4 then break end
+    local root=npc.PrimaryPart;local nearby=false
+    if not root or (npc:GetAttribute('NPCSpeakingUntil') or 0)>os.clock() then continue end
+    for _,player in Players:GetPlayers()do local p=player.Character and player.Character:FindFirstChild('HumanoidRootPart');if p and (p.Position-root.Position).Magnitude<75 then nearby=true;break end end
+    if not nearby then continue end
+    local target=home.Frame*(if home.Away then CFrame.new() else CFrame.new(2.5,0,0))
+    local delta=target.Position-root.Position;local valid=true;local feet
+    for step=0,4 do
+     local point=root.Position+delta*(step/4)-Vector3.new(0,3,0)
+     feet=Placement.safe(point,{folder},point.Y)
+     if not feet or math.abs(feet.Y-point.Y)>0.7 then valid=false;break end
+    end
+    for other in homes do if other~=npc and other.PrimaryPart and (other.PrimaryPart.Position-target.Position).Magnitude<6 then valid=false;break end end
+    if valid and feet then
+     active+=1;home.Away=not home.Away
+     local destination=target+Vector3.new(0,feet.Y+3-target.Position.Y,0)
+     TweenService:Create(root,TweenInfo.new(2,Enum.EasingStyle.Linear),{CFrame=destination}):Play()
+    end
+   end
+  end
+ end)
+end
+return Ambient
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="LocalScript" referent="16">
+          <Properties>
+            <string name="Name">NPCInteractionClient</string>
+            <bool name="Disabled">true</bool>
+            <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local player=Players.LocalPlayer
+local remotes=game.ReplicatedStorage:WaitForChild('EldravynNPC'):WaitForChild('RemoteEvents')
+local ui=require(script.Parent.NPCDialogueClient).new(player:WaitForChild('PlayerGui'),remotes:WaitForChild('Action'))
+local marker
+remotes:WaitForChild('View').OnClientEvent:Connect(function(payload)
+ ui:receive(payload)
+ if payload.Marker then
+  if marker then marker:Destroy()end
+  marker=Instance.new('Part');marker.Name='NPCDestination';marker.Size=Vector3.new(0.5,0.5,0.5);marker.Transparency=1;marker.Anchored=true;marker.CanCollide=false;marker.CanTouch=false;marker.CanQuery=false;marker.Position=payload.Marker.Position+Vector3.new(0,10,0);marker.Parent=workspace
+  local billboard=Instance.new('BillboardGui');billboard.Size=UDim2.fromOffset(240,64);billboard.AlwaysOnTop=true;billboard.Adornee=marker;billboard.Parent=marker
+  local label=Instance.new('TextLabel');label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=0.2;label.BackgroundColor3=Color3.fromRGB(42,34,24);label.TextColor3=Color3.fromRGB(255,226,145);label.Font=Enum.Font.SourceSansBold;label.TextSize=18;label.TextWrapped=true;label.Text='◆ '..payload.Marker.Name;label.Parent=billboard
+  local this=marker;task.delay(payload.Marker.Seconds,function()if this then this:Destroy()end;if marker==this then marker=nil end end)
+ end
+end)
+game:GetService('UserInputService').InputBegan:Connect(function(input,processed)if not processed and input.KeyCode==Enum.KeyCode.Escape then ui:hide()end end)
+-- V2 owns animation motors only; the existing dialogue, shop UI and marker above stay intact.
+if workspace:GetAttribute('EldravynNPCVisualVersion')==2 then
+ local manager=require(script.Parent.NPCPerformanceManager).start(workspace:WaitForChild('EldravynNPCs'),player,game:GetService('UserInputService').TouchEnabled)
+ script.Destroying:Connect(function()manager:destroy()end)
+ return
+end
+-- Bounded local idle poses; no external Animation IDs or server frame loop.
+local joints={};local elapsed=0
+local function refresh()
+ joints={};local folder=workspace:FindFirstChild('EldravynNPCs');local root=player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+ if not folder or not root then return end
+ local nearest={}
+ for _,npc in folder:GetDescendants()do if npc:IsA('Model') and npc:GetAttribute('EldravynNPCId') and npc.PrimaryPart then
+  local distance=(npc.PrimaryPart.Position-root.Position).Magnitude;if distance<90 then table.insert(nearest,{NPC=npc,Distance=distance})end
+ end end
+ table.sort(nearest,function(a,b)return a.Distance<b.Distance end)
+ for index=1,math.min(#nearest,12)do
+  local npc=nearest[index].NPC;local torso=npc:FindFirstChild('UpperTorso');local neck=torso and torso:FindFirstChild('Neck')
+  if neck then table.insert(joints,neck)end
+ end
+end
+task.spawn(function()while true do refresh();task.wait(2)end end)
+game:GetService('RunService').Heartbeat:Connect(function(dt)
+ elapsed+=dt;for index,joint in joints do if joint.Parent then joint.Transform=CFrame.Angles(math.sin(elapsed*1.3+index)*0.025,math.sin(elapsed*0.8+index)*0.07,0)end end
+end)
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="17">
+          <Properties>
+            <string name="Name">NPCService</string>
+            <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Shared=game.ReplicatedStorage:WaitForChild('EldravynNPC')
+local C=require(Shared.Registry)
+local Data=require(script.Parent.NPCDataService)
+local Actions=require(script.Parent.NPCActionService)
+local Dialogue=require(script.Parent.DialogueService)
+local Purchase=require(script.Parent.PurchaseService)
+local Placement=require(script.Parent.Placement)
+local Service={Started=false}
+local function remote(parent,name)
+ local value=parent:FindFirstChild(name)
+ if not value then value=Instance.new('RemoteEvent');value.Name=name;value.Parent=parent end
+ assert(value:IsA('RemoteEvent'));return value
+end
+function Service.start()
+ if Service.Started then return end
+ local world=workspace:FindFirstChild('GeneratedWorld');local folder=workspace:FindFirstChild('EldravynNPCs')
+ assert(world and folder,'Instale os NPCs no mapa antes de iniciar.')
+ if world:GetAttribute('TerrainPending')==true then warn('[NPC] Terrain pendente. Use PrepareStudio em Edit antes de testar. Nenhum terreno será gerado no runtime.');return end
+ Service.Started=true
+ local remotes=Shared:FindFirstChild('RemoteEvents') or Instance.new('Folder');remotes.Name='RemoteEvents';remotes.Parent=Shared
+ local view,action=remote(remotes,'View'),remote(remotes,'Action');Dialogue.start(view,action)
+ for _,npc in folder:GetDescendants()do
+  local id=npc:GetAttribute('EldravynNPCId')
+  if npc:IsA('Model') and id then
+   assert(not Actions.NPCs[id],'NPC duplicado: '..id);Actions.NPCs[id]=npc
+   local root=npc:FindFirstChild('HumanoidRootPart');local prompt=npc:FindFirstChild('NPCInteraction',true)
+   local entry=require(Shared.PlacementConfig).NPCs[id]
+   local visualV2=workspace:GetAttribute('EldravynNPCVisualVersion')==2 and npc:GetAttribute('NPCVisualVersion')==2
+   local frame=if visualV2 then require(script.Parent.NPCPositionAdapter).frame(npc,world,entry,folder,Placement) else entry and Placement.frame(world,entry,folder,true)
+   if root and prompt and frame then
+    if not visualV2 then npc:PivotTo(frame*CFrame.new(0,3,0))end;prompt.Enabled=true
+    prompt.Triggered:Connect(function(player)Dialogue.open(player,npc)end)
+    if not npc:GetAttribute('AmbientNPC') then Actions.Locations[id]={Name=C.Roles[npc:GetAttribute('NPCRole')].Title..' • '..npc:GetAttribute('City'),Position=frame.Position}end
+   else
+    if prompt then prompt.Enabled=false end
+    warn('[NPC] Posição não validada; interação desativada: '..id)
+   end
+  end
+ end
+ local regions={}
+ for id,entry in require(Shared.PlacementConfig).Regions do
+  local anchor=Placement.resolve(world,entry.Anchor)
+  if anchor and anchor:IsA('BasePart') then
+   local record={Name=entry.Name,Position=anchor.Position,Radius=entry.Radius}
+   regions[id]=record;Actions.Locations[id]=record
+  end
+ end
+ Purchase.registerProduct('NPCClassChange',C.ClassChangeProduct,require(Shared.Rules).classReceipt)
+ Purchase.OnGrant=function(p)Dialogue.close(p);view:FireClient(p,{Notice='Crédito oficial registrado. Converse novamente com o mestre de classes.'})end
+ Purchase.start();Data.start()
+ require(script.Parent.AmbientService).start(Actions.NPCs,folder)
+ local function onCharacter(player,character)
+  local root=character:WaitForChild('HumanoidRootPart',10);if not root then return end
+  local state=Data.get(player);local id=state and state.NPC.ReturnNPC;local npc=id and Actions.NPCs[id]
+  if not npc or not npc.PrimaryPart then return end
+  -- Return beside the inn only if a fresh floor/clearance query succeeds.
+  local position=npc.PrimaryPart.Position+npc.PrimaryPart.CFrame.LookVector*5-Vector3.new(0,3,0)
+  local safe=Placement.safe(position,{folder,character},position.Y)
+  if safe then root.CFrame=CFrame.new(safe+Vector3.new(0,3,0))end
+ end
+ local function joined(player)
+  local ok,message=Data.load(player)
+  if player.Parent~=Players then return end
+  if not ok then view:FireClient(player,{Notice=message});return end
+  local state=Data.get(player)
+  if state and state.NPC.PendingHeal then
+   Data.change(player,function(s)s.Gold=math.min(C.MaxGold,s.Gold+s.NPC.PendingHeal);s.NPC.PendingHeal=nil;return true end)
+  end
+  player.CharacterAdded:Connect(function(character)onCharacter(player,character)end)
+  if player.Character then onCharacter(player,player.Character)end
+  view:FireClient(player,{Notice=if Data.Persistent then 'Perfil NPC carregado.' else 'Prévia Studio: progresso temporário, sem persistência ou compras Robux.'})
+ end
+ Players.PlayerAdded:Connect(joined);Players.PlayerRemoving:Connect(Data.remove)
+ for _,player in Players:GetPlayers()do task.spawn(joined,player)end
+ -- A single low-frequency scheduler. Only meaningful progress writes to the profile.
+ task.spawn(function()
+  local visits={}
+  while Service.Started do
+   task.wait(2)
+   for _,player in Players:GetPlayers()do
+    local character=player.Character;local root=character and character:FindFirstChild('HumanoidRootPart')
+    local hum=character and character:FindFirstChildOfClass('Humanoid')
+    if root and hum and hum.Health>0 and Data.get(player) then
+     local previous=visits[player] or {};local current={}
+     for id,region in regions do
+      if (root.Position-region.Position).Magnitude<region.Radius then
+       current[id]=true;if previous[id] then Data.event(player,'Visit:'..id,'Exploration')end
+      end
+     end
+     visits[player]=current
+    end
+    local session=Dialogue.Sessions[player]
+    if session and not session.Busy and (os.clock()>session.Expires or not Dialogue.near(player,session.NPC)) then Dialogue.close(player)end
+   end
+   for player in visits do if player.Parent~=Players then visits[player]=nil end end
+  end
+ end)
+ print('[NPC] Etapa 2 iniciada. Combate, conjuração, fusões e interiores de dungeon permanecem fora desta etapa.')
+end
+return Service
+]]></string>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Folder" referent="18">
+        <Properties>
+          <string name="Name">Server</string>
+        </Properties>
+        <Item class="ModuleScript" referent="19">
+          <Properties>
+            <string name="Name">NPCBehaviorController</string>
+            <string name="Source"><![CDATA[-- One authoritative cosmetic-behavior scheduler; never mutates data, quests or services.
+local Players=game:GetService('Players')
+local Run=game:GetService('RunService')
+local Tween=game:GetService('TweenService')
+local Shared=game.ReplicatedStorage.EldravynNPCVisualV2
+local Config=require(Shared.NPCVisualConfig).Behavior
+local Appearance=require(Shared.NPCAppearanceConfig)
+local Behavior={Current=nil}
+function Behavior.start(npcs,folder)
+ if Behavior.Current and not Behavior.Current.Stopped then return Behavior.Current end
+ local Placement=require(script.Parent.Placement);local Dialogue=require(script.Parent.DialogueService)
+ local self={Entries={},Connections={},Stopped=false,Accum=0};Behavior.Current=self
+ local function state(e,name)if e.State~=name then e.State=name;e.NPC:SetAttribute('NPCV2State',name)end end
+ function self:cancel(e)
+  if e.Tween then e.Tween:Cancel();e.Tween:Destroy();e.Tween=nil end;e.Moving=false
+ end
+ function self:speaker(e,now)
+  local candidates={}
+  for player,s in Dialogue.Sessions do
+   if player.Parent==Players and s.NPC==e.NPC and (s.Busy or (s.Expires or 0)>now) then table.insert(candidates,player)end
+  end
+  table.sort(candidates,function(a,b)return a.UserId<b.UserId end)
+  for _,player in candidates do if player.UserId==e.Speaker then return player.UserId end end
+  return candidates[1] and candidates[1].UserId
+ end
+ function self:interaction(e,now)
+  local speaker=self:speaker(e,now)
+  if speaker then self:cancel(e);e.Speaker=speaker;e.NPC:SetAttribute('NPCV2Speaker',speaker);state(e,'Talk');return true end
+  if e.Speaker then e.Speaker=nil;e.NPC:SetAttribute('NPCV2Speaker',nil);e.NextMove=now+1;e.ReturnPending=(e.Root.Position-e.Home.Position).Magnitude>.06;state(e,'Idle')end
+  return false
+ end
+ function self:clear(e,target)
+  if e.NPC:GetAttribute('NPCV2PatrolFloorValid')==false then return false end
+  local origin=e.Root.Position;local delta=target.Position-origin
+  if (target.Position-e.Home.Position).Magnitude>Config.PatrolRadius+.05 then return false end
+  local samples=math.max(1,math.ceil(delta.Magnitude/.35))
+  for i=0,samples do
+   local point=origin+delta*(i/samples)-Vector3.new(0,3,0)
+   local floor=Placement.safe(point,{folder},point.Y)
+   if not floor or math.abs(floor.Y-point.Y)>.65 then return false end
+  end
+  -- Prevent cosmetic actors crossing one another, even with collision disabled.
+  for _,other in self.Entries do
+   if other~=e and other.Root.Parent then
+    local d=other.Root.Position-origin;local length=delta:Dot(delta)
+    local t=if length>0 then math.clamp(d:Dot(delta)/length,0,1) else 0
+    if (other.Root.Position-(origin+delta*t)).Magnitude<4.5 then return false end
+   end
+  end
+  return true
+ end
+ function self:move(e,target,now)
+  if not self:clear(e,target) then state(e,'Observe');e.NextMove=now+Config.Pause;return false end
+  local distance=(target.Position-e.Root.Position).Magnitude
+  if distance<.06 then e.ReturnPending=false;return false end
+  local duration=distance/Config.Speed
+  e.Tween=Tween:Create(e.Root,TweenInfo.new(duration,Enum.EasingStyle.Linear),{CFrame=target});e.Tween:Play()
+  e.Target=target;e.EndAt=now+duration;e.Moving=true;state(e,'Walk');return true
+ end
+ function self:step(now)
+  if self.Stopped then return end
+  local people={};for _,player in Players:GetPlayers()do local char=player.Character;local root=char and char:FindFirstChild('HumanoidRootPart');local hum=char and char:FindFirstChildOfClass('Humanoid');if root and hum and hum.Health>0 then table.insert(people,root.Position)end end
+  local moving=0;for _,e in self.Entries do if e.Moving then moving+=1 end end
+  for _,e in self.Entries do
+   if not e.NPC:IsDescendantOf(folder) or e.Humanoid.Health<=0 then self:cancel(e);state(e,'Idle');continue end
+   if self:interaction(e,now) then continue end
+   local near=false;for _,point in people do if (e.Root.Position-point).Magnitude<=Config.ActiveDistance then near=true;break end end
+   if not near then self:cancel(e);state(e,'Idle');continue end
+   if e.Moving then
+    -- Re-query the remaining path so a new obstacle cancels movement.
+    if not self:clear(e,e.Target) then self:cancel(e);e.NextMove=now+Config.Pause;state(e,'Observe')
+    elseif now>=e.EndAt then
+     self:cancel(e);e.ReturnPending=(e.Root.Position-e.Home.Position).Magnitude>.06;e.NextMove=now+Config.Pause;state(e,'Observe')
+    end
+   elseif e.Style.Patrol and now>=e.NextMove and moving<Config.MaxMoving then
+    local away=(e.Root.Position-e.Home.Position).Magnitude>.06
+    local target=if away or e.ReturnPending then e.Home else e.Home*CFrame.new(if e.Direction==1 then 2.5 else -2.5,0,0)
+    if self:move(e,target,now) then moving+=1;if not away then e.Direction=-e.Direction end end
+   else state(e,if e.Style.Patrol then 'Observe' else 'Work')end
+  end
+ end
+ function self:destroy()
+  if self.Stopped then return end;self.Stopped=true
+  for _,c in self.Connections do c:Disconnect()end
+  for _,e in self.Entries do self:cancel(e);if e.NPC.Parent then e.NPC:SetAttribute('NPCV2State',nil);e.NPC:SetAttribute('NPCV2Speaker',nil)end end
+  table.clear(self.Entries);table.clear(self.Connections);if Behavior.Current==self then Behavior.Current=nil end
+ end
+ local ordered={};for id,npc in npcs do if npc:GetAttribute('NPCVisualVersion')==2 then table.insert(ordered,{Id=id,NPC=npc})end end
+ table.sort(ordered,function(a,b)return a.Id<b.Id end)
+ for index,row in ordered do
+  local npc=row.NPC;local root=npc.PrimaryPart;local hum=npc:FindFirstChildOfClass('Humanoid')
+  if root and hum then
+   local e={NPC=npc,Root=root,Humanoid=hum,Home=root.CFrame,Style=Appearance.forNPC(row.Id,npc:GetAttribute('NPCRole'),npc:GetAttribute('City')),NextMove=os.clock()+2+(index%5),Direction=1}
+   table.insert(self.Entries,e);state(e,'Idle')
+   local prompt=npc:FindFirstChild('NPCInteraction',true)
+   if prompt then table.insert(self.Connections,prompt.Triggered:Connect(function(player)
+    local now=os.clock()
+    if not self:interaction(e,now) and player and Dialogue.near(player,npc) then
+     -- Listener order is not a contract: the original handler may not yet have
+     -- opened its session. Pause only cosmetics after its existing proximity check.
+     self:cancel(e);e.NextMove=now+Config.Tick*2;state(e,'Idle')
+    end
+   end))end
+  end
+ end
+ table.insert(self.Connections,Run.Heartbeat:Connect(function(dt)self.Accum+=dt;if self.Accum>=Config.Tick then self.Accum=0;self:step(os.clock())end end))
+ table.insert(self.Connections,folder.Destroying:Connect(function()self:destroy()end))
+ return self
+end
+return Behavior
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="20">
+          <Properties>
+            <string name="Name">NPCPositionAdapter</string>
+            <string name="Source"><![CDATA[-- Preserve the installed position. This adapter never calls PivotTo or changes CFrame.
+local Adapter={}
+function Adapter.frame(npc,world,entry,folder,placement)
+ if npc:GetAttribute('NPCVisualVersion')~=2 then return entry and placement.frame(world,entry,folder,true)end
+ local root=npc:FindFirstChild('HumanoidRootPart');if not root then return nil end
+ local frame=root.CFrame*CFrame.new(0,-3,0)
+ local floor=placement.safe(frame.Position,{folder},frame.Position.Y)
+ local valid=floor~=nil and math.abs(floor.Y-frame.Position.Y)<=.8
+ npc:SetAttribute('NPCV2PatrolFloorValid',valid)
+ if not valid then warn('[NPC V2] Piso incompatível em '..npc.Name..'; posição preservada e patrulha bloqueada. Revise a cópia manualmente.')end
+ return frame
+end
+return Adapter
+]]></string>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Folder" referent="21">
+        <Properties>
+          <string name="Name">Shared</string>
+        </Properties>
+        <Item class="ModuleScript" referent="22">
+          <Properties>
+            <string name="Name">NPCAppearanceConfig</string>
+            <string name="Source"><![CDATA[-- Original designs made from native Roblox geometry. No uploaded asset dependency.
+local C={Version=2,MaxVisualParts=150,DetailDistance=42}
+C.Cities={
+ Valoria={Cloth={29,49,69},Accent={194,158,87},Metal={132,143,154}},
+ Arkheim={Cloth={94,43,44},Accent={179,135,84},Metal={95,106,116}},
+ Eldoria={Cloth={39,88,78},Accent={175,192,160},Metal={149,167,164}},
+ Durakh={Cloth={105,74,46},Accent={184,125,72},Metal={111,119,124}},
+ Asterion={Cloth={70,58,105},Accent={191,183,215},Metal={153,158,181}},
+ MalgorthDepths={Cloth={65,39,48},Accent={171,115,77},Metal={104,112,127}},
+ FallenSanctum={Cloth={55,67,87},Accent={173,183,194},Metal={136,151,168}},
+}
+C.Roles={
+ GuildMaster={Style='Commander',Hair='Swept',Cape=true,Armor=true,Book=true,Sword=true,Work='Documents',HairColor={224,215,192}},
+ Reception={Style='Scribe',Hair='Braided',Book=true,Work='Documents'},
+ Guard={Style='Guard',Hair='Short',Cape=true,Armor=true,Sword=true,Shield=true,Helmet=true,Work='Observe',Patrol=true},
+ Classes={Style='Veteran',Hair='Swept',Armor=true,Sword=true,Cape=true,Work='Inspect'},
+ Skills={Style='Duelist',Hair='Short',Sword=true,Work='Inspect'},
+ Blacksmith={Style='Smith',Hair='Short',Apron=true,Hammer=true,Work='Forge',HairColor={56,45,39}},
+ Armor={Style='Armorer',Hair='Braided',Armor=true,Apron=true,Work='Organize'},
+ Weapons={Style='Quartermaster',Hair='Swept',Sword=true,Work='Organize'},
+ General={Style='Merchant',Hair='Swept',Work='Trade'},
+ TravelShop={Style='Nomad',Hair='Braided',Cape=true,Backpack=true,Work='Trade'},
+ Magic={Style='Mage',Hair='Long',Cape=true,Robe=true,Staff=true,Book=true,Work='Study'},
+ Races={Style='Lorekeeper',Hair='Long',Robe=true,Cape=true,Book=true,Work='Study'},
+ Fusions={Style='Artificer',Hair='Swept',Robe=true,Staff=true,Monocle=true,Work='Study'},
+ Inn={Style='Host',Hair='Braided',Apron=true,Cup=true,Work='Serve'},
+ Healer={Style='Healer',Hair='Long',Robe=true,Work='Study'},
+ Bank={Style='Clerk',Hair='Short',Book=true,Monocle=true,Work='Documents'},
+ Guide={Style='Scout',Hair='Swept',Cape=true,Work='Orient'},
+ Tutorial={Style='Page',Hair='Swept',Work='Orient'},
+ Dungeon={Style='Warden',Hair='Long',Armor=true,Cape=true,Work='Inspect'},
+ Resident={Style='Citizen',Hair='Swept',Work='Observe',Patrol=true},
+ Traveler={Style='Traveler',Hair='Long',Backpack=true,Work='Observe',Patrol=true},
+ Artisan={Style='Artisan',Hair='Short',Apron=true,Hammer=true,Work='Forge'},
+ Employee={Style='Assistant',Hair='Braided',Apron=true,Work='Organize'},
+ Adventurer={Style='Ranger',Hair='Swept',Cape=true,Sword=true,Work='Observe',Patrol=true},
+ Farmer={Style='Farmer',Hair='Short',Apron=true,Hat=true,Work='Observe',Patrol=true},
+}
+local skins={{230,191,160},{198,147,111},{156,107,81},{239,209,184},{174,126,101}}
+local hairs={{65,43,32},{132,92,55},{197,170,118},{42,39,47},{176,182,190},{119,54,41}}
+local eyes={{67,113,112},{121,91,54},{92,101,137},{108,135,89}}
+function C.hash(id)
+ local n=17;for i=1,#id do n=(n*31+string.byte(id,i))%104729 end;return n
+end
+function C.forNPC(id,role,city)
+ assert(type(id)=='string' and C.Roles[role] and C.Cities[city],'Visual V2: identidade/papel/cidade desconhecidos')
+ local n=C.hash(id);local out=table.clone(C.Roles[role]);local palette=C.Cities[city]
+ out.Id=id;out.Role=role;out.City=city;out.Variant=n%3+1
+ out.Skin=skins[n%#skins+1];out.HairColor=out.HairColor or hairs[n%#hairs+1];out.Eyes=eyes[n%#eyes+1]
+ out.Cloth=palette.Cloth;out.Accent=palette.Accent;out.Metal=palette.Metal
+ out.Leather={72+n%12,49+n%8,36+n%6};out.Linen={207,197,170};out.MaxParts=C.MaxVisualParts
+ if role=='Healer' then out.Cloth={202,206,185}end
+ return out
+end
+return C
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="23">
+          <Properties>
+            <string name="Name">NPCMotion</string>
+            <string name="Source"><![CDATA[-- Authored procedural pose vocabulary. Radians, no assets, Instances or gameplay state.
+local M={}
+function M.pose(state,t,phase,reduced)
+ local p={};local rad=math.rad
+ local function joint(name,x,y,z)p[name]={rad(x or 0),rad(y or 0),rad(z or 0)}end
+ local breath=math.sin(t*1.6+phase)
+ joint('Waist',.6*breath,0,.45*math.sin(t*.65+phase));joint('Neck',.6*breath,2.5*math.sin(t*.38+phase),0)
+ joint('LeftShoulder',1.5*breath,0,-3);joint('RightShoulder',-1.5*breath,0,3)
+ joint('LeftElbow',5,0,0);joint('RightElbow',5,0,0)
+ if reduced and state~='Walk' and state~='Run' then return p end
+ local pulse=math.sin(t*2.6+phase)
+ if state=='Walk' or state=='Run' then
+  local run=state=='Run';local step=math.sin(t*(if run then 9 else 5.5)+phase);local swing=if run then 36 else 22
+  joint('LeftHip',swing*step,0,0);joint('RightHip',-swing*step,0,0)
+  joint('LeftKnee',-math.max(0,-step)*(if run then 46 else 28),0,0);joint('RightKnee',-math.max(0,step)*(if run then 46 else 28),0,0)
+  joint('LeftAnkle',-8*step,0,0);joint('RightAnkle',8*step,0,0)
+  joint('LeftShoulder',-swing*step,0,-4);joint('RightShoulder',swing*step,0,4);joint('Waist',if run then -8 else -2,1.2*step,0)
+ elseif state=='Greet' then
+  joint('RightShoulder',28,0,84);joint('RightElbow',65,0,0);joint('RightWrist',0,0,14*math.sin(t*10));joint('Neck',-3,0,-4)
+ elseif state=='Talk' or state=='Trade' or state=='Orient' then
+  joint('RightShoulder',22+5*pulse,0,12);joint('RightElbow',39+9*pulse,0,0);joint('RightWrist',0,12*math.sin(t*1.4),-8)
+  joint('LeftElbow',15+7*math.sin(t*1.8+phase),0,0);joint('Neck',2*math.sin(t*2.1),0,0)
+ elseif state=='Forge' then
+  local lift=(math.sin(t*3+phase)+1)/2
+  joint('Waist',-8,0,-3);joint('RightShoulder',35+35*lift,0,8);joint('RightElbow',12+53*lift,0,0)
+  joint('RightWrist',12-16*lift,0,0);joint('LeftShoulder',27,0,-5);joint('LeftElbow',24,0,0);joint('Neck',-18,0,0)
+ elseif state=='Study' or state=='Documents' then
+  joint('LeftShoulder',34,0,-9);joint('LeftElbow',65,0,0);joint('LeftWrist',0,0,-8)
+  joint('RightShoulder',23,0,5);joint('RightElbow',45+5*pulse,0,0);joint('RightWrist',0,9*pulse,0);joint('Neck',-16,2*pulse,0)
+ elseif state=='Arcane' then
+  joint('RightShoulder',38,0,24);joint('RightElbow',28-5*pulse,0,0);joint('LeftShoulder',18,0,-23);joint('LeftElbow',55,0,0)
+  joint('LeftWrist',0,18*pulse,0);joint('Neck',-7,0,0)
+ elseif state=='Inspect' then
+  joint('LeftShoulder',30,0,-6);joint('LeftElbow',43,0,0);joint('RightShoulder',28,0,10);joint('RightElbow',48,0,0);joint('Neck',-13,8*pulse,0)
+ elseif state=='Organize' then
+  joint('Waist',-5,5*pulse,0);joint('RightShoulder',36+8*pulse,0,9);joint('RightElbow',21+10*pulse,0,0);joint('LeftShoulder',18,0,-5);joint('LeftElbow',35,0,0)
+ elseif state=='Serve' then
+  joint('RightShoulder',45+5*pulse,0,5);joint('RightElbow',20,0,0);joint('LeftShoulder',10,0,-8);joint('LeftElbow',25,0,0);joint('Neck',-2,3*pulse,0)
+ elseif state=='Observe' then joint('Neck',0,10*math.sin(t*.35+phase),0);joint('Waist',0,3*math.sin(t*.35+phase),0)
+ end
+ return p
+end
+function M.work(base,t,phase,cycle)
+ cycle=cycle or 18;local slot=math.floor((t+phase)%cycle/(cycle/3))
+ if base=='Forge' then return ({'Forge','Inspect','Organize'})[slot+1]end
+ if base=='Study' then return ({'Study','Study','Arcane'})[slot+1]end
+ if base=='Trade' then return ({'Trade','Organize','Trade'})[slot+1]end
+ return base
+end
+return M
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="24">
+          <Properties>
+            <string name="Name">NPCVisualConfig</string>
+            <string name="Source"><![CDATA[return {
+ Version=2,
+ Attention={Distance=22,HalfField=80,HeadYaw=44,HeadPitch=20,TorsoYaw=11,Response=7,GreetingCooldown=14},
+ Performance={ScanSeconds=0.5,FullDistance=48,ReducedDistance=100,DesktopFull=12,MobileFull=8,Reduced=8,DesktopHz=30,MobileHz=20,ReducedHz=6,Effects=3,Particles=0},
+ Behavior={Tick=0.2,ActiveDistance=90,MaxMoving=4,PatrolRadius=3,Speed=1.6,Pause=5,WorkCycle=12},
+ -- Empty IDs intentionally use authored procedural poses. Configure ONLY owned/authorized published assets.
+ Animations={
+  Idle={Id='',Priority='Idle',Looped=true},Walk={Id='',Priority='Movement',Looped=true},Run={Id='',Priority='Movement',Looped=true},
+  Greet={Id='',Priority='Action2',Looped=false},Talk={Id='',Priority='Action2',Looped=true},
+  Forge={Id='',Priority='Action',Looped=true},Inspect={Id='',Priority='Action',Looped=true},Organize={Id='',Priority='Action',Looped=true},
+  Study={Id='',Priority='Action',Looped=true},Arcane={Id='',Priority='Action',Looped=true},Trade={Id='',Priority='Action',Looped=true},
+  Documents={Id='',Priority='Action',Looped=true},Serve={Id='',Priority='Action',Looped=true},Orient={Id='',Priority='Action',Looped=true},Observe={Id='',Priority='Idle',Looped=true},
+ },
+ FadeSeconds=0.22,
+}
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="25">
+          <Properties>
+            <string name="Name">NPCVisualPolicy</string>
+            <string name="Source"><![CDATA[local P={}
+function P.clipId(id)return type(id)=='string' and id:match('^rbxassetid://[1-9]%d*$')~=nil end
+function P.attention(x,y,z,active,c)
+ local distance=math.sqrt(x*x+y*y+z*z)
+ if distance>c.Distance or distance<.01 then return 0,0,0,false end
+ local yaw=math.atan2(-x,-z);local pitch=math.atan2(y,math.sqrt(x*x+z*z))
+ if not active and math.abs(yaw)>math.rad(c.HalfField) then return 0,0,0,false end
+ return math.clamp(yaw, -math.rad(c.HeadYaw), math.rad(c.HeadYaw)),math.clamp(pitch,-math.rad(c.HeadPitch),math.rad(c.HeadPitch)),math.clamp(yaw*.22,-math.rad(c.TorsoYaw),math.rad(c.TorsoYaw)),true
+end
+function P.select(candidates,mobile,config)
+ table.sort(candidates,function(a,b)if a.Active~=b.Active then return a.Active end;if a.Distance~=b.Distance then return a.Distance<b.Distance end;return a.Id<b.Id end)
+ local result={};local full,reduced=0,0;local cap=if mobile then config.MobileFull else config.DesktopFull
+ for _,entry in candidates do
+  if entry.Distance<=config.FullDistance and full<cap then result[entry.Key]='Full';full+=1
+  elseif entry.Distance<=config.ReducedDistance and reduced<config.Reduced then result[entry.Key]='Reduced';reduced+=1 end
+ end
+ return result
+end
+return P
+]]></string>
+          </Properties>
+        </Item>
+      </Item>
+    </Item>
+  </Item>
+</roblox>
