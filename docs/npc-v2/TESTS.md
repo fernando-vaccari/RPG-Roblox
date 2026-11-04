@@ -18,12 +18,13 @@ Execução em Linux na sessão iniciada em **31/10/2026, horário de Brasília**
 | Builds anteriores | Continente e dungeon clássicos compilados em `build/`, 55 módulos cada, sem ciclos/dependências ausentes; entregas antigas não sobrescritas |
 | Python/diff | Compilação sintática dos helpers modificados e `git diff --check` |
 | Revisão visual | Duas pranchas com oito renders da geometria e poses efetivamente produzidas, Blender offline; revisão de cabelo, continuidade das roupas, acessórios e silhuetas |
+| Download do GitHub | Pacote, manifesto e guia do commit `fa9bcccbec1fab5fcd68a441484a35407ca0766f` baixados por HTTP 200 e comparados byte a byte com os arquivos locais; verificação repetida na retomada de 04/11/2026 |
 
 Os 120 atores são um teste de limites de seleção, cache e liberação de recursos no host Luau. **Não é um benchmark de FPS.** Tracks sintéticos só existem nos testes com Animator falso; nenhum ID de teste entra na entrega. O teste com dois interlocutores manipula jogadores/sessões simulados e testa também o prompt/DialogueService original; **não é um servidor multiplayer Roblox real**.
 
 O log da suíte geral registra 5.449 adornos. Os últimos ajustes adicionaram a lâmina inacabada decorativa aos ferreiros/artesãos e alternância de organização para comerciantes: a recompilação e a execução V2 posteriores registram o total final de **5.467**, sem alterar o máximo de 100. O pacote e as prévias foram reconstruídos após esses ajustes.
 
-Evidências: [suite geral](evidence/full-check.log), [V2 isolado](evidence/v2-tests.log), [recompilação final](evidence/final-compile.log), [pacote](evidence/package.log), [preservação XML](evidence/preservation.log), [manifesto](../../delivery-npcs/visual-v2/MANIFEST.json) e [hashes dos Sources](PACKAGE_SOURCES.json).
+Evidências: [suite geral](evidence/full-check.log), [V2 isolado](evidence/v2-tests.log), [recompilação final](evidence/final-compile.log), [pacote](evidence/package.log), [preservação XML](evidence/preservation.log), [download GitHub](evidence/github-downloads.json), [manifesto](../../delivery-npcs/visual-v2/MANIFEST.json) e [hashes dos Sources](PACKAGE_SOURCES.json).
 
 ## Problemas encontrados e corrigidos durante a implementação
 

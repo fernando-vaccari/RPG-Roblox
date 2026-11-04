@@ -1,6 +1,6 @@
 # Atualização NPC Visual V2 — Windows 11
 
-[**Baixar Eldravyn-NPC-Overhaul-V2.rbxmx**](Eldravyn-NPC-Overhaul-V2.rbxmx?raw=1)
+[**Baixar Eldravyn-NPC-Overhaul-V2.rbxmx**](https://raw.githubusercontent.com/fernando-vaccari/RPG-Roblox/fa9bcccbec1fab5fcd68a441484a35407ca0766f/delivery-npcs/visual-v2/Eldravyn-NPC-Overhaul-V2.rbxmx)
 
 Modelo passivo de atualização para o Place que **já tem os NPCs Stage 2 instalados**. Inclui os visuais, controladores e atualizador; não contém mapa ou um novo jogo. A entrega Stage 2 foi preservada. Sem ZIP, instaladores ou assets pagos obrigatórios.
 

@@ -1,0 +1,35 @@
+{
+  "commit": "fa9bcccbec1fab5fcd68a441484a35407ca0766f",
+  "checked_at_utc": "2026-11-01T00:30:41.576712+00:00",
+  "checks": "Downloaded GitHub bytes equal local files; no antivirus or Studio execution",
+  "files": [
+    {
+      "file": "delivery-npcs/visual-v2/Eldravyn-NPC-Overhaul-V2.rbxmx",
+      "url": "https://raw.githubusercontent.com/fernando-vaccari/RPG-Roblox/fa9bcccbec1fab5fcd68a441484a35407ca0766f/delivery-npcs/visual-v2/Eldravyn-NPC-Overhaul-V2.rbxmx",
+      "status": 200,
+      "bytes": 88117,
+      "sha256": "5df96644973e6ad6094d96f73df2d5487a22eb2d35965dea772787c5e4dabb3c",
+      "content_type": "text/plain; charset=utf-8",
+      "content_disposition": null
+    },
+    {
+      "file": "delivery-npcs/visual-v2/MANIFEST.json",
+      "url": "https://raw.githubusercontent.com/fernando-vaccari/RPG-Roblox/fa9bcccbec1fab5fcd68a441484a35407ca0766f/delivery-npcs/visual-v2/MANIFEST.json",
+      "status": 200,
+      "bytes": 1102,
+      "sha256": "09c0b923b9383397e8f694c5594176adda0f1986a6a84501275cf3dd49ce23e3",
+      "content_type": "text/plain; charset=utf-8",
+      "content_disposition": null
+    },
+    {
+      "file": "docs/npc-v2/README.md",
+      "url": "https://raw.githubusercontent.com/fernando-vaccari/RPG-Roblox/fa9bcccbec1fab5fcd68a441484a35407ca0766f/docs/npc-v2/README.md",
+      "status": 200,
+      "bytes": 8654,
+      "sha256": "129ebc8abaa84b0822ce2dfe9d4e44f27c4d7114c9888b7707492f9e48c34462",
+      "content_type": "text/plain; charset=utf-8",
+      "content_disposition": null
+    }
+  ],
+  "rechecked_at_utc": "2026-11-04T23:30:41.782829+00:00"
+}
