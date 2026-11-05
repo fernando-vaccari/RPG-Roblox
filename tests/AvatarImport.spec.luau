@@ -21,6 +21,7 @@ test('conteúdo precisa de URI Roblox publicada; nenhuma URL arbitrária é acei
  for _,s in {'','rbxassetid://0','rbxtemp://12345','file:///tmp/a.mesh','https://other.example/model.mesh','rbxassetid://-1',1}do assert(not Frame.asset(s))end
 end)
 test('catálogo cobre 66 NPCs e 14 inimigos, sem preços ou probabilidades novos',function()
+ assert(Catalog.ArtRevision=='rounded-1')
  local npcs,enemies=0,0
  for id,key in Catalog.NPCs do npcs+=1;local def=Catalog.Models[key];assert(def.NPCId==id and #def.Bones==15 and def.Kind=='R15'and not def.Gold)end
  for kind,key in Catalog.Enemies do enemies+=1;assert(Catalog.Models[key].EnemyKind==kind)end

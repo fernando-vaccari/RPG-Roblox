@@ -1,4 +1,14 @@
-# Continuidade vigente — Avatar Style
+# Continuidade vigente — avatares arredondados
+
+Branch `codex/eldravyn-rounded-avatars-20261104`, base `ceea116`. Pedido atual: personagens mais arredondados no estilo Roblox. Leia `PROGRESSO_AVATARES_ARREDONDADOS.md` e `docs/avatar-rounded/README.md`.
+
+Geometria nova em `assets/avatars-rounded/source`, pacote separado em `delivery-npcs/avatar-rounded`. A biblioteca anterior permanece intacta. Use `EldravynRoundedAvatarUpgrade`; o catálogo/FBX identificam `rounded-1` para impedir misturas. Se Avatar anterior estiver aplicado, use o rollback do pacote anterior antes da nova instalação. Não regenerar continente ou modificar gameplay.
+
+Os builders atuais geram a revisão arredondada. Próxima validação externa: importação/publicação dos FBX na conta do dono, materiais/poses/rigs, diálogo/serviços, inimigos, salvar/reabrir/rollback e FPS no Studio/Windows 11. Prévia e FBX roundtrip são Blender offline; não alegar testes Roblox/Defender sem executá-los.
+
+---
+
+# Histórico — Avatar Style
 
 Branch `codex/eldravyn-avatar-style-20261104`, base `9a6564c`. Pedido atual: estilo de avatar Roblox conforme referência e inimigos temáticos; o visual V2 de peças primitivas foi rejeitado. Leia `PROGRESSO_AVATARES.md`, `docs/avatar-style/README.md` e `TESTS.md`.
 

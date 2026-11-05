@@ -20,10 +20,12 @@ end
 function Register.Apply(imported)
  editor();assert(typeof(imported)=='Instance' and imported~=workspace and imported:IsDescendantOf(game),'Selecione o Model de UM arquivo FBX importado, não o Workspace inteiro.')
  local samples,parts,seen,group={},{},{},nil
+ local revisionName='ELDRAVYN_ART_'..Catalog.ArtRevision:gsub('%W','_');local revisionFound=false
  for _,node in imported:GetDescendants()do
   assert(not node:IsA('LuaSourceContainer'),'O grupo importado contém scripts; somente o FBX original é aceito.')
   local marker=node.Name:match('^ELDRAVYN_CAL_([OXYZ])$')
-  if marker then assert(node:IsA('BasePart') and not samples[marker],'Marcador duplicado/inválido');samples[marker]=vec(node.Position)
+  if node.Name==revisionName then assert(node:IsA('BasePart')and not revisionFound,'Marcador de revisão duplicado/inválido');revisionFound=true
+  elseif marker then assert(node:IsA('BasePart') and not samples[marker],'Marcador duplicado/inválido');samples[marker]=vec(node.Position)
   elseif node:IsA('MeshPart') then
    local key,bone=node.Name:match('^(.-)__(.+)$');local def=key and Catalog.Models[key]
    assert(def and table.find(def.Bones,bone),'Nome de mesh desconhecido: '..node.Name..'. Preserve os nomes durante a importação.')
@@ -33,7 +35,7 @@ function Register.Apply(imported)
    parts[key]=parts[key]or{};parts[key][bone]=node
   end
  end
- assert(group,'Nenhuma malha de avatar encontrada');local basis=Frame.basis(samples)
+ assert(group,'Nenhuma malha de avatar encontrada');assert(revisionFound,'Revisão do FBX incompatível. Importe os arquivos arredondados desta entrega, preservando o marcador de revisão.');local basis=Frame.basis(samples)
  local count=0
  for key,def in Catalog.Models do if def.Group==group then
   assert(parts[key],'Modelo ausente: '..key);for _,bone in def.Bones do assert(parts[key][bone],'Peça ausente: '..key..'/'..bone)end;count+=1

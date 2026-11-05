@@ -1,6 +1,8 @@
 # Eldravyn: Rise of Shadows
 
-**Etapa vigente: Avatar Style (04/11/2026).** Malhas originais com visual de avatar Roblox para 66 NPCs e 14 tipos de inimigo: [FBX, integrador e instalação](docs/avatar-style/README.md), [prévia NPC](docs/avatar-style/previews/npcs.png), [criaturas](docs/avatar-style/previews/inimigos.png), [testes](docs/avatar-style/TESTS.md), [progresso](PROGRESSO_AVATARES.md). Importação/publicação dos assets no Studio do dono é necessária; nenhum ID foi inventado. Mapa e sistemas anteriores preservados.
+**Revisão vigente: avatares arredondados (`rounded-1`).** Cabeça/membros com perfis curvos e peitoral convexo: [comparação e instalação](docs/avatar-rounded/README.md), [FBX e integrador](delivery-npcs/avatar-rounded/README.md), [progresso](PROGRESSO_AVATARES_ARREDONDADOS.md). Mesmos NPCs, rigs e sistemas; importação real no Studio ainda necessária. A entrega Avatar anterior abaixo foi preservada.
+
+**Biblioteca Avatar anterior (04/11/2026).** Malhas originais com visual de avatar Roblox para 66 NPCs e 14 tipos de inimigo: [FBX, integrador e instalação](docs/avatar-style/README.md), [prévia NPC](docs/avatar-style/previews/npcs.png), [criaturas](docs/avatar-style/previews/inimigos.png), [testes](docs/avatar-style/TESTS.md), [progresso](PROGRESSO_AVATARES.md). Importação/publicação dos assets no Studio do dono é necessária; nenhum ID foi inventado. Mapa e sistemas anteriores preservados.
 
 **NPC Overhaul V2 (31/10/2026):** [pacote anterior `.rbxmx`](delivery-npcs/visual-v2/README.md), [instalação e rollback V2](docs/npc-v2/README.md), [progresso anterior](PROGRESSO_NPC_V2.md). Esta entrega foi preservada.
 

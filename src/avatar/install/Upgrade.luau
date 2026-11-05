@@ -32,11 +32,12 @@ end
 function Upgrade.Report()
  editor();local items=npcs();local registered=require(root.RegisterImported).Report()
  print('[Avatar] '..#items..' NPCs existentes. Aplique somente após registrar todos os grupos FBX.')
- return{NPCs=#items,Registered=registered,ArtVersion=workspace:GetAttribute('EldravynAvatarArtVersion'),StudioValidated=false}
+ return{NPCs=#items,Registered=registered,ArtVersion=workspace:GetAttribute('EldravynAvatarArtVersion'),ArtRevision=workspace:GetAttribute('EldravynAvatarRevision'),StudioValidated=false}
 end
 local function rollback(backup,strict)
  if strict then
   assert(backup:GetAttribute('State')=='Applied','Backup Avatar incompleto')
+  assert(backup:GetAttribute('ArtRevision')==Catalog.ArtRevision,'Use o pacote da revisão anterior para reverter antes de instalar a revisão arredondada.')
   for _,record in backup.Modules:GetChildren()do assert(record.Installed.Value and record.Installed.Value.Parent==record.TargetParent.Value and source(record.Installed.Value)==record:GetAttribute('InstalledSource'),'Módulo modificado após atualização; exporte suas mudanças antes de reverter.')end
   for _,record in backup.Models:GetChildren()do assert(record.NPC.Value and record.Visuals.Value and record.Visuals.Value.Parent==record.NPC.Value,'Camada V2 alterada depois do upgrade; restaure sua cópia antes de reverter.')end
   for _,record in backup.Sources:GetChildren()do assert(record.Value and record.Value.Parent and source(record.Value)==record:GetAttribute('Source'),'Biblioteca Avatar personalizada; exporte suas alterações antes de reverter.')end
@@ -57,7 +58,7 @@ local function rollback(backup,strict)
   local original=record:FindFirstChild('Original');if original then original.Name='EnemyService';original.Parent=record.TargetParent.Value end
  end
  for _,record in backup.Additions:GetChildren()do if record.Value then record.Value:Destroy()end end
- workspace:SetAttribute('EldravynAvatarArtVersion',nil);backup:SetAttribute('State','RolledBack');backup.Name='EldravynAvatarRollback_'..game:GetService('HttpService'):GenerateGUID(false)
+ workspace:SetAttribute('EldravynAvatarArtVersion',nil);workspace:SetAttribute('EldravynAvatarRevision',nil);backup:SetAttribute('State','RolledBack');backup.Name='EldravynAvatarRollback_'..game:GetService('HttpService'):GenerateGUID(false)
 end
 function Upgrade.Rollback()
  editor();local backup=SS:FindFirstChild('EldravynAvatarBackupV3');assert(backup,'Backup Avatar não encontrado');rollback(backup,true)
@@ -66,6 +67,7 @@ end
 function Upgrade.Apply()
  editor();local rows=npcs();local version=workspace:GetAttribute('EldravynAvatarArtVersion')
  if version==3 then
+  assert(workspace:GetAttribute('EldravynAvatarRevision')==Catalog.ArtRevision,'Outra revisão Avatar está instalada. Reverta pelo pacote anterior, depois registre as malhas arredondadas e aplique este pacote.')
   local backup=SS:FindFirstChild('EldravynAvatarBackupV3');assert(backup and backup:GetAttribute('State')=='Applied','Backup Avatar ausente')
   for _,row in rows do assert(row.NPC:GetAttribute('AvatarArtVersion')==3 and row.NPC:FindFirstChild('NPCV2Visuals'),'Instalação Avatar parcial')end
   assert(SS:FindFirstChild('EldravynEnemyAvatarLibrary')and game:GetService('ReplicatedStorage'):FindFirstChild('EldravynAvatarShared')and game:GetService('StarterPlayer').StarterPlayerScripts:FindFirstChild('EldravynAvatarClient'),'Dependência Avatar ausente; instalação parcial não será reaplicada.')
@@ -84,7 +86,7 @@ function Upgrade.Apply()
   end end)
   if not ok then for _,p in prepared do p:Destroy()end;error(err)end
  end
- local backup=folder('EldravynAvatarBackupV3',SS);backup:SetAttribute('State','Preparing');backup:SetAttribute('Mode',if base==nil then'Stage2'else'V2')
+ local backup=folder('EldravynAvatarBackupV3',SS);backup:SetAttribute('State','Preparing');backup:SetAttribute('ArtRevision',Catalog.ArtRevision);backup:SetAttribute('Mode',if base==nil then'Stage2'else'V2')
  folder('Models',backup);folder('Modules',backup);folder('Additions',backup);folder('Sources',backup)
  local ok,err=pcall(function()
   if base==nil then core.Apply()
@@ -111,7 +113,7 @@ function Upgrade.Apply()
    local new=root.EnemyServiceTemplate:Clone();new.Name='EnemyService';ref('Installed',new,record);record:SetAttribute('InstalledSource',source(new))
    local parent=enemy.Parent;enemy.Name='Original';enemy.Parent=record;new.Parent=parent
   end
-  backup:SetAttribute('State','Applied');workspace:SetAttribute('EldravynAvatarArtVersion',3)
+  backup:SetAttribute('State','Applied');workspace:SetAttribute('EldravynAvatarArtVersion',3);workspace:SetAttribute('EldravynAvatarRevision',Catalog.ArtRevision)
  end)
  if not ok then
   local restored,reason=pcall(rollback,backup,false);for _,f in prepared do if not f.Parent then f:Destroy()end end

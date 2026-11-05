@@ -8,7 +8,10 @@ from pathlib import Path
 import argparse,hashlib,json,math,random,subprocess,sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
-from avatar_geometry import COLORS,SWATCHES,TILES,TILE,R15,QUAD,humanoid,creature
+from avatar_geometry import ART_REVISION,COLORS,SWATCHES,TILES,TILE,R15,QUAD,humanoid,creature
+SOURCE=ROOT/'assets/avatars-rounded/source'
+SCENE=ROOT/'build/avatar-rounded-scene.json'
+RENDERS=ROOT/'build/avatar-rounded-renders'
 
 def textures():
  from PIL import Image,ImageDraw
@@ -71,19 +74,19 @@ def author():
   index=counts.get('Dungeons',0)+i;m.origin=(6+(index%5)*8,0,6+(index//5)*9)
   record={'Key':key,'Label':definition['Name'],'Kind':m.kind,'Origin':m.origin,'Group':'Dungeons','Parts':m.parts,'Bones':list(m.parts),'EnemyKind':kind}
   models.append(record);catalog[key]={k:v for k,v in record.items()if k!='Parts'}
- scene={'Version':3,'Coordinates':'Roblox studs; x right, y up, front -z','Models':models,'R15':R15,'Quadruped':QUAD,'AtlasSwatches':SWATCHES}
- (ROOT/'build/avatar-scene.json').write_text(json.dumps(scene,ensure_ascii=False,separators=(',',':')))
- (ROOT/'assets/avatars/source/CATALOG.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n')
+ scene={'Version':3,'ArtRevision':ART_REVISION,'Coordinates':'Roblox studs; x right, y up, front -z','Models':models,'R15':R15,'Quadruped':QUAD,'AtlasSwatches':SWATCHES}
+ SCENE.write_text(json.dumps(scene,ensure_ascii=False,separators=(',',':')))
+ SOURCE.mkdir(parents=True,exist_ok=True);(SOURCE/'CATALOG.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n')
  # Single generated data contract used by importer, rigs, themes and tests.
  from npc_host import luau
- data={'Version':3,'Models':catalog,'R15':R15,'Quadruped':QUAD,'NPCs':{d['Id']:'NPC_'+d['Id']for d in defs['NPCs']},'Enemies':{k:'ENEMY_'+k for k in defs['Enemies']}}
+ data={'Version':3,'ArtRevision':ART_REVISION,'Models':catalog,'R15':R15,'Quadruped':QUAD,'NPCs':{d['Id']:'NPC_'+d['Id']for d in defs['NPCs']},'Enemies':{k:'ENEMY_'+k for k in defs['Enemies']}}
  (ROOT/'src/avatar/shared/AvatarCatalog.luau').write_text('-- Generated from original mesh authoring; gameplay catalog remains unchanged.\nreturn '+luau(json.loads(json.dumps(data)))+'\n')
  print('Authored',len(defs['NPCs']),'NPCs and',len(defs['Enemies']),'enemies;',sum(len(m['Parts'])for m in models),'mesh nodes.',flush=True)
 
 def worker(args):
  import bpy,bmesh
  from mathutils import Vector
- scene_data=json.loads((ROOT/'build/avatar-scene.json').read_text());out=ROOT/'assets/avatars/source';out.mkdir(exist_ok=True)
+ scene_data=json.loads(SCENE.read_text());out=SOURCE;out.mkdir(exist_ok=True)
  bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
  scene=bpy.context.scene;scene.unit_settings.system='METRIC';scene.unit_settings.scale_length=1.0
  material=bpy.data.materials.new('EldravynOriginalAtlas');material.use_nodes=True;nodes=material.node_tree.nodes;links=material.node_tree.links;shader=nodes.get('Principled BSDF')
@@ -110,6 +113,7 @@ def worker(args):
  markers=[]
  for name,pos in [('O',(0,.5,0)),('X',(1,.5,0)),('Y',(0,1.5,0)),('Z',(0,.5,1))]:
   bpy.ops.mesh.primitive_cube_add(size=.10,location=(pos[0],-pos[2],pos[1]));obj=bpy.context.object;obj.name='ELDRAVYN_CAL_'+name;markers.append(obj)
+ bpy.ops.mesh.primitive_cube_add(size=.10,location=(-1,0,.5));revision=bpy.context.object;revision.name='ELDRAVYN_ART_'+ART_REVISION.replace('-','_');markers.append(revision)
  if not args.preview_only:
   for group,objects in groups.items():
    bpy.ops.object.select_all(action='DESELECT')
@@ -117,6 +121,7 @@ def worker(args):
    bpy.context.view_layer.objects.active=objects[0]
    bpy.ops.export_scene.fbx(filepath=str(out/f'Eldravyn_{group}.fbx'),use_selection=True,object_types={'MESH'},use_mesh_modifiers=True,add_leaf_bones=False,axis_forward='-Z',axis_up='Y',path_mode='COPY',embed_textures=True,bake_anim=False)
   bpy.ops.object.select_all(action='SELECT');bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'build/EldravynAvatarLibrary.blend'))
+ if args.export_only:return
  # Gallery renders actual exported meshes, no external character reference.
  for group in groups.values():
   for obj in group:obj.hide_render=True
@@ -131,7 +136,7 @@ def worker(args):
  scene.render.resolution_x=720;scene.render.resolution_y=900;scene.render.resolution_percentage=100
  try:scene.view_settings.view_transform='AgX';scene.view_settings.look='AgX - Medium High Contrast'
  except TypeError:scene.view_settings.view_transform='Standard'
- preview=ROOT/'build/avatar-renders';preview.mkdir(exist_ok=True)
+ preview=RENDERS;preview.mkdir(exist_ok=True)
  keys=args.keys or ['NPC_Valoria_Ambient_Guard','NPC_Arkheim_Ambient_Guard','NPC_Valoria_Blacksmith','NPC_Valoria_Magic','ENEMY_Demon','ENEMY_Wolf']
  for index,key in enumerate(keys):
   record=next(r for r in scene_data['Models']if r['Key']==key);offset=Vector((record['Origin'][0],-record['Origin'][2],record['Origin'][1]))
@@ -144,13 +149,14 @@ def worker(args):
  (preview/'rendered.json').write_text(json.dumps(keys))
 
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--worker',action='store_true');p.add_argument('--preview-only',action='store_true');p.add_argument('--keys',nargs='*');args=p.parse_args(sys.argv[sys.argv.index('--')+1:]if '--'in sys.argv else None)
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--worker',action='store_true');p.add_argument('--preview-only',action='store_true');p.add_argument('--export-only',action='store_true');p.add_argument('--keys',nargs='*');args=p.parse_args(sys.argv[sys.argv.index('--')+1:]if '--'in sys.argv else None)
  if args.worker:worker(args);return
  textures();author()
  cmd=['blender','--background','--factory-startup','--threads','4','--python-exit-code','1','--python',str(Path(__file__).resolve()),'--','--worker']
  if args.preview_only:cmd+=['--preview-only']
+ if args.export_only:cmd+=['--export-only']
  if args.keys:cmd+=['--keys',*args.keys]
- with (ROOT/'build/avatar-blender.log').open('w')as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
+ with (ROOT/'build/avatar-rounded-blender.log').open('w')as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
  print('Meshes/UV/textures exported and offline previews rendered. Roblox import/publication NOT performed.')
 
 if __name__=='__main__':main()

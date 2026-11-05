@@ -14,6 +14,7 @@ local Art=require(avatar.Upgrade)
 local function near(a,b)assert(math.abs(a-b)<.00001,tostring(a)..' ~= '..tostring(b))end
 local function importedGroup(group)
  local f=Instance.new('Model');f.Name='Imported_'..group;f.Parent=workspace
+ local revision=Instance.new('Part');revision.Name='ELDRAVYN_ART_'..Catalog.ArtRevision:gsub('%W','_');revision.Parent=f
  local rotation=CFrame.new(123,71,-32)*CFrame.Angles(0,.7,0);local scale=100
  for key,v in {O={0,.5,0},X={1,.5,0},Y={0,1.5,0},Z={0,.5,1}}do
   local marker=Instance.new('MeshPart');marker.Name='ELDRAVYN_CAL_'..key;marker.CFrame=rotation*CFrame.new(Vector3.new(table.unpack(v))*scale);marker.Parent=f

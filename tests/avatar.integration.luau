@@ -9,9 +9,13 @@ end)
 test('importação rejeita código e assets não publicados sem mutação',function()
  local f=importedGroup('Valoria');local injected=Instance.new('Script');injected.Parent=f
  assert(not pcall(Register.Apply,f));injected:Destroy()
- local p;for _,n in f:GetChildren()do if n.MeshId~=''then p=n;break end end
+ local p;for _,n in f:GetChildren()do if n:IsA('MeshPart')and n.MeshId~=''then p=n;break end end
  local id=p.MeshId;p.MeshId='rbxtemp://not-published';assert(not pcall(Register.Apply,f));p.MeshId=id
  assert(not avatar:FindFirstChild('ImportedTemplates'));f:Destroy()
+end)
+test('FBX de outra revisão é rejeitado antes de registrar modelos',function()
+ local f=importedGroup('Valoria');f:FindFirstChild('ELDRAVYN_ART_'..Catalog.ArtRevision:gsub('%W','_')):Destroy()
+ assert(not pcall(Register.Apply,f)and not avatar:FindFirstChild('ImportedTemplates'));f:Destroy()
 end)
 test('quatro grupos: 80 modelos normalizados por escala/rotação; fontes intactas',function()
  local total=0
@@ -44,6 +48,7 @@ test('aplica meshes nas mesmas 66 instâncias e conserva serviços/identidade',f
 end)
 test('reaplicação idempotente e EnemyService original guardado',function()
  local count=#npcs:GetDescendants();assert(Art.Apply().Already and #npcs:GetDescendants()==count)
+ workspace:SetAttribute('EldravynAvatarRevision',nil);assert(not pcall(Art.Apply));assert(#npcs:GetDescendants()==count);workspace:SetAttribute('EldravynAvatarRevision',Catalog.ArtRevision)
  assert(enemyBefore.Parent~=game.ServerScriptService.MedievalServer.Services)
  assert(game.ServerStorage.EldravynEnemyAvatarLibrary:GetAttribute('Ready'))
  local shared=game.ReplicatedStorage.EldravynAvatarShared;shared.Parent=nil;assert(not pcall(Art.Apply));shared.Parent=game.ReplicatedStorage

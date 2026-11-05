@@ -6,7 +6,8 @@ import hashlib,json,subprocess,xml.etree.ElementTree as ET
 from pathlib import Path
 from npc_host import ROOT,BIN
 from npc_placements import index_tree
-OUT=ROOT/'delivery-npcs/avatar-style'
+OUT=ROOT/'delivery-npcs/avatar-rounded'
+SOURCE=ROOT/'assets/avatars-rounded/source'
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def sources(root):return sorted((n.get('class'),n.findtext('./Properties/*[@name="Source"]'))for n in root.iter('Item')if n.get('class')in('ModuleScript','LocalScript','Script'))
 def build():
@@ -18,8 +19,10 @@ def build():
  base=subprocess.check_output(['git','show','9a6564c:'+allowed],cwd=ROOT)
  assert (ROOT/'src/avatar/install/EnemyServiceBaseline.luau').read_bytes()==base
  assert sha(ROOT/'delivery-npcs/visual-v2/Eldravyn-NPC-Overhaul-V2.rbxmx')=='5df96644973e6ad6094d96f73df2d5487a22eb2d35965dea772787c5e4dabb3c'
- OUT.mkdir(parents=True,exist_ok=True);output=OUT/'Eldravyn-Avatar-Integration.rbxmx'
- subprocess.run([str(BIN/'rojo'),'build','avatar-style.project.json','--output',str(output)],cwd=ROOT,check=True)
+ previous=json.loads((ROOT/'delivery-npcs/avatar-style/MANIFEST.json').read_text())
+ for item in previous['files']:assert sha(ROOT/item['path'])==item['sha256'],('Previous avatar delivery changed',item['path'])
+ OUT.mkdir(parents=True,exist_ok=True);output=OUT/'Eldravyn-Rounded-Avatar-Integration.rbxmx'
+ subprocess.run([str(BIN/'rojo'),'build','avatar-rounded.project.json','--output',str(output)],cwd=ROOT,check=True)
  root=ET.parse(output).getroot();items=list(root.iter('Item'));referents=[i.get('referent')for i in items];assert len(referents)==len(set(referents))
  for r in root.iter('Ref'):assert r.text in('null','nil',None)or r.text in referents
  scripts=[i for i in items if i.get('class')in('Script','LocalScript')]
@@ -29,13 +32,13 @@ def build():
  assert root.find('.//Content[@name="MeshId"]')is None
  known={p.read_text()for p in(ROOT/'src').rglob('*.luau')}
  for cls,text in sources(root):assert text in known,('Unknown source',cls)
- project=ROOT/'build/avatar-roundtrip.project.json';project.write_text(json.dumps({'name':'AvatarRoundtrip','tree':{'$className':'DataModel','ServerStorage':{'$className':'ServerStorage','EldravynAvatarUpgrade':{'$path':str(output)}}}}))
- roundtrip=ROOT/'build/avatar-roundtrip.rbxlx';subprocess.run([str(BIN/'rojo'),'build',str(project),'--output',str(roundtrip)],cwd=ROOT,check=True)
+ project=ROOT/'build/avatar-rounded-roundtrip.project.json';project.write_text(json.dumps({'name':'AvatarRoundtrip','tree':{'$className':'DataModel','ServerStorage':{'$className':'ServerStorage','EldravynRoundedAvatarUpgrade':{'$path':str(output)}}}}))
+ roundtrip=ROOT/'build/avatar-rounded-roundtrip.rbxlx';subprocess.run([str(BIN/'rojo'),'build',str(project),'--output',str(roundtrip)],cwd=ROOT,check=True)
  assert sources(root)==sources(ET.parse(roundtrip).getroot())
- data=json.loads((ROOT/'assets/avatars/source/CATALOG.json').read_text());fbx=json.loads((ROOT/'build/avatar-fbx-roundtrip.json').read_text())
- files=[output,*sorted((ROOT/'assets/avatars/source').glob('*.fbx')),*sorted((ROOT/'assets/avatars/textures').glob('*.png'))]
+ data=json.loads((SOURCE/'CATALOG.json').read_text());fbx=json.loads((ROOT/'build/avatar-rounded-fbx-roundtrip.json').read_text())
+ files=[output,*sorted(SOURCE.glob('*.fbx')),*sorted((ROOT/'assets/avatars/textures').glob('*.png'))]
  assert len(files)==8 and len(data)==80
- report={'version':3,'NPCs':66,'EnemyTypes':14,'mesh_nodes':sum(r['meshes']for r in fbx['groups']),
+ report={'version':3,'art_revision':fbx['art_revision'],'previous_avatar_delivery_preserved':True,'NPCs':66,'EnemyTypes':14,'mesh_nodes':sum(r['meshes']for r in fbx['groups']),
   'triangles_all_source_models':sum(r['triangles']for r in fbx['groups']),'fbx_roundtrip':fbx,'map_modified':False,
   'old_place_sha256':inspect['sha256'],'previous_v2_package_preserved':True,'protected_sources_unchanged':len(inspect['protected_sources'])-1,
   'existing_gameplay_hook':allowed,'published_Roblox_assets':False,'published_asset_ids':[],

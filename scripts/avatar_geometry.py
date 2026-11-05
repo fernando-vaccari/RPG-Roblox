@@ -27,6 +27,8 @@ COLORS={
  'WraithFace':(28,23,42),'GreenEye':(100,189,140),'Crimson':(152,34,42),'Rope':(146,117,73),
 }
 SWATCHES=list(COLORS);TILES=8;TILE=128
+ART_REVISION='rounded-1'
+HEAD_RINGS=((4.72,1.04,.81),(4.74,1.18,.93),(4.80,1.30,1.02),(4.89,1.33,1.04),(5.60,1.33,1.04),(5.68,1.29,1.01),(5.74,1.17,.92),(5.76,1.04,.81))
 PALETTES={'Valoria':('ClothNavy','Gold'),'Arkheim':('ClothRed','Bronze'),
  'Eldoria':('ClothGreen','Silver'),'Durakh':('ClothBrown','Bronze'),'Asterion':('ClothPurple','Silver'),
  'MalgorthDepths':('ClothRed','BlackSteel'),'FallenSanctum':('ClothNavy','Silver')}
@@ -45,6 +47,17 @@ def rotate(p,angles):
  return x,y,z
 def tile_uv(mat,u,v):
  i=SWATCHES.index(mat);return ((i%TILES+.035+u*.93)/TILES,1-(i//TILES+.035+(1-v)*.93)/TILES)
+
+def chest_surface(x,y):
+ """Convex cuirass surface shared by its plate, border and engraved relief."""
+ return -.69+.21*(x/.84)**2+.07*((y-4)/.8)**2
+
+def head_front(x,y):
+ if y<HEAD_RINGS[0][0]or y>HEAD_RINGS[-1][0]:return None
+ for a,b in zip(HEAD_RINGS,HEAD_RINGS[1:]):
+  if a[0]<=y<=b[0]:
+   t=(y-a[0])/(b[0]-a[0]);rx=(a[1]+(b[1]-a[1])*t)/2;rz=(a[2]+(b[2]-a[2])*t)/2
+   return -rz*math.sqrt(max(0,1-(x/rx)**2)) if abs(x)<rx else None
 
 class Model:
  def __init__(self,key,label,kind='R15',origin=(0,0,0)):
@@ -70,6 +83,16 @@ class Model:
   x,y,z=center;w,h,d=size;b=min(bevel,h*.25,w*.25,d*.25)
   self.loft(bone,[(y-h/2,w-b*2,d-b*2,x,z),(y-h/2+b,w,d,x,z),
    (y+h/2-b,w,d,x,z),(y+h/2,w-b*2,d-b*2,x,z)],mat)
+ def soft_volume(self,bone,center,size,mat,cap=.18,n=24):
+  # Elliptical cross-sections with curved end fillets, not a bevelled cuboid.
+  x,y,z=center;w,h,d=size;b=min(cap,h*.35,w*.35,d*.35);rings=[]
+  for i in range(4):
+   a=(math.pi/2)*(1-i/3);r=b*(1-math.cos(a))
+   rings.append((y-h/2+b-b*math.sin(a),w-2*r,d-2*r,x,z))
+  for i in range(4):
+   a=(math.pi/2)*(i/3);r=b*(1-math.cos(a))
+   rings.append((y+h/2-b+b*math.sin(a),w-2*r,d-2*r,x,z))
+  self.loft(bone,rings,mat,n=n,power=1)
  def sphere(self,bone,c,size,mat,rings=7,n=16):
   x,y,z=c;w,h,d=size
   self.loft(bone,[(y+math.cos(math.pi-i*math.pi/rings)*h/2,
@@ -87,8 +110,8 @@ class Model:
   for i in range(len(points)-1):
    for k in range(n):faces.append([i*n+k,i*n+(k+1)%n,(i+1)*n+(k+1)%n,(i+1)*n+k])
   faces.append(list(range((len(points)-1)*n,len(points)*n)));self.mesh(bone,verts,faces,mat)
- def plaque(self,bone,outline,z,depth,mat):
-  v=[(x,y,z+dz)for dz in (-depth/2,depth/2)for x,y in outline];n=len(outline)
+ def plaque(self,bone,outline,z,depth,mat,surface=None):
+  v=[(x,y,(surface(x,y)if surface else z)+dz)for dz in (-depth/2,depth/2)for x,y in outline];n=len(outline)
   self.mesh(bone,v,[list(range(n-1,-1,-1)),list(range(n,2*n))]+[[i,(i+1)%n,(i+1)%n+n,i+n]for i in range(n)],mat)
  def face(self,mat='Face'):
   # UV the actual head surface. No raised rectangle or 3D eyeballs.
@@ -97,15 +120,18 @@ class Model:
    points=[item['Vertices'][v]for v in face]
    if max(p[2]for p in points)<.001 and min(p[2]for p in points)<-.19 and max(p[1]for p in points)-min(p[1]for p in points)>.01:
     item['Materials'][i]=mat;item['UV'][i]=[tile_uv(mat,max(0,min(1,(p[0]+.665)/1.33)),max(0,min(1,(p[1]-4.72)/1.04)))for p in points]
- def hair(self,style='Short',mat='HairBrown'):
+ def hair(self,style='Short',mat='HairBrown',fringe=True):
   self.sphere('Head',(0,5.67,.06),(1.43,.51,1.13),mat,rings=10,n=24)
   for side in (-1,1):
    self.tube('Head',[(side*.49,5.74,.05),(side*.66,5.52,.01),(side*.64,5.22,.03)],[(.18,.20),(.13,.18),(.04,.08)],mat)
-  for i in range(7):
+  for i in range(7 if fringe else 0):
    x=(i-3)*.16
    a,b,c=(x-.16,5.83,.02),(x-.05,5.74,-.30),(x+.10,5.56-(i%3)*.035,-.48)
    points=[add(add(mul(a,(1-t)**2),mul(b,2*t*(1-t))),mul(c,t*t))for t in [j/9 for j in range(10)]]
-   self.tube('Head',points,[(.15*(1-j/10)**.55,.12*(1-j/10)**.55)for j in range(10)],mat,n=12)
+   radii=[(.15*(1-j/10)**.55,.12*(1-j/10)**.55)for j in range(10)]
+   # Fit the lock to the cylindrical forehead; buried middles left isolated tips.
+   points=[(x,y,min(z,front-.015-r[1]*.4)if(front:=head_front(x,y))is not None else z)for(x,y,z),r in zip(points,radii)]
+   self.tube('Head',points,radii,mat,n=12)
   if style=='Braided':
    for side in (-1,1):
     for i in range(10):
@@ -114,12 +140,13 @@ class Model:
   if style=='Long':
    for i in range(5):
     x=(i-2)*.24;self.tube('Head',[(x,5.62,.43),(x*1.15,5.04,.54),(x*1.1,4.56,.55)],[(.19,.16),(.18,.12),(.03,.04)],mat)
- def curve(self,bone,center,scale,mat='Gold',mirror=1):
+ def curve(self,bone,center,scale,mat='Gold',mirror=1,surface=None):
   # Original engraved scroll, a tapered spiral rather than a copied emblem.
   pts=[]
   for i in range(20):
    t=i/19;a=t*math.tau*1.15;r=scale*(1-t*.76)
-   pts.append((center[0]+mirror*math.cos(a)*r,center[1]+math.sin(a)*r,center[2]))
+   x,y=center[0]+mirror*math.cos(a)*r,center[1]+math.sin(a)*r
+   pts.append((x,y,surface(x,y)-.025 if surface else center[2]))
   self.tube(bone,pts,[.024*(1-i/26)for i in range(20)],mat,n=6)
  def collar(self,cloth,metal):
   self.tube('UpperTorso',[(-.6,4.59,-.40),(-.26,4.64,-.51),(0,4.44,-.57),(.26,4.64,-.51),(.6,4.59,-.40)],.045,metal)
@@ -149,22 +176,34 @@ class Model:
   self.tube('LeftLowerArm',[(a,b,-.54)for a,b in outline+[outline[0]]],.035,metal)
   for side in (-1,1):self.curve('LeftLowerArm',(x+side*.17,y+.03,-.56),.17,metal,side)
  def armor(self,cloth,metal):
-  outline=[(-.83,4.45),(-.51,4.62),(-.25,4.48),(.25,4.48),(.51,4.62),(.83,4.45),(.67,3.48),(0,3.36),(-.67,3.48)]
-  self.plaque('UpperTorso',outline,-.59,.17,cloth)
-  self.tube('UpperTorso',[(x,y,-.70)for x,y in outline+[outline[0]]],.035,metal)
+  # Closed convex breastplate. The former extruded flat polygon read as a box.
+  rows=[(3.36,.08),(3.40,.30),(3.47,.56),(3.58,.70),(3.95,.77),(4.30,.82),(4.44,.79),(4.48,.53)]
+  front=[];n=17
+  for j,(y,w)in enumerate(rows):
+   for i in range(n):
+    u=i/(n-1)*2-1;x=u*w;yy=y+(.11*u*u if j==len(rows)-1 else 0)
+    front.append((x,yy,chest_surface(x,yy)))
+  length=len(front);vertices=front+[(x,y,z+.11)for x,y,z in front];faces=[]
+  for j in range(len(rows)-1):
+   for i in range(n-1):
+    f=[j*n+i,j*n+i+1,(j+1)*n+i+1,(j+1)*n+i];faces.append(f);faces.append([v+length for v in reversed(f)])
+  perimeter=list(range(n))+[j*n+n-1 for j in range(1,len(rows))]+list(range(length-2,length-n-1,-1))+[j*n for j in range(len(rows)-2,0,-1)]
+  for i,a in enumerate(perimeter):b=perimeter[(i+1)%len(perimeter)];faces.append([a,b,b+length,a+length])
+  self.mesh('UpperTorso',vertices,faces,cloth)
+  self.tube('UpperTorso',[(front[i][0],front[i][1],front[i][2]-.015)for i in perimeter+[perimeter[0]]],.035,metal)
   for side in (-1,1):
-   self.curve('UpperTorso',(side*.36,4.02,-.71),.25,metal,side)
-   self.curve('UpperTorso',(side*.35,4.39,-.72),.10,metal,side)
+   self.curve('UpperTorso',(side*.36,4.02,-.71),.25,metal,side,surface=chest_surface)
+   self.curve('UpperTorso',(side*.35,4.39,-.72),.10,metal,side,surface=chest_surface)
    arm=('Left'if side<0 else 'Right')+'UpperArm'
-   self.loft(arm,[(4.18,.94,1.10,side*1.36,.04),(4.30,1.03,1.16,side*1.36,.04),(4.59,.97,1.14,side*1.31,.03),(4.70,.73,.86,side*1.26,.02)],cloth,power=.7)
+   self.loft(arm,[(4.18,.92,1.08,side*1.36,.04),(4.24,1.0,1.14,side*1.36,.04),(4.35,1.03,1.16,side*1.35,.04),(4.51,.98,1.12,side*1.32,.03),(4.64,.81,.96,side*1.29,.02),(4.72,.53,.65,side*1.26,.02),(4.75,.23,.30,side*1.25,.02)],cloth,n=24,power=1)
    self.tube(arm,[(side*1.36+math.cos(a)*.48,4.28,.04+math.sin(a)*.57)for a in [i*math.tau/24 for i in range(25)]],.035,metal)
    self.curve(arm,(side*1.37,4.48,-.55),.13,metal,side)
    fore=('Left'if side<0 else 'Right')+'LowerArm';leg=('Left'if side<0 else 'Right')+'LowerLeg'
-   self.rounded(fore,(side*1.35,2.96,-.35),(.62,.62,.16),'Steel',.06)
-   self.curve(fore,(side*1.35,3.0,-.445),.16,metal,side)
-   self.rounded(leg,(side*.5,.97,-.38),(.59,.77,.14),'Steel',.08)
+   self.soft_volume(fore,(side*1.35,2.96,0),(.70,.68,.86),'Steel',.09)
+   self.curve(fore,(side*1.35,3.0,-.445),.16,metal,side,surface=lambda x,y,s=side:-.43*math.sqrt(max(.01,1-((x-s*1.35)/.35)**2)))
+   self.soft_volume(leg,(side*.5,.97,-.34),(.60,.80,.26),'Steel',.09)
    self.tube(leg,[(side*.5-.24,.67,-.47),(side*.5,.60,-.49),(side*.5+.24,.67,-.47)],.025,metal)
-  self.plaque('UpperTorso',[(-.15,4.30),(0,4.43),(.15,4.30),(0,4.03)],-.76,.035,metal)
+  self.plaque('UpperTorso',[(-.15,4.30),(0,4.43),(.15,4.30),(0,4.03)],-.76,.035,metal,surface=lambda x,y:chest_surface(x,y)-.04)
  def helmet(self,cloth,metal):
   self.loft('Head',[(5.49,1.46,1.15,0,.02),(5.72,1.47,1.17,0,.03),(5.92,1.22,1.02,0,.06),(6.00,.80,.68,0,.06),(6.04,.12,.12,0,.06)],cloth,n=24,power=1)
   self.tube('Head',[(-.67,5.53,-.39),(-.42,5.59,-.58),(0,5.62,-.61),(.42,5.59,-.58),(.67,5.53,-.39)],.04,metal)
@@ -185,29 +224,29 @@ def humanoid(key,label,role,city='Valoria',variant=0,enemy=None):
  if role=='Healer':cloth='White';metal='Gold'
  if role=='GuildMaster':hair='HairSilver'
  if role in ('Inn','Farmer'):hair='HairBlond'
- # Tapered, bevelled avatar body; distinct from boxes or stacked cylinders.
- m.loft('UpperTorso',[(3.32,1.46,.76,0,0),(3.45,1.66,.88,0,0),(4.32,2.0,1.0,0,0),(4.63,1.90,.91,0,0),(4.69,1.55,.78,0,0)],'Mail'if armor else cloth)
- m.rounded('LowerTorso',(0,3.0,0),(1.64,.86,.83),cloth,.12)
- m.loft('Head',[(4.72,1.10,.87,0,0),(4.80,1.33,1.04,0,0),(5.65,1.33,1.04,0,0),(5.76,1.12,.86,0,0)],skin,n=32,power=.65)
+ # Rounded avatar silhouettes; the unchanged R15 centers remain the attachment contract.
+ m.loft('UpperTorso',[(3.32,1.44,.75,0,0),(3.40,1.62,.85,0,0),(3.66,1.76,.94,0,0),(4.05,1.96,1.01,0,0),(4.34,2.0,1.0,0,0),(4.53,1.91,.93,0,0),(4.64,1.76,.85,0,0),(4.69,1.54,.76,0,0)],'Mail'if armor else cloth,n=24,power=1)
+ m.soft_volume('LowerTorso',(0,3.0,0),(1.64,.86,.83),cloth,.16)
+ m.loft('Head',[(y,w,d,0,0)for y,w,d in HEAD_RINGS],skin,n=32,power=1)
  for side in (-1,1):
   name='Left'if side<0 else 'Right';x=side*1.35
-  m.loft(name+'UpperArm',[(3.46,.61,.63,x,0),(3.53,.75,.73,x,0),(4.43,.82,.83,x,0),(4.55,.63,.66,x,0)],'Mail'if armor else cloth)
-  m.loft(name+'LowerArm',[(2.52,.57,.59,x,0),(2.62,.65,.67,x,0),(3.38,.69,.69,x,0),(3.45,.60,.61,x,0)],'Mail'if armor else skin if role in ('Blacksmith','Artisan','Farmer') else cloth)
+  m.loft(name+'UpperArm',[(3.44,.60,.62,x,0),(3.52,.68,.70,x,0),(3.78,.79,.81,x,0),(4.20,.82,.84,x,0),(4.41,.77,.80,x,0),(4.53,.63,.67,x,0),(4.59,.39,.44,x,0),(4.61,.18,.22,x,0)],'Mail'if armor else cloth,n=24,power=1)
+  m.loft(name+'LowerArm',[(2.52,.54,.57,x,0),(2.58,.62,.65,x,0),(2.76,.68,.71,x,0),(3.08,.70,.72,x,0),(3.32,.67,.68,x,0),(3.40,.62,.64,x,0),(3.45,.59,.61,x,0)],'Mail'if armor else skin if role in ('Blacksmith','Artisan','Farmer') else cloth,n=24,power=1)
   glove='Leather'if armor or role in ('Blacksmith','Artisan') else skin
-  m.rounded(name+'Hand',(x,2.30,-.01),(.53,.43,.56),glove,.13)
+  m.soft_volume(name+'Hand',(x,2.30,-.01),(.55,.44,.57),glove,.13)
   for finger in range(4):m.tube(name+'Hand',[(x-.19+finger*.125,2.20,-.08),(x-.19+finger*.125,2.10,-.10)],.069,glove,n=8)
   m.sphere(name+'Hand',(x-side*.28,2.31,-.10),(.18,.30,.23),glove,rings=5,n=10)
   for bone,y,h,w,d in [('UpperLeg',1.95,1.18,.79,.78),('LowerLeg',.9,1.03,.70,.68)]:
-   m.loft(name+bone,[(y-h/2,w*.84,d*.84,side*.5,0),(y-h/2+.07,w,d,side*.5,0),(y+h/2-.07,w,d,side*.5,0),(y+h/2,w*.88,d*.9,side*.5,0)],cloth if robe else 'BlackSteel')
-  m.rounded(name+'Foot',(side*.5,.24,-.19),(.79,.48,1.26),'Leather',.12)
-  m.rounded(name+'LowerLeg',(side*.5,.76,.015),(.73,.77,.73),'Leather',.06)
+   m.loft(name+bone,[(y-h/2,w*.82,d*.84,side*.5,0),(y-h/2+.04,w*.91,d*.92,side*.5,0),(y-h/2+.15,w,d,side*.5,0),(y+.15,w,d,side*.5,0),(y+h/2-.07,w*.93,d*.95,side*.5,0),(y+h/2,w*.85,d*.88,side*.5,0)],cloth if robe else 'BlackSteel',n=24,power=1)
+  m.soft_volume(name+'Foot',(side*.5,.24,-.19),(.80,.48,1.28),'Leather',.15)
+  m.soft_volume(name+'LowerLeg',(side*.5,.76,.015),(.73,.77,.73),'Leather',.12)
   m.tube(name+'LowerLeg',[(side*.5+math.cos(a)*.375,1.02,math.sin(a)*.375)for a in [i*math.tau/20 for i in range(21)]],.026,metal)
- m.rounded('LowerTorso',(0,3.08,0),(1.74,.20,.92),'Leather',.04)
+ m.soft_volume('LowerTorso',(0,3.08,0),(1.74,.20,.92),'Leather',.04)
  m.rounded('LowerTorso',(0,3.08,-.51),(.30,.25,.08),metal,.025)
  m.rounded('LowerTorso',(.67,2.79,-.40),(.43,.52,.28),'LeatherLight',.09)
  m.tube('UpperTorso',[(-.65,4.49,-.48),(-.18,3.91,-.56),(.54,3.39,-.46)],.048,'Leather')
  m.face('DemonFace'if enemy in ('Demon','Malgorth') else 'SkullFace'if enemy=='Skeleton' else 'WraithFace'if enemy in ('Shadow','NoctharBoss','VesperaBoss') else 'Face')
- if enemy!='Skeleton':m.hair('Long'if robe else 'Braided'if role in ('Inn','Reception') else 'Short',hair)
+ if enemy!='Skeleton':m.hair('Long'if robe else 'Braided'if role in ('Inn','Reception') else 'Short',hair,fringe=role not in ('Guard','Knight'))
  if armor:m.armor(cloth,metal)
  else:
   m.collar(cloth,metal)
@@ -254,7 +293,7 @@ def humanoid(key,label,role,city='Valoria',variant=0,enemy=None):
  if enemy in ('Demon','Malgorth'):
   for s in (-1,1):
    m.tube('Head',[(s*.51,5.65,.18),(s*.80,6.02,.22),(s*.80,6.42,.1),(s*.61,6.58,-.04)],[.19,.15,.08,.006],'Bone',n=10)
-   m.curve('UpperTorso',(s*.33,4.04,-.73),.26,'Gold',s)
+   m.curve('UpperTorso',(s*.33,4.04,-.73),.26,'Gold',s,surface=chest_surface)
   m.tube('LowerTorso',[(0,2.95,.43),(.35,2.0,.80),(.71,1.8,1.0),(.94,2.15,1.05)],[.11,.08,.05,.008],'DemonSkin')
  if enemy=='Malgorth':
   for s in (-1,1):

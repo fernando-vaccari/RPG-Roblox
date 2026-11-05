@@ -1,0 +1,10 @@
+test_arm_has_oval_cross_section (__main__.RoundedGeometry.test_arm_has_oval_cross_section) ... ok
+test_cuirass_curves_in_depth (__main__.RoundedGeometry.test_cuirass_curves_in_depth) ... ok
+test_head_is_cylindrical_not_superellipse_box (__main__.RoundedGeometry.test_head_is_cylindrical_not_superellipse_box) ... ok
+test_meshes_uv_and_budget (__main__.RoundedGeometry.test_meshes_uv_and_budget) ... ok
+test_rig_ids_origins_roles_unchanged (__main__.RoundedGeometry.test_rig_ids_origins_roles_unchanged) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.711s
+
+OK

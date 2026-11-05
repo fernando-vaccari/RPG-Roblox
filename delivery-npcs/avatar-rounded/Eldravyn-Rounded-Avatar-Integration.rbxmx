@@ -1,0 +1,2293 @@
+<roblox version="4">
+  <Item class="Model" referent="0">
+    <Properties>
+      <string name="Name">EldravynRoundedAvatarUpgrade</string>
+      <bool name="NeedsPivotMigration">false</bool>
+    </Properties>
+    <Item class="ModuleScript" referent="1">
+      <Properties>
+        <string name="Name">AvatarAppearance</string>
+        <string name="Source"><![CDATA[-- True imported mesh shells bound to the existing R15, without replacing its rig.
+local A={}
+local Catalog=require(script.Parent.Shared.AvatarCatalog)
+function A.build(rig,style)
+ local key=Catalog.NPCs[style.Id];local def=key and Catalog.Models[key]
+ assert(def and def.Role==style.Role and def.City==style.City,'Tema não registrado para '..tostring(style.Id))
+ local templates=script.Parent:FindFirstChild('ImportedTemplates');local template=templates and templates:FindFirstChild(key)
+ assert(template,'Importe e registre o FBX antes de atualizar: '..tostring(key))
+ local folder=Instance.new('Folder');folder.Name='NPCV2Visuals';folder:SetAttribute('NPCVisualOwner',2);folder:SetAttribute('AvatarArtVersion',3)
+ local changes={};local count=0
+ local ok,err=pcall(function()
+  local scale=rig.Humanoid.Parent:GetScale();assert(scale>0 and scale<10,'Escala do avatar incompatível')
+  for _,bone in def.Bones do
+   local source=template:FindFirstChild(bone);local body=rig.Bodies[bone];assert(source and source:IsA('MeshPart') and body,'Peça registrada incompatível: '..bone)
+   local localFrame=CFrame.new(table.unpack(Catalog.R15[bone])):ToObjectSpace(source.CFrame)
+   local components={localFrame:GetComponents()};for i=1,3 do components[i]*=scale end
+   local mesh=source:Clone();mesh.Name='Avatar_'..bone;mesh.Size=source.Size*scale;mesh.CFrame=body.CFrame*CFrame.new(table.unpack(components));mesh.Anchored=false;mesh.CanCollide=false;mesh.CanQuery=false;mesh.CanTouch=false;mesh.Massless=true
+   local weld=Instance.new('WeldConstraint');weld.Part0=body;weld.Part1=mesh;weld.Name='AvatarWeld';weld.Parent=mesh;mesh.Parent=folder;count+=1
+  end
+  for name,body in rig.Bodies do if name~='HumanoidRootPart' then changes[body]={Transparency=1}end end
+ end)
+ if not ok then folder:Destroy();error(err)end
+ folder:SetAttribute('VisualPartCount',count);folder:SetAttribute('VisualStyle',key)
+ return {Folder=folder,Changes=changes,Count=count}
+end
+return A
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="Folder" referent="2">
+      <Properties>
+        <string name="Name">Client</string>
+      </Properties>
+      <Item class="LocalScript" referent="3">
+        <Properties>
+          <string name="Name">Bootstrap</string>
+          <bool name="Disabled">true</bool>
+          <string name="Source"><![CDATA[local controller=require(script.Parent.EnemyAnimationClient).start()
+script.Destroying:Connect(function()controller:destroy()end)
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="4">
+        <Properties>
+          <string name="Name">EnemyAnimationClient</string>
+          <string name="Source"><![CDATA[-- One bounded cosmetic scheduler. Never starts AI or sends combat intentions.
+local Run=game:GetService('RunService')
+local Players=game:GetService('Players')
+local Collection=game:GetService('CollectionService')
+local Animation=require(script.Parent.NPCAnimationController)
+local Controller={Current=nil}
+function Controller.start()
+ if Controller.Current then return Controller.Current end
+ local self={Entries={},Connections={},Selected={},Scan=0,Stopped=false};Controller.Current=self
+ function self:remove(model)
+  local e=self.Entries[model];if not e then return end
+  e.Animation:destroy();for joint in e.Joints do if joint.Parent then joint.Transform=CFrame.new()end end
+  if e.Blob and e.Blob.Parent then e.Blob.Size=e.BlobSize end
+  self.Entries[model]=nil;self.Selected[model]=nil
+ end
+ function self:add(model)
+  if self.Entries[model]or not model:IsA('Model')or model:GetAttribute('AvatarArtVersion')~=3 or not model:GetAttribute('AvatarEnemyKind')or not model.PrimaryPart then return end
+  local h=model:FindFirstChildOfClass('Humanoid');local visuals=model:FindFirstChild('AvatarEnemyVisuals');if not h or not visuals then return end
+  local e={Model=model,Root=model.PrimaryPart,Humanoid=h,Kind=model:GetAttribute('AvatarRigKind'),Animation=Animation.new(model),Joints={},Last=model.PrimaryPart.Position,Accum=0}
+  for _,node in model:GetDescendants()do if node:IsA('Motor6D')and node.Name:match('^Avatar_')then e.Joints[node]=node.Name:sub(8)end end
+  e.Blob=visuals:FindFirstChild('Avatar_Blob');if e.Blob then e.BlobSize=e.Blob.Size end
+  self.Entries[model]=e
+ end
+ function self:scan()
+  for model in self.Entries do if not model:IsDescendantOf(workspace)then self:remove(model)end end
+  local player=Players.LocalPlayer;local root=player and player.Character and player.Character:FindFirstChild('HumanoidRootPart');local rows={}
+  if root then for model,e in self.Entries do local d=(e.Root.Position-root.Position).Magnitude;if d<100 and e.Humanoid.Health>0 then table.insert(rows,{Model=model,Distance=d})end end end
+  table.sort(rows,function(a,b)return a.Distance<b.Distance end)
+  local nextSelection={};for i=1,math.min(10,#rows)do nextSelection[rows[i].Model]=true end
+  for model in self.Selected do if not nextSelection[model]and self.Entries[model]then self.Entries[model].Animation:stop(true)end end
+  self.Selected=nextSelection
+ end
+ function self:step(dt,now)
+  if self.Stopped then return end;self.Scan+=dt;if self.Scan>=1 then self.Scan=0;self:scan()end
+  for model in self.Selected do
+   local e=self.Entries[model];if not e then continue end;e.Accum+=dt
+   if e.Accum<.05 then e.Animation:afterAnimation();continue end
+   local elapsed=e.Accum;e.Accum=0;local speed=(e.Root.Position-e.Last).Magnitude/math.max(elapsed,.001);e.Last=e.Root.Position
+   if e.Humanoid.Health<=0 then e.Animation:stop(true);continue end
+   local state=model:GetAttribute('State');local pose=if state=='WINDUP'then'Inspect'elseif state=='ATTACK'then'Forge'elseif speed>.3 then'Walk'else'Idle'
+   if e.Kind=='R15'then e.Animation:update(pose,now,elapsed,0,nil,false)
+   elseif e.Kind=='Quadruped'then
+    for joint,bone in e.Joints do
+     local sign=if bone=='FrontLeft'or bone=='HindRight'then 1 else-1
+     local angle=if bone:find('Front')or bone:find('Hind')then math.sin(now*7)*.48*sign*(if speed>.3 then 1 else 0)elseif bone=='BeastHead'then math.sin(now*1.1)*.045 else math.sin(now*1.7)*.10
+     joint.Transform=joint.Transform:Lerp(CFrame.Angles(angle,0,0),.3)
+    end
+   elseif e.Blob and e.Blob.Parent then local pulse=math.sin(now*4)*.055;e.Blob.Size=Vector3.new(e.BlobSize.X*(1-pulse/2),e.BlobSize.Y*(1+pulse),e.BlobSize.Z*(1-pulse/2))end
+  end
+ end
+ function self:destroy()
+  if self.Stopped then return end;self.Stopped=true;for _,c in self.Connections do c:Disconnect()end
+  local list={};for model in self.Entries do table.insert(list,model)end;for _,model in list do self:remove(model)end;table.clear(self.Selected);Controller.Current=nil
+ end
+ table.insert(self.Connections,Run.PreAnimation:Connect(function()for model in self.Selected do local e=self.Entries[model];if e then e.Animation:beforeAnimation()end end end))
+ table.insert(self.Connections,Run.PreSimulation:Connect(function(dt)self:step(dt,workspace:GetServerTimeNow())end))
+ for _,model in Collection:GetTagged('EldravynAvatarEnemy')do self:add(model)end
+ table.insert(self.Connections,Collection:GetInstanceAddedSignal('EldravynAvatarEnemy'):Connect(function(model)self:add(model)end))
+ table.insert(self.Connections,Collection:GetInstanceRemovedSignal('EldravynAvatarEnemy'):Connect(function(model)self:remove(model)end))
+ self:scan();return self
+end
+return Controller
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="5">
+        <Properties>
+          <string name="Name">NPCAnimationController</string>
+          <string name="Source"><![CDATA[local Shared=game.ReplicatedStorage.EldravynNPCVisualV2
+local Config=require(Shared.NPCVisualConfig)
+local Motion=require(Shared.NPCMotion)
+local Policy=require(Shared.NPCVisualPolicy)
+local Animation={}
+local function playable(hum)
+ if not hum or hum.Health<=0 then return false end
+ local state=hum:GetState()
+ return state~=Enum.HumanoidStateType.Dead and state~=Enum.HumanoidStateType.Ragdoll and state~=Enum.HumanoidStateType.Seated and state~=Enum.HumanoidStateType.FallingDown
+end
+function Animation.new(npc)
+ local hum=npc:FindFirstChildOfClass('Humanoid');local self={NPC=npc,Humanoid=hum,Animator=hum and hum:FindFirstChildOfClass('Animator'),Joints={},Tracks={},Failed={},Assets={},Connections={},NativeOffsets={},NativeAttention={},State=nil,Current=nil,Owns=false,Released=false,External=false,CheckAt=0}
+ for _,node in npc:GetDescendants()do if node:IsA('Motor6D') then self.Joints[node.Name]=node end end
+ return setmetatable(self,{__index=Animation})
+end
+-- Remove our previous additive offsets BEFORE Animator samples the next frame.
+-- Tracks may omit Neck/Waist; without this, attention would accumulate on them.
+function Animation:beforeAnimation()
+ for joint,offset in self.NativeOffsets do
+  if joint.Parent and joint.Transform==offset.Applied then joint.Transform=offset.Base end
+ end
+ table.clear(self.NativeOffsets)
+end
+function Animation:afterAnimation()
+ if not self.Current or not self.Current.IsPlaying or self.Current.Length<=0 or not self.Owns or self.External or not playable(self.Humanoid) then return end
+ self:beforeAnimation()
+ -- Reapply only these two cached offsets even on frames between budgeted pose
+ -- updates, otherwise PreAnimation removal would make native attention flicker.
+ for joint,desired in self.NativeAttention do if joint.Parent then
+  local base=joint.Transform;local applied=base*desired
+  self.NativeOffsets[joint]={Base=base,Applied=applied};joint.Transform=applied
+ end end
+end
+function Animation:stop(reset)
+ self:beforeAnimation()
+ table.clear(self.NativeAttention)
+ if self.Current then self.Current:Stop(Config.FadeSeconds);self.Current=nil end
+ if reset and self.Owns then for _,joint in self.Joints do if joint.Parent then joint.Transform=CFrame.new()end end end
+ self.Owns=false;self.State=nil
+end
+function Animation:destroy()
+ if self.Released then return end;self:stop(true);self.Released=true
+ for _,connection in self.Connections do connection:Disconnect()end
+ for _,track in self.Tracks do track:Destroy()end
+ for _,asset in self.Assets do asset:Destroy()end
+ table.clear(self.Joints);table.clear(self.Tracks);table.clear(self.Assets)
+end
+function Animation:track(state)
+ local def=Config.Animations[state]
+ if not def or not Policy.clipId(def.Id) or self.Failed[state] or not self.Animator then return nil end
+ if self.Tracks[state] then return self.Tracks[state]end
+ local asset=Instance.new('Animation');asset.AnimationId=def.Id;table.insert(self.Assets,asset)
+ local ok,track=pcall(function()return self.Animator:LoadAnimation(asset)end)
+ if not ok then self.Failed[state]=true;warn('[NPC V2] Animação indisponível; fallback procedural: '..state);return nil end
+ track.Priority=Enum.AnimationPriority[def.Priority];track.Looped=def.Looped;self.Tracks[state]=track;return track
+end
+function Animation:update(state,now,dt,phase,attention,reduced)
+ self:beforeAnimation()
+ if self.Released or not self.NPC.Parent or not playable(self.Humanoid) then self:stop(true);return end
+ if now>=self.CheckAt then
+  self.CheckAt=now+1;self.External=false
+  local animate=self.NPC:FindFirstChild('Animate')
+  if animate and animate:IsA('BaseScript') and not animate.Disabled then self.External=true end
+  if self.Animator then for _,track in self.Animator:GetPlayingAnimationTracks()do
+   local ours=false;for _,own in self.Tracks do if own==track then ours=true;break end end
+   if not ours then self.External=true;break end
+  end end
+ end
+ if self.External then self:stop(false);return end
+ if self.State~=state then
+  if self.Current then self.Current:Stop(Config.FadeSeconds)end
+  self.State=state;self.Current=self:track(state)
+  if self.Current then self.Current:Play(Config.FadeSeconds,1,1)end
+ end
+ local native=self.Current and self.Current.IsPlaying and self.Current.Length>0
+ table.clear(self.NativeAttention)
+ local pose=if native then {} else Motion.pose(state,now,phase,reduced)
+ local alpha=1-math.exp(-10*math.min(dt,.25))
+ for name,joint in self.Joints do
+  if not joint.Parent then continue end
+  local angles=pose[name] or {0,0,0};local desired=CFrame.Angles(angles[1],angles[2],angles[3])
+  if name=='Neck' and attention then desired*=CFrame.Angles(attention.Pitch,attention.Yaw,0)
+  elseif name=='Waist' and attention then desired*=CFrame.Angles(0,attention.Torso,0)end
+  if native then
+   if name=='Neck' or name=='Waist' then
+    self.NativeAttention[joint]=desired
+   end
+  else joint.Transform=joint.Transform:Lerp(desired,alpha)end
+ end
+ self.Owns=true;if native then self:afterAnimation()end
+end
+return Animation
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Model" referent="6">
+      <Properties>
+        <string name="Name">CoreV2</string>
+        <bool name="NeedsPivotMigration">false</bool>
+      </Properties>
+      <Item class="Folder" referent="7">
+        <Properties>
+          <string name="Name">Authoring</string>
+        </Properties>
+        <Item class="ModuleScript" referent="8">
+          <Properties>
+            <string name="Name">NPCRigAdapter</string>
+            <string name="Source"><![CDATA[-- Inspect and retain the installed R15 bodies, joints, Humanoid and prompt.
+local R={}
+R.BodyNames={'HumanoidRootPart','LowerTorso','UpperTorso','Head','LeftUpperArm','LeftLowerArm','LeftHand','RightUpperArm','RightLowerArm','RightHand','LeftUpperLeg','LeftLowerLeg','LeftFoot','RightUpperLeg','RightLowerLeg','RightFoot'}
+R.Joints={Root={'HumanoidRootPart','LowerTorso'},Waist={'LowerTorso','UpperTorso'},Neck={'UpperTorso','Head'}}
+for _,side in {'Left','Right'}do
+ R.Joints[side..'Shoulder']={'UpperTorso',side..'UpperArm'};R.Joints[side..'Elbow']={side..'UpperArm',side..'LowerArm'}
+ R.Joints[side..'Wrist']={side..'LowerArm',side..'Hand'};R.Joints[side..'Hip']={'LowerTorso',side..'UpperLeg'}
+ R.Joints[side..'Knee']={side..'UpperLeg',side..'LowerLeg'};R.Joints[side..'Ankle']={side..'LowerLeg',side..'Foot'}
+end
+R.LegacyDecor={Hair=true,Mouth=true,Belt=true,Robe=true,HatBrim=true,HatCrown=true,DecorativeStaff=true,Breastplate=true,Apron=true,HammerHandle=true,HammerHead=true,VestTrim=true,Satchel=true,['Eye-0.3']=true,['Eye0.3']=true,['Pauldron-1']=true,['Pauldron1']=true}
+function R.inspect(npc)
+ assert(npc:IsA('Model') and type(npc:GetAttribute('EldravynNPCId'))=='string','NPC V2: modelo sem identificador')
+ local bodies,motors={},{}
+ for _,name in R.BodyNames do local p=npc:FindFirstChild(name);assert(p and p:IsA('BasePart'),'Corpo R15 ausente: '..npc.Name..'/'..name);bodies[name]=p end
+ local hum=npc:FindFirstChildOfClass('Humanoid');assert(hum and hum.RigType==Enum.HumanoidRigType.R15,'Humanoid R15 obrigatório')
+ assert(hum:FindFirstChildOfClass('Animator'),'Animator original ausente')
+ local prompt=npc:FindFirstChild('NPCInteraction',true);assert(prompt and prompt:IsA('ProximityPrompt') and prompt.Parent==bodies.Head,'Prompt original incompatível')
+ assert(npc.PrimaryPart==bodies.HumanoidRootPart and bodies.HumanoidRootPart.Anchored,'Rig V1 exige root ancorado; nenhuma alteração automática')
+ for _,node in npc:GetDescendants()do
+  if node:IsA('BaseScript') then assert(node.Disabled,'Script de animação/comportamento ativo no NPC: '..node.Name)end
+  if node:IsA('Motor6D') and R.Joints[node.Name] then assert(not motors[node.Name],'Motor duplicado');motors[node.Name]=node end
+ end
+ for name,pair in R.Joints do local j=motors[name];assert(j and j.Part0==bodies[pair[1]] and j.Part1==bodies[pair[2]],'Junta R15 incompatível: '..name)end
+ return {Bodies=bodies,Motors=motors,Humanoid=hum,Prompt=prompt}
+end
+return R
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="9">
+          <Properties>
+            <string name="Name">NPCVisualFactory</string>
+            <string name="Source"><![CDATA[-- Reuse the unchanged V2 installer/rollback with the imported avatar factory.
+local Factory={}
+function Factory.build(rig,style)return require(script.Parent.Parent.Parent.AvatarAppearance).build(rig,style)end
+return Factory
+]]></string>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Folder" referent="10">
+        <Properties>
+          <string name="Name">Baselines</string>
+        </Properties>
+        <Item class="ModuleScript" referent="11">
+          <Properties>
+            <string name="Name">AmbientService</string>
+            <string name="Source"><![CDATA[-- Small, bounded patrols for ambient residents only. No pathfinding or combat AI.
+local Players=game:GetService('Players')
+local TweenService=game:GetService('TweenService')
+local Placement=require(script.Parent.Placement)
+local Ambient={}
+local mobile={Resident=true,Traveler=true,Farmer=true,Adventurer=true}
+function Ambient.start(npcs,folder)
+ local homes={};for _,npc in npcs do
+  if npc:GetAttribute('AmbientNPC') and mobile[npc:GetAttribute('NPCRole')] and npc.PrimaryPart then homes[npc]={Frame=npc.PrimaryPart.CFrame,Away=false}end
+ end
+ task.spawn(function()
+  while folder.Parent do
+   task.wait(10);local active=0
+   for npc,home in homes do
+    if active>=4 then break end
+    local root=npc.PrimaryPart;local nearby=false
+    if not root or (npc:GetAttribute('NPCSpeakingUntil') or 0)>os.clock() then continue end
+    for _,player in Players:GetPlayers()do local p=player.Character and player.Character:FindFirstChild('HumanoidRootPart');if p and (p.Position-root.Position).Magnitude<75 then nearby=true;break end end
+    if not nearby then continue end
+    local target=home.Frame*(if home.Away then CFrame.new() else CFrame.new(2.5,0,0))
+    local delta=target.Position-root.Position;local valid=true;local feet
+    for step=0,4 do
+     local point=root.Position+delta*(step/4)-Vector3.new(0,3,0)
+     feet=Placement.safe(point,{folder},point.Y)
+     if not feet or math.abs(feet.Y-point.Y)>0.7 then valid=false;break end
+    end
+    for other in homes do if other~=npc and other.PrimaryPart and (other.PrimaryPart.Position-target.Position).Magnitude<6 then valid=false;break end end
+    if valid and feet then
+     active+=1;home.Away=not home.Away
+     local destination=target+Vector3.new(0,feet.Y+3-target.Position.Y,0)
+     TweenService:Create(root,TweenInfo.new(2,Enum.EasingStyle.Linear),{CFrame=destination}):Play()
+    end
+   end
+  end
+ end)
+end
+return Ambient
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="12">
+          <Properties>
+            <string name="Name">NPCInteractionClient</string>
+            <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local player=Players.LocalPlayer
+local remotes=game.ReplicatedStorage:WaitForChild('EldravynNPC'):WaitForChild('RemoteEvents')
+local ui=require(script.Parent.NPCDialogueClient).new(player:WaitForChild('PlayerGui'),remotes:WaitForChild('Action'))
+local marker
+remotes:WaitForChild('View').OnClientEvent:Connect(function(payload)
+ ui:receive(payload)
+ if payload.Marker then
+  if marker then marker:Destroy()end
+  marker=Instance.new('Part');marker.Name='NPCDestination';marker.Size=Vector3.new(0.5,0.5,0.5);marker.Transparency=1;marker.Anchored=true;marker.CanCollide=false;marker.CanTouch=false;marker.CanQuery=false;marker.Position=payload.Marker.Position+Vector3.new(0,10,0);marker.Parent=workspace
+  local billboard=Instance.new('BillboardGui');billboard.Size=UDim2.fromOffset(240,64);billboard.AlwaysOnTop=true;billboard.Adornee=marker;billboard.Parent=marker
+  local label=Instance.new('TextLabel');label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=0.2;label.BackgroundColor3=Color3.fromRGB(42,34,24);label.TextColor3=Color3.fromRGB(255,226,145);label.Font=Enum.Font.SourceSansBold;label.TextSize=18;label.TextWrapped=true;label.Text='◆ '..payload.Marker.Name;label.Parent=billboard
+  local this=marker;task.delay(payload.Marker.Seconds,function()if this then this:Destroy()end;if marker==this then marker=nil end end)
+ end
+end)
+game:GetService('UserInputService').InputBegan:Connect(function(input,processed)if not processed and input.KeyCode==Enum.KeyCode.Escape then ui:hide()end end)
+-- Bounded local idle poses; no external Animation IDs or server frame loop.
+local joints={};local elapsed=0
+local function refresh()
+ joints={};local folder=workspace:FindFirstChild('EldravynNPCs');local root=player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+ if not folder or not root then return end
+ local nearest={}
+ for _,npc in folder:GetDescendants()do if npc:IsA('Model') and npc:GetAttribute('EldravynNPCId') and npc.PrimaryPart then
+  local distance=(npc.PrimaryPart.Position-root.Position).Magnitude;if distance<90 then table.insert(nearest,{NPC=npc,Distance=distance})end
+ end end
+ table.sort(nearest,function(a,b)return a.Distance<b.Distance end)
+ for index=1,math.min(#nearest,12)do
+  local npc=nearest[index].NPC;local torso=npc:FindFirstChild('UpperTorso');local neck=torso and torso:FindFirstChild('Neck')
+  if neck then table.insert(joints,neck)end
+ end
+end
+task.spawn(function()while true do refresh();task.wait(2)end end)
+game:GetService('RunService').Heartbeat:Connect(function(dt)
+ elapsed+=dt;for index,joint in joints do if joint.Parent then joint.Transform=CFrame.Angles(math.sin(elapsed*1.3+index)*0.025,math.sin(elapsed*0.8+index)*0.07,0)end end
+end)
+]]></string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="13">
+          <Properties>
+            <string name="Name">NPCService</string>
+            <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Shared=game.ReplicatedStorage:WaitForChild('EldravynNPC')
+local C=require(Shared.Registry)
+local Data=require(script.Parent.NPCDataService)
+local Actions=require(script.Parent.NPCActionService)
+local Dialogue=require(script.Parent.DialogueService)
+local Purchase=require(script.Parent.PurchaseService)
+local Placement=require(script.Parent.Placement)
+local Service={Started=false}
+local function remote(parent,name)
+ local value=parent:FindFirstChild(name)
+ if not value then value=Instance.new('RemoteEvent');value.Name=name;value.Parent=parent end
+ assert(value:IsA('RemoteEvent'));return value
+end
+function Service.start()
+ if Service.Started then return end
+ local world=workspace:FindFirstChild('GeneratedWorld');local folder=workspace:FindFirstChild('EldravynNPCs')
+ assert(world and folder,'Instale os NPCs no mapa antes de iniciar.')
+ if world:GetAttribute('TerrainPending')==true then warn('[NPC] Terrain pendente. Use PrepareStudio em Edit antes de testar. Nenhum terreno será gerado no runtime.');return end
+ Service.Started=true
+ local remotes=Shared:FindFirstChild('RemoteEvents') or Instance.new('Folder');remotes.Name='RemoteEvents';remotes.Parent=Shared
+ local view,action=remote(remotes,'View'),remote(remotes,'Action');Dialogue.start(view,action)
+ for _,npc in folder:GetDescendants()do
+  local id=npc:GetAttribute('EldravynNPCId')
+  if npc:IsA('Model') and id then
+   assert(not Actions.NPCs[id],'NPC duplicado: '..id);Actions.NPCs[id]=npc
+   local root=npc:FindFirstChild('HumanoidRootPart');local prompt=npc:FindFirstChild('NPCInteraction',true)
+   local entry=require(Shared.PlacementConfig).NPCs[id]
+   local frame=entry and Placement.frame(world,entry,folder,true)
+   if root and prompt and frame then
+    npc:PivotTo(frame*CFrame.new(0,3,0));prompt.Enabled=true
+    prompt.Triggered:Connect(function(player)Dialogue.open(player,npc)end)
+    if not npc:GetAttribute('AmbientNPC') then Actions.Locations[id]={Name=C.Roles[npc:GetAttribute('NPCRole')].Title..' • '..npc:GetAttribute('City'),Position=frame.Position}end
+   else
+    if prompt then prompt.Enabled=false end
+    warn('[NPC] Posição não validada; interação desativada: '..id)
+   end
+  end
+ end
+ local regions={}
+ for id,entry in require(Shared.PlacementConfig).Regions do
+  local anchor=Placement.resolve(world,entry.Anchor)
+  if anchor and anchor:IsA('BasePart') then
+   local record={Name=entry.Name,Position=anchor.Position,Radius=entry.Radius}
+   regions[id]=record;Actions.Locations[id]=record
+  end
+ end
+ Purchase.registerProduct('NPCClassChange',C.ClassChangeProduct,require(Shared.Rules).classReceipt)
+ Purchase.OnGrant=function(p)Dialogue.close(p);view:FireClient(p,{Notice='Crédito oficial registrado. Converse novamente com o mestre de classes.'})end
+ Purchase.start();Data.start()
+ require(script.Parent.AmbientService).start(Actions.NPCs,folder)
+ local function onCharacter(player,character)
+  local root=character:WaitForChild('HumanoidRootPart',10);if not root then return end
+  local state=Data.get(player);local id=state and state.NPC.ReturnNPC;local npc=id and Actions.NPCs[id]
+  if not npc or not npc.PrimaryPart then return end
+  -- Return beside the inn only if a fresh floor/clearance query succeeds.
+  local position=npc.PrimaryPart.Position+npc.PrimaryPart.CFrame.LookVector*5-Vector3.new(0,3,0)
+  local safe=Placement.safe(position,{folder,character},position.Y)
+  if safe then root.CFrame=CFrame.new(safe+Vector3.new(0,3,0))end
+ end
+ local function joined(player)
+  local ok,message=Data.load(player)
+  if player.Parent~=Players then return end
+  if not ok then view:FireClient(player,{Notice=message});return end
+  local state=Data.get(player)
+  if state and state.NPC.PendingHeal then
+   Data.change(player,function(s)s.Gold=math.min(C.MaxGold,s.Gold+s.NPC.PendingHeal);s.NPC.PendingHeal=nil;return true end)
+  end
+  player.CharacterAdded:Connect(function(character)onCharacter(player,character)end)
+  if player.Character then onCharacter(player,player.Character)end
+  view:FireClient(player,{Notice=if Data.Persistent then 'Perfil NPC carregado.' else 'Prévia Studio: progresso temporário, sem persistência ou compras Robux.'})
+ end
+ Players.PlayerAdded:Connect(joined);Players.PlayerRemoving:Connect(Data.remove)
+ for _,player in Players:GetPlayers()do task.spawn(joined,player)end
+ -- A single low-frequency scheduler. Only meaningful progress writes to the profile.
+ task.spawn(function()
+  local visits={}
+  while Service.Started do
+   task.wait(2)
+   for _,player in Players:GetPlayers()do
+    local character=player.Character;local root=character and character:FindFirstChild('HumanoidRootPart')
+    local hum=character and character:FindFirstChildOfClass('Humanoid')
+    if root and hum and hum.Health>0 and Data.get(player) then
+     local previous=visits[player] or {};local current={}
+     for id,region in regions do
+      if (root.Position-region.Position).Magnitude<region.Radius then
+       current[id]=true;if previous[id] then Data.event(player,'Visit:'..id,'Exploration')end
+      end
+     end
+     visits[player]=current
+    end
+    local session=Dialogue.Sessions[player]
+    if session and not session.Busy and (os.clock()>session.Expires or not Dialogue.near(player,session.NPC)) then Dialogue.close(player)end
+   end
+   for player in visits do if player.Parent~=Players then visits[player]=nil end end
+  end
+ end)
+ print('[NPC] Etapa 2 iniciada. Combate, conjuração, fusões e interiores de dungeon permanecem fora desta etapa.')
+end
+return Service
+]]></string>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="ModuleScript" referent="14">
+        <Properties>
+          <string name="Name">NPCVisualUpgrade</string>
+          <string name="Source"><![CDATA[-- Editor-only additive visual migration. Original NPC instances and services survive.
+local Upgrade={Version=2}
+local Http=game:GetService('HttpService')
+local function source(node)
+ local ok,value=pcall(function()return node.Source end)
+ assert(ok and type(value)=='string','Execute pela Command Bar do Studio em Edit; leitura de Source não autorizada.')
+ return (value:gsub('\r\n','\n'))
+end
+local function folder(name,parent)local n=Instance.new('Folder');n.Name=name;n.Parent=parent;return n end
+local function ref(name,value,parent)local n=Instance.new('ObjectValue');n.Name=name;n.Value=value;n.Parent=parent;return n end
+local function enumName(value)return tostring(value):match('([^%.]+)$')end
+local visualAttributes={'NPCVisualVersion','NPCVisualStyle','NPCV2State','NPCV2Speaker','NPCV2PatrolFloorValid'}
+local function matchingTree(installed,template)
+ if not installed or installed.ClassName~=template.ClassName then return false end
+ if template:IsA('LuaSourceContainer') and source(installed)~=source(template) then return false end
+ if #installed:GetChildren()~=#template:GetChildren() then return false end
+ for _,child in template:GetChildren()do if not matchingTree(installed:FindFirstChild(child.Name),child) then return false end end
+ return true
+end
+local function editor()assert(game:GetService('RunService'):IsStudio() and not game:GetService('RunService'):IsRunning(),'Pare Play/Run. Atualize uma cópia salva no editor do Studio.')end
+local function context()
+ local package=script.Parent
+ local npcs=workspace:FindFirstChild('EldravynNPCs');assert(npcs and npcs:GetAttribute('NPCInstallVersion')==1,'Instalação NPC V1 compatível não encontrada; nada será criado do zero.')
+ local rs=game:GetService('ReplicatedStorage');local ss=game:GetService('ServerScriptService')
+ local shared=rs:FindFirstChild('EldravynNPC');local server=ss:FindFirstChild('EldravynNPC')
+ local starter=game:GetService('StarterPlayer'):FindFirstChild('StarterPlayerScripts');local client=starter and starter:FindFirstChild('EldravynNPCClient')
+ assert(shared and server and client and shared:FindFirstChild('NPCConfig') and shared:FindFirstChild('PlacementConfig'),'Dependências NPC V1 ausentes')
+ assert(server:FindFirstChild('DialogueService') and server:FindFirstChild('NPCDataService') and client:FindFirstChild('NPCDialogueClient'),'Serviços originais ausentes')
+ for _,pair in {{shared,{'NPCConfig','PlacementConfig','Registry','Rules','DialogueConfig','ShopConfig','QuestConfig','DungeonTicketConfig'}},{server,{'NPCService','AmbientService','DataService','NPCDataService','NPCActionService','DialogueService','QuestService','PurchaseService','Placement'}},{client,{'NPCDialogueClient'}}}do
+  for _,name in pair[2]do local dependency=pair[1]:FindFirstChild(name);assert(dependency and dependency:IsA('ModuleScript'),'Dependência V1 ausente/incompatível: '..name)end
+ end
+ local bootstrap=server:FindFirstChild('Bootstrap');assert(bootstrap and bootstrap:IsA('Script'),'Bootstrap original ausente; V2 não cria outro servidor')
+ assert(package:FindFirstChild('Runtime') and package:FindFirstChild('Baselines') and package:FindFirstChild('Authoring'),'Pacote V2 incompleto')
+ local replacements={{Parent=server,Name='NPCService',Template=package.Runtime.Replacements.NPCService},{Parent=server,Name='AmbientService',Template=package.Runtime.Replacements.AmbientService},{Parent=client,Name='NPCInteractionClient',Template=package.Runtime.Replacements.NPCInteractionClient}}
+ return {Package=package,NPCs=npcs,Shared=shared,Server=server,Client=client,RS=rs,SS=ss,Replacements=replacements}
+end
+function Upgrade.Plan()
+ editor();local ctx=context();local rig=require(ctx.Package.Authoring.NPCRigAdapter);local appearance=require(ctx.Package.Runtime.Shared.NPCAppearanceConfig)
+ local list,seen={},{}
+ for _,npc in ctx.NPCs:GetDescendants()do if npc:IsA('Model') and npc:GetAttribute('EldravynNPCId') then
+  local id=npc:GetAttribute('EldravynNPCId');assert(not seen[id],'NPC duplicado antes da atualização: '..id);seen[id]=true
+  local structure=rig.inspect(npc);local style=appearance.forNPC(id,npc:GetAttribute('NPCRole'),npc:GetAttribute('City'))
+  table.insert(list,{NPC=npc,Id=id,Rig=structure,Style=style,Position=structure.Bodies.HumanoidRootPart.CFrame})
+ end end
+ assert(#list>0,'Nenhum NPC identificado; mapa preservado');table.sort(list,function(a,b)return a.Id<b.Id end)
+ local version=workspace:GetAttribute('EldravynNPCVisualVersion')
+ assert(version==nil or version==2,'Versão visual desconhecida; migração interrompida')
+ if version==2 then
+  local backup=ctx.SS:FindFirstChild('EldravynNPCVisualBackupV2')
+  assert(backup and backup:GetAttribute('State')=='Applied','Backup V2 ausente/incompleto; não repetir uma migração parcial')
+  for _,row in list do assert(row.NPC:GetAttribute('NPCVisualVersion')==2 and row.NPC:FindFirstChild('NPCV2Visuals'),'Instalação mista; reverta/inspecione antes de atualizar novamente')end
+  assert(ctx.RS:FindFirstChild('EldravynNPCVisualV2'),'Dependência visual ausente')
+  for _,row in ctx.Replacements do assert(row.Parent:FindFirstChild(row.Name),'Adaptador ausente: '..row.Name)end
+  for _,pair in {{ctx.Package.Runtime.Shared,ctx.RS.EldravynNPCVisualV2},{ctx.Package.Runtime.Server,ctx.Server},{ctx.Package.Runtime.Client,ctx.Client}}do
+   for _,module in pair[1]:GetChildren()do assert(pair[2]:FindFirstChild(module.Name),'Dependência V2 ausente: '..module.Name)end
+  end
+  return {Already=true,Count=#list,Context=ctx,List=list}
+ end
+ assert(not ctx.SS:FindFirstChild('EldravynNPCVisualBackupV2'),'Backup anterior existe; inspecione ou reverta antes de continuar')
+ assert(not ctx.RS:FindFirstChild('EldravynNPCVisualV2'),'Nome da biblioteca visual já ocupado')
+ for _,row in list do assert(row.NPC:GetAttribute('NPCVisualVersion')==nil and not row.NPC:FindFirstChild('NPCV2Visuals'),'Camada visual preexistente não será sobrescrita')end
+ for _,row in ctx.Replacements do
+  local old=row.Parent:FindFirstChild(row.Name);assert(old,'Adaptador original ausente: '..row.Name)
+  assert(old.ClassName==row.Template.ClassName,'Tipo do adaptador incompatível: '..row.Name)
+  local baseline=ctx.Package.Baselines:FindFirstChild(row.Name);assert(baseline,'Baseline ausente')
+  local current=source(old)
+  assert(current==source(baseline) or current==source(row.Template),'Script customizado: '..row.Name..'. Revise a adaptação; nenhuma mudança aplicada.')
+  row.Original=old;row.Replace=current~=source(row.Template)
+ end
+ for _,pair in {{ctx.Package.Runtime.Server,ctx.Server},{ctx.Package.Runtime.Client,ctx.Client}}do
+  for _,module in pair[1]:GetChildren()do assert(not pair[2]:FindFirstChild(module.Name),'Nome V2 já ocupado: '..module.Name)end
+ end
+ -- Return plain facts from Report(); Apply keeps these object references private in this module.
+ return {Already=false,Count=#list,Context=ctx,List=list}
+end
+function Upgrade.Report()
+ local plan=Upgrade.Plan();local ids={};for _,row in plan.List do table.insert(ids,row.Id)end
+ local report={Version=2,Already=plan.Already,Count=plan.Count,NPCs=ids,MapChanges=0,DataStoreChanges=0,PublishedAssetsRequired=0}
+ print('[NPC V2] '..Http:JSONEncode(report));return report
+end
+local function rollback(backup,strict)
+ if strict then
+  assert(backup:GetAttribute('State')=='Applied','Backup não está em estado reversível')
+  for _,record in backup.Modules:GetChildren()do
+   local installed=record.Installed.Value;local parent=record.TargetParent.Value
+   assert(installed and installed.Parent==parent and source(installed)==record.Source.Value,'Módulo V2 foi alterado após upgrade; rollback automático interrompido: '..record.Name)
+  end
+  for _,record in backup.Additions:GetChildren()do
+   assert(record.Value and record.Value.Parent==record.TargetParent.Value and matchingTree(record.Value,record.Snapshot),'Biblioteca V2 foi alterada; salve sua customização antes do rollback: '..record.Name)
+  end
+ end
+ for _,record in backup.Models:GetChildren()do
+  local npc=record.NPC.Value
+  if npc then
+   local visuals=record:FindFirstChild('InstalledVisuals');if visuals and visuals.Value then visuals.Value:Destroy()end
+   for _,bodyRecord in record.Bodies:GetChildren()do
+    local part=bodyRecord.Target.Value
+    if part then
+     part.Color=bodyRecord:GetAttribute('Color');part.Material=Enum.Material[bodyRecord:GetAttribute('Material')]
+     if bodyRecord:GetAttribute('Size') then part.Size=bodyRecord:GetAttribute('Size')end
+     if bodyRecord:GetAttribute('Shape') then part.Shape=Enum.PartType[bodyRecord:GetAttribute('Shape')]end
+     if bodyRecord:GetAttribute('Transparency')~=nil then part.Transparency=bodyRecord:GetAttribute('Transparency')end
+    end
+   end
+   for _,item in record.Decor:GetChildren()do item.Parent=npc end
+   for _,key in visualAttributes do npc:SetAttribute(key,record.Attributes:GetAttribute(key))end
+  end
+ end
+ for _,record in backup.Modules:GetChildren()do
+  if record.Installed.Value then record.Installed.Value:Destroy()end
+  local original=record:FindFirstChild('Original');local parent=record.TargetParent.Value
+  if original and parent then
+   original.Name=record:GetAttribute('OriginalName');original.Parent=parent
+   if original:IsA('BaseScript') then original.Disabled=record:GetAttribute('OriginalDisabled')end
+  end
+ end
+ for _,record in backup.Additions:GetChildren()do if record.Value then record.Value:Destroy()end end
+ workspace:SetAttribute('EldravynNPCVisualVersion',nil)
+ backup:SetAttribute('State','RolledBack')
+ -- Keep the audit record, now empty of live original objects; never delete a NPC.
+ backup.Name='EldravynNPCVisualRollback_'..Http:GenerateGUID(false)
+ return true
+end
+function Upgrade.Rollback()
+ editor();local ctx=context();local backup=ctx.SS:FindFirstChild('EldravynNPCVisualBackupV2');assert(backup,'Backup V2 não encontrado')
+ rollback(backup,true);print('[NPC V2] Visual/controle V1 restaurados. NPCs, posições, serviços e mapa preservados.');return {Restored=true}
+end
+function Upgrade.Apply()
+ local plan=Upgrade.Plan();if plan.Already then print('[NPC V2] Já aplicado; nenhum NPC duplicado.');return {Already=true,Count=plan.Count}end
+ local ctx=plan.Context;local factory=require(ctx.Package.Authoring.NPCVisualFactory);local rig=require(ctx.Package.Authoring.NPCRigAdapter)
+ local prepared={}
+ local ready,prepareError=pcall(function()for _,row in plan.List do row.Visual=factory.build(row.Rig,row.Style);table.insert(prepared,row.Visual.Folder)end end)
+ if not ready then for _,f in prepared do f:Destroy()end;error(prepareError)end
+ local backup=folder('EldravynNPCVisualBackupV2',ctx.SS);backup:SetAttribute('State','Preparing');backup:SetAttribute('Version',2)
+ folder('Models',backup);folder('Modules',backup);folder('Additions',backup)
+ local ok,err=pcall(function()
+  for _,row in plan.List do
+   local record=folder(row.Id,backup.Models);ref('NPC',row.NPC,record);folder('Bodies',record);folder('Decor',record)
+   local attributes=folder('Attributes',record);for _,key in visualAttributes do attributes:SetAttribute(key,row.NPC:GetAttribute(key))end
+   for part,change in row.Visual.Changes do
+    local body=folder(part.Name,record.Bodies);ref('Target',part,body)
+    body:SetAttribute('Color',part.Color);body:SetAttribute('Material',enumName(part.Material))
+    if change.Size then body:SetAttribute('Size',part.Size)end
+    if change.Shape then body:SetAttribute('Shape',enumName(part.Shape or Enum.PartType.Block))end
+    if change.Transparency~=nil then body:SetAttribute('Transparency',part.Transparency)end
+    for key,value in change do part[key]=value end
+   end
+   for _,child in row.NPC:GetChildren()do if child:IsA('BasePart') and rig.LegacyDecor[child.Name] then child.Parent=record.Decor end end
+   ref('InstalledVisuals',row.Visual.Folder,record);row.Visual.Folder.Parent=row.NPC
+   row.NPC:SetAttribute('NPCVisualVersion',2);row.NPC:SetAttribute('NPCVisualStyle',row.Style.Style)
+   assert(row.Rig.Bodies.HumanoidRootPart.CFrame==row.Position,'Root foi movido durante migração')
+  end
+  local function addition(name,clone,parent)
+   local record=ref(name,clone,backup.Additions);ref('TargetParent',parent,record)
+   local snapshot=clone:Clone();snapshot.Name='Snapshot';snapshot.Parent=record
+   clone:SetAttribute('NPCVisualOwner',2);clone.Parent=parent
+  end
+  local shared=ctx.Package.Runtime.Shared:Clone();shared.Name='EldravynNPCVisualV2';addition('Shared',shared,ctx.RS)
+  for _,pair in {{ctx.Package.Runtime.Server,ctx.Server},{ctx.Package.Runtime.Client,ctx.Client}}do
+   for _,template in pair[1]:GetChildren()do addition(template.Name,template:Clone(),pair[2])end
+  end
+  for _,row in ctx.Replacements do if row.Replace then
+   local record=folder(row.Name,backup.Modules);ref('TargetParent',row.Parent,record)
+   record:SetAttribute('OriginalName',row.Original.Name)
+   local disabled=if row.Original:IsA('BaseScript') then row.Original.Disabled else nil
+   record:SetAttribute('OriginalDisabled',disabled)
+   local replacement=row.Template:Clone();replacement.Name=row.Name;replacement:SetAttribute('NPCVisualOwner',2)
+   ref('Installed',replacement,record);local text=Instance.new('StringValue');text.Name='Source';text.Value=source(replacement);text.Parent=record
+   row.Original.Name='Original';row.Original.Parent=record
+   if row.Original:IsA('BaseScript') then row.Original.Disabled=true;replacement.Disabled=disabled end
+   replacement.Parent=row.Parent
+  end end
+  workspace:SetAttribute('EldravynNPCVisualVersion',2);backup:SetAttribute('State','Applied');backup:SetAttribute('Count',plan.Count)
+ end)
+ if not ok then
+  local restored,reason=pcall(rollback,backup,false)
+  for _,f in prepared do if not f.Parent then f:Destroy()end end
+  if not restored then error(tostring(err)..' | Falha de reversão: '..tostring(reason)..'. Backup preservado para recuperação.')end
+  error('Migração cancelada e revertida: '..tostring(err))
+ end
+ print('[NPC V2] '..plan.Count..' NPCs atualizados no lugar. Backup criado; mapa e economia não alterados. Salve a cópia e teste Play.')
+ return {Updated=plan.Count,Version=2,Backup=backup.Name}
+end
+return Upgrade
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="Folder" referent="15">
+        <Properties>
+          <string name="Name">Runtime</string>
+        </Properties>
+        <Item class="Folder" referent="16">
+          <Properties>
+            <string name="Name">Client</string>
+          </Properties>
+          <Item class="ModuleScript" referent="17">
+            <Properties>
+              <string name="Name">NPCAnimationController</string>
+              <string name="Source"><![CDATA[local Shared=game.ReplicatedStorage.EldravynNPCVisualV2
+local Config=require(Shared.NPCVisualConfig)
+local Motion=require(Shared.NPCMotion)
+local Policy=require(Shared.NPCVisualPolicy)
+local Animation={}
+local function playable(hum)
+ if not hum or hum.Health<=0 then return false end
+ local state=hum:GetState()
+ return state~=Enum.HumanoidStateType.Dead and state~=Enum.HumanoidStateType.Ragdoll and state~=Enum.HumanoidStateType.Seated and state~=Enum.HumanoidStateType.FallingDown
+end
+function Animation.new(npc)
+ local hum=npc:FindFirstChildOfClass('Humanoid');local self={NPC=npc,Humanoid=hum,Animator=hum and hum:FindFirstChildOfClass('Animator'),Joints={},Tracks={},Failed={},Assets={},Connections={},NativeOffsets={},NativeAttention={},State=nil,Current=nil,Owns=false,Released=false,External=false,CheckAt=0}
+ for _,node in npc:GetDescendants()do if node:IsA('Motor6D') then self.Joints[node.Name]=node end end
+ return setmetatable(self,{__index=Animation})
+end
+-- Remove our previous additive offsets BEFORE Animator samples the next frame.
+-- Tracks may omit Neck/Waist; without this, attention would accumulate on them.
+function Animation:beforeAnimation()
+ for joint,offset in self.NativeOffsets do
+  if joint.Parent and joint.Transform==offset.Applied then joint.Transform=offset.Base end
+ end
+ table.clear(self.NativeOffsets)
+end
+function Animation:afterAnimation()
+ if not self.Current or not self.Current.IsPlaying or self.Current.Length<=0 or not self.Owns or self.External or not playable(self.Humanoid) then return end
+ self:beforeAnimation()
+ -- Reapply only these two cached offsets even on frames between budgeted pose
+ -- updates, otherwise PreAnimation removal would make native attention flicker.
+ for joint,desired in self.NativeAttention do if joint.Parent then
+  local base=joint.Transform;local applied=base*desired
+  self.NativeOffsets[joint]={Base=base,Applied=applied};joint.Transform=applied
+ end end
+end
+function Animation:stop(reset)
+ self:beforeAnimation()
+ table.clear(self.NativeAttention)
+ if self.Current then self.Current:Stop(Config.FadeSeconds);self.Current=nil end
+ if reset and self.Owns then for _,joint in self.Joints do if joint.Parent then joint.Transform=CFrame.new()end end end
+ self.Owns=false;self.State=nil
+end
+function Animation:destroy()
+ if self.Released then return end;self:stop(true);self.Released=true
+ for _,connection in self.Connections do connection:Disconnect()end
+ for _,track in self.Tracks do track:Destroy()end
+ for _,asset in self.Assets do asset:Destroy()end
+ table.clear(self.Joints);table.clear(self.Tracks);table.clear(self.Assets)
+end
+function Animation:track(state)
+ local def=Config.Animations[state]
+ if not def or not Policy.clipId(def.Id) or self.Failed[state] or not self.Animator then return nil end
+ if self.Tracks[state] then return self.Tracks[state]end
+ local asset=Instance.new('Animation');asset.AnimationId=def.Id;table.insert(self.Assets,asset)
+ local ok,track=pcall(function()return self.Animator:LoadAnimation(asset)end)
+ if not ok then self.Failed[state]=true;warn('[NPC V2] Animação indisponível; fallback procedural: '..state);return nil end
+ track.Priority=Enum.AnimationPriority[def.Priority];track.Looped=def.Looped;self.Tracks[state]=track;return track
+end
+function Animation:update(state,now,dt,phase,attention,reduced)
+ self:beforeAnimation()
+ if self.Released or not self.NPC.Parent or not playable(self.Humanoid) then self:stop(true);return end
+ if now>=self.CheckAt then
+  self.CheckAt=now+1;self.External=false
+  local animate=self.NPC:FindFirstChild('Animate')
+  if animate and animate:IsA('BaseScript') and not animate.Disabled then self.External=true end
+  if self.Animator then for _,track in self.Animator:GetPlayingAnimationTracks()do
+   local ours=false;for _,own in self.Tracks do if own==track then ours=true;break end end
+   if not ours then self.External=true;break end
+  end end
+ end
+ if self.External then self:stop(false);return end
+ if self.State~=state then
+  if self.Current then self.Current:Stop(Config.FadeSeconds)end
+  self.State=state;self.Current=self:track(state)
+  if self.Current then self.Current:Play(Config.FadeSeconds,1,1)end
+ end
+ local native=self.Current and self.Current.IsPlaying and self.Current.Length>0
+ table.clear(self.NativeAttention)
+ local pose=if native then {} else Motion.pose(state,now,phase,reduced)
+ local alpha=1-math.exp(-10*math.min(dt,.25))
+ for name,joint in self.Joints do
+  if not joint.Parent then continue end
+  local angles=pose[name] or {0,0,0};local desired=CFrame.Angles(angles[1],angles[2],angles[3])
+  if name=='Neck' and attention then desired*=CFrame.Angles(attention.Pitch,attention.Yaw,0)
+  elseif name=='Waist' and attention then desired*=CFrame.Angles(0,attention.Torso,0)end
+  if native then
+   if name=='Neck' or name=='Waist' then
+    self.NativeAttention[joint]=desired
+   end
+  else joint.Transform=joint.Transform:Lerp(desired,alpha)end
+ end
+ self.Owns=true;if native then self:afterAnimation()end
+end
+return Animation
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="ModuleScript" referent="18">
+            <Properties>
+              <string name="Name">NPCAttentionController</string>
+              <string name="Source"><![CDATA[local Shared=game.ReplicatedStorage.EldravynNPCVisualV2
+local Policy=require(Shared.NPCVisualPolicy)
+local Config=require(Shared.NPCVisualConfig).Attention
+local A={}
+function A.new(npc)
+ return {NPC=npc,Head=npc:FindFirstChild('Head'),Root=npc:FindFirstChild('HumanoidRootPart'),Target=nil,LastGreeting=-math.huge,Yaw=0,Pitch=0,Torso=0}
+end
+function A.update(self,people,now,dt)
+ local target,nearest=nil,Config.Distance;local activeId=self.NPC:GetAttribute('NPCV2Speaker')
+ if not self.Head or not self.Root then return self end
+ for _,record in people do
+  local distance=(record.Position-self.Head.Position).Magnitude
+  if record.Id==activeId and distance<=Config.Distance then target=record;break end
+  if not activeId and distance<nearest then
+   local localPoint=self.Root.CFrame:PointToObjectSpace(record.Position)
+   local _,_,_,visible=Policy.attention(localPoint.X,localPoint.Y-2.25,localPoint.Z,false,Config)
+   if visible then target=record;nearest=distance end
+  end
+ end
+ local yaw,pitch,torso=0,0,0
+ if target then
+  local localPoint=self.Root.CFrame:PointToObjectSpace(target.Position)
+  yaw,pitch,torso=Policy.attention(localPoint.X,localPoint.Y-2.25,localPoint.Z,target.Id==activeId,Config)
+ end
+ self.Greeting=false
+ if target and not activeId and self.Target~=target.Id and now-self.LastGreeting>=Config.GreetingCooldown then self.Greeting=true;self.LastGreeting=now end
+ self.Target=target and target.Id
+ local alpha=1-math.exp(-Config.Response*math.min(dt,.25))
+ self.Yaw+=(yaw-self.Yaw)*alpha;self.Pitch+=(pitch-self.Pitch)*alpha;self.Torso+=(torso-self.Torso)*alpha
+ return self
+end
+return A
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="ModuleScript" referent="19">
+            <Properties>
+              <string name="Name">NPCPerformanceManager</string>
+              <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Run=game:GetService('RunService')
+local Shared=game.ReplicatedStorage.EldravynNPCVisualV2
+local Config=require(Shared.NPCVisualConfig)
+local Appearance=require(Shared.NPCAppearanceConfig)
+local Motion=require(Shared.NPCMotion)
+local Policy=require(Shared.NPCVisualPolicy)
+local Animation=require(script.Parent.NPCAnimationController)
+local Attention=require(script.Parent.NPCAttentionController)
+local Manager={Current=nil}
+function Manager.start(folder,localPlayer,mobile)
+ if Manager.Current and not Manager.Current.Stopped then return Manager.Current end
+ local self={Entries={},Connections={},Stopped=false,Scan=0,People={},Selected={},EffectSelection={},Effects=0};Manager.Current=self
+ function self:remove(npc)
+  local e=self.Entries[npc];if not e then return end;e.Animation:destroy()
+  for _,p in e.Details do if p.Part.Parent then p.Part.LocalTransparencyModifier=p.Original end end
+  for _,p in e.Effects do if p.Part.Parent then p.Part.Transparency=p.Transparency;p.Part.Size=p.Size end end
+  self.Entries[npc]=nil;self.Selected[npc]=nil;self.EffectSelection[npc]=nil
+ end
+ function self:add(npc)
+  if self.Stopped or self.Entries[npc] or not npc:IsA('Model') or npc:GetAttribute('NPCVisualVersion')~=2 or not npc.PrimaryPart then return end
+  local hum=npc:FindFirstChildOfClass('Humanoid');if not hum or not hum:FindFirstChildOfClass('Animator') then return end
+  local id=npc:GetAttribute('EldravynNPCId');if type(id)~='string' then return end
+  local style=Appearance.forNPC(id,npc:GetAttribute('NPCRole'),npc:GetAttribute('City'))
+  local e={NPC=npc,Root=npc.PrimaryPart,Style=style,Phase=(Appearance.hash(id)%1000)/79,Animation=Animation.new(npc),Attention=Attention.new(npc),Details={},Effects={},Accum=0,GreetUntil=0,LastPosition=npc.PrimaryPart.Position,Speed=0,WasSelected=false}
+  for _,p in npc:GetDescendants()do if p:IsA('BasePart') then
+   if p:GetAttribute('VisualDetail')==2 then table.insert(e.Details,{Part=p,Original=p.LocalTransparencyModifier})end
+   if p:GetAttribute('NPCVisualEffect') then table.insert(e.Effects,{Part=p,Transparency=p.Transparency,Size=p.Size})end
+  end end
+  self.Entries[npc]=e
+ end
+ function self:scan(now)
+  local character=localPlayer.Character;local origin=character and character:FindFirstChild('HumanoidRootPart')
+  local camera=workspace.CurrentCamera;local position=origin and origin.Position or camera and camera.CFrame.Position
+  self.People={}
+  for _,p in Players:GetPlayers()do local c=p.Character;local root=c and c:FindFirstChild('HumanoidRootPart');local h=c and c:FindFirstChildOfClass('Humanoid')
+   if root and h and h.Health>0 then table.insert(self.People,{Id=p.UserId,Position=root.Position+Vector3.new(0,1.5,0)})end
+  end
+  local candidates={}
+  for npc,e in self.Entries do
+   if not npc:IsDescendantOf(folder) then self:remove(npc);continue end
+   local distance=if position then (e.Root.Position-position).Magnitude else math.huge;e.Distance=distance
+   table.insert(candidates,{Key=npc,Id=npc:GetAttribute('EldravynNPCId'),Distance=distance,Active=npc:GetAttribute('NPCV2Speaker')==localPlayer.UserId})
+  end
+  self.Selected=Policy.select(candidates,mobile,Config.Performance)
+  self.EffectSelection={};local effectCount=0
+  for _,candidate in candidates do
+   local e=self.Entries[candidate.Key]
+   if self.Selected[candidate.Key]=='Full' and #e.Effects>0 and effectCount<Config.Performance.Effects then self.EffectSelection[candidate.Key]=true;effectCount+=1 end
+  end
+  for npc,e in self.Entries do
+   local selected=self.Selected[npc];local detailed=selected=='Full' and e.Distance<Appearance.DetailDistance
+   if detailed~=e.Detailed then e.Detailed=detailed;for _,p in e.Details do if p.Part.Parent then p.Part.LocalTransparencyModifier=if detailed then p.Original else 1 end end end
+   if not selected and e.WasSelected then e.Animation:stop(true)end
+   if selected and not e.WasSelected then e.LastPosition=e.Root.Position;e.Accum=0 end
+   e.WasSelected=selected~=nil
+   if not self.EffectSelection[npc] then for _,p in e.Effects do if p.Part.Parent then p.Part.Transparency=.65;p.Part.Size=p.Size end end end
+  end
+ end
+ function self:step(dt,now)
+  if self.Stopped then return end
+  self.Scan+=dt;if self.Scan>=Config.Performance.ScanSeconds then self.Scan=0;self:scan(now)end
+  local effects=0
+  for npc,tier in self.Selected do
+   local e=self.Entries[npc];if not e then continue end
+   local full=tier=='Full';local hz=if not full then Config.Performance.ReducedHz elseif mobile then Config.Performance.MobileHz else Config.Performance.DesktopHz
+   e.Accum+=dt;if e.Accum<1/hz then e.Animation:afterAnimation();continue end
+   local elapsed=math.min(e.Accum,.25);e.Accum=0
+   local speed=(e.Root.Position-e.LastPosition).Magnitude/elapsed;e.LastPosition=e.Root.Position;e.Speed=speed
+   local attention=Attention.update(e.Attention,self.People,now,elapsed)
+   if attention.Greeting then e.GreetUntil=now+1.4 end
+   local state=npc:GetAttribute('NPCV2State') or 'Idle'
+   if state=='Talk' or npc:GetAttribute('NPCV2Speaker') then state='Talk'
+   elseif speed>.22 then state=if speed>4.5 then 'Run' else 'Walk'
+   elseif now<e.GreetUntil then state='Greet'
+   elseif state=='Work' then state=Motion.work(e.Style.Work,now,e.Phase,Config.Behavior.WorkCycle)
+   elseif state~='Observe' then state='Idle'end
+   if not full and state~='Walk' and state~='Run' then state='Idle'end
+   e.Animation:update(state,now,elapsed,e.Phase,attention,not full)
+   local effect=self.EffectSelection[npc]==true
+   if effect then effects+=1 end
+   for _,p in e.Effects do if p.Part.Parent then
+    p.Part.Transparency=if effect and state=='Arcane' then .28+.12*math.sin(now*3) else .65
+    p.Part.Size=p.Size*(if effect and state=='Arcane' then 1+.09*math.sin(now*3) else 1)
+   end end
+  end
+  self.Effects=effects
+ end
+ function self:destroy()
+  if self.Stopped then return end;self.Stopped=true
+  for _,connection in self.Connections do connection:Disconnect()end
+  local npcs={};for npc in self.Entries do table.insert(npcs,npc)end;for _,npc in npcs do self:remove(npc)end
+  table.clear(self.Connections);table.clear(self.People);table.clear(self.Selected);table.clear(self.EffectSelection)
+  if Manager.Current==self then Manager.Current=nil end
+ end
+ local function discover(node)
+  if node:IsA('Model') then self:add(node)else local npc=node:FindFirstAncestorOfClass('Model');if npc and npc:IsDescendantOf(folder) then self:add(npc)end end
+ end
+ for _,node in folder:GetDescendants()do if node:IsA('Model') then self:add(node)end end
+ table.insert(self.Connections,folder.DescendantAdded:Connect(discover))
+ table.insert(self.Connections,folder.DescendantRemoving:Connect(function(node)if self.Entries[node] then self:remove(node)end end))
+ table.insert(self.Connections,folder.Destroying:Connect(function()self:destroy()end))
+ table.insert(self.Connections,Run.PreAnimation:Connect(function()for npc in self.Selected do local e=self.Entries[npc];if e then e.Animation:beforeAnimation()end end end))
+ table.insert(self.Connections,Run.PreSimulation:Connect(function(dt)self:step(dt,workspace:GetServerTimeNow())end))
+ self:scan(workspace:GetServerTimeNow());return self
+end
+return Manager
+]]></string>
+            </Properties>
+          </Item>
+        </Item>
+        <Item class="Folder" referent="20">
+          <Properties>
+            <string name="Name">Replacements</string>
+          </Properties>
+          <Item class="ModuleScript" referent="21">
+            <Properties>
+              <string name="Name">AmbientService</string>
+              <string name="Source"><![CDATA[-- Small, bounded patrols for ambient residents only. No pathfinding or combat AI.
+local Players=game:GetService('Players')
+local TweenService=game:GetService('TweenService')
+local Placement=require(script.Parent.Placement)
+local Ambient={}
+local mobile={Resident=true,Traveler=true,Farmer=true,Adventurer=true}
+function Ambient.start(npcs,folder)
+ if workspace:GetAttribute('EldravynNPCVisualVersion')==2 then return require(script.Parent.NPCBehaviorController).start(npcs,folder)end
+ local homes={};for _,npc in npcs do
+  if npc:GetAttribute('AmbientNPC') and mobile[npc:GetAttribute('NPCRole')] and npc.PrimaryPart then homes[npc]={Frame=npc.PrimaryPart.CFrame,Away=false}end
+ end
+ task.spawn(function()
+  while folder.Parent do
+   task.wait(10);local active=0
+   for npc,home in homes do
+    if active>=4 then break end
+    local root=npc.PrimaryPart;local nearby=false
+    if not root or (npc:GetAttribute('NPCSpeakingUntil') or 0)>os.clock() then continue end
+    for _,player in Players:GetPlayers()do local p=player.Character and player.Character:FindFirstChild('HumanoidRootPart');if p and (p.Position-root.Position).Magnitude<75 then nearby=true;break end end
+    if not nearby then continue end
+    local target=home.Frame*(if home.Away then CFrame.new() else CFrame.new(2.5,0,0))
+    local delta=target.Position-root.Position;local valid=true;local feet
+    for step=0,4 do
+     local point=root.Position+delta*(step/4)-Vector3.new(0,3,0)
+     feet=Placement.safe(point,{folder},point.Y)
+     if not feet or math.abs(feet.Y-point.Y)>0.7 then valid=false;break end
+    end
+    for other in homes do if other~=npc and other.PrimaryPart and (other.PrimaryPart.Position-target.Position).Magnitude<6 then valid=false;break end end
+    if valid and feet then
+     active+=1;home.Away=not home.Away
+     local destination=target+Vector3.new(0,feet.Y+3-target.Position.Y,0)
+     TweenService:Create(root,TweenInfo.new(2,Enum.EasingStyle.Linear),{CFrame=destination}):Play()
+    end
+   end
+  end
+ end)
+end
+return Ambient
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="LocalScript" referent="22">
+            <Properties>
+              <string name="Name">NPCInteractionClient</string>
+              <bool name="Disabled">true</bool>
+              <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local player=Players.LocalPlayer
+local remotes=game.ReplicatedStorage:WaitForChild('EldravynNPC'):WaitForChild('RemoteEvents')
+local ui=require(script.Parent.NPCDialogueClient).new(player:WaitForChild('PlayerGui'),remotes:WaitForChild('Action'))
+local marker
+remotes:WaitForChild('View').OnClientEvent:Connect(function(payload)
+ ui:receive(payload)
+ if payload.Marker then
+  if marker then marker:Destroy()end
+  marker=Instance.new('Part');marker.Name='NPCDestination';marker.Size=Vector3.new(0.5,0.5,0.5);marker.Transparency=1;marker.Anchored=true;marker.CanCollide=false;marker.CanTouch=false;marker.CanQuery=false;marker.Position=payload.Marker.Position+Vector3.new(0,10,0);marker.Parent=workspace
+  local billboard=Instance.new('BillboardGui');billboard.Size=UDim2.fromOffset(240,64);billboard.AlwaysOnTop=true;billboard.Adornee=marker;billboard.Parent=marker
+  local label=Instance.new('TextLabel');label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=0.2;label.BackgroundColor3=Color3.fromRGB(42,34,24);label.TextColor3=Color3.fromRGB(255,226,145);label.Font=Enum.Font.SourceSansBold;label.TextSize=18;label.TextWrapped=true;label.Text='◆ '..payload.Marker.Name;label.Parent=billboard
+  local this=marker;task.delay(payload.Marker.Seconds,function()if this then this:Destroy()end;if marker==this then marker=nil end end)
+ end
+end)
+game:GetService('UserInputService').InputBegan:Connect(function(input,processed)if not processed and input.KeyCode==Enum.KeyCode.Escape then ui:hide()end end)
+-- V2 owns animation motors only; the existing dialogue, shop UI and marker above stay intact.
+if workspace:GetAttribute('EldravynNPCVisualVersion')==2 then
+ local manager=require(script.Parent.NPCPerformanceManager).start(workspace:WaitForChild('EldravynNPCs'),player,game:GetService('UserInputService').TouchEnabled)
+ script.Destroying:Connect(function()manager:destroy()end)
+ return
+end
+-- Bounded local idle poses; no external Animation IDs or server frame loop.
+local joints={};local elapsed=0
+local function refresh()
+ joints={};local folder=workspace:FindFirstChild('EldravynNPCs');local root=player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+ if not folder or not root then return end
+ local nearest={}
+ for _,npc in folder:GetDescendants()do if npc:IsA('Model') and npc:GetAttribute('EldravynNPCId') and npc.PrimaryPart then
+  local distance=(npc.PrimaryPart.Position-root.Position).Magnitude;if distance<90 then table.insert(nearest,{NPC=npc,Distance=distance})end
+ end end
+ table.sort(nearest,function(a,b)return a.Distance<b.Distance end)
+ for index=1,math.min(#nearest,12)do
+  local npc=nearest[index].NPC;local torso=npc:FindFirstChild('UpperTorso');local neck=torso and torso:FindFirstChild('Neck')
+  if neck then table.insert(joints,neck)end
+ end
+end
+task.spawn(function()while true do refresh();task.wait(2)end end)
+game:GetService('RunService').Heartbeat:Connect(function(dt)
+ elapsed+=dt;for index,joint in joints do if joint.Parent then joint.Transform=CFrame.Angles(math.sin(elapsed*1.3+index)*0.025,math.sin(elapsed*0.8+index)*0.07,0)end end
+end)
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="ModuleScript" referent="23">
+            <Properties>
+              <string name="Name">NPCService</string>
+              <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Shared=game.ReplicatedStorage:WaitForChild('EldravynNPC')
+local C=require(Shared.Registry)
+local Data=require(script.Parent.NPCDataService)
+local Actions=require(script.Parent.NPCActionService)
+local Dialogue=require(script.Parent.DialogueService)
+local Purchase=require(script.Parent.PurchaseService)
+local Placement=require(script.Parent.Placement)
+local Service={Started=false}
+local function remote(parent,name)
+ local value=parent:FindFirstChild(name)
+ if not value then value=Instance.new('RemoteEvent');value.Name=name;value.Parent=parent end
+ assert(value:IsA('RemoteEvent'));return value
+end
+function Service.start()
+ if Service.Started then return end
+ local world=workspace:FindFirstChild('GeneratedWorld');local folder=workspace:FindFirstChild('EldravynNPCs')
+ assert(world and folder,'Instale os NPCs no mapa antes de iniciar.')
+ if world:GetAttribute('TerrainPending')==true then warn('[NPC] Terrain pendente. Use PrepareStudio em Edit antes de testar. Nenhum terreno será gerado no runtime.');return end
+ Service.Started=true
+ local remotes=Shared:FindFirstChild('RemoteEvents') or Instance.new('Folder');remotes.Name='RemoteEvents';remotes.Parent=Shared
+ local view,action=remote(remotes,'View'),remote(remotes,'Action');Dialogue.start(view,action)
+ for _,npc in folder:GetDescendants()do
+  local id=npc:GetAttribute('EldravynNPCId')
+  if npc:IsA('Model') and id then
+   assert(not Actions.NPCs[id],'NPC duplicado: '..id);Actions.NPCs[id]=npc
+   local root=npc:FindFirstChild('HumanoidRootPart');local prompt=npc:FindFirstChild('NPCInteraction',true)
+   local entry=require(Shared.PlacementConfig).NPCs[id]
+   local visualV2=workspace:GetAttribute('EldravynNPCVisualVersion')==2 and npc:GetAttribute('NPCVisualVersion')==2
+   local frame=if visualV2 then require(script.Parent.NPCPositionAdapter).frame(npc,world,entry,folder,Placement) else entry and Placement.frame(world,entry,folder,true)
+   if root and prompt and frame then
+    if not visualV2 then npc:PivotTo(frame*CFrame.new(0,3,0))end;prompt.Enabled=true
+    prompt.Triggered:Connect(function(player)Dialogue.open(player,npc)end)
+    if not npc:GetAttribute('AmbientNPC') then Actions.Locations[id]={Name=C.Roles[npc:GetAttribute('NPCRole')].Title..' • '..npc:GetAttribute('City'),Position=frame.Position}end
+   else
+    if prompt then prompt.Enabled=false end
+    warn('[NPC] Posição não validada; interação desativada: '..id)
+   end
+  end
+ end
+ local regions={}
+ for id,entry in require(Shared.PlacementConfig).Regions do
+  local anchor=Placement.resolve(world,entry.Anchor)
+  if anchor and anchor:IsA('BasePart') then
+   local record={Name=entry.Name,Position=anchor.Position,Radius=entry.Radius}
+   regions[id]=record;Actions.Locations[id]=record
+  end
+ end
+ Purchase.registerProduct('NPCClassChange',C.ClassChangeProduct,require(Shared.Rules).classReceipt)
+ Purchase.OnGrant=function(p)Dialogue.close(p);view:FireClient(p,{Notice='Crédito oficial registrado. Converse novamente com o mestre de classes.'})end
+ Purchase.start();Data.start()
+ require(script.Parent.AmbientService).start(Actions.NPCs,folder)
+ local function onCharacter(player,character)
+  local root=character:WaitForChild('HumanoidRootPart',10);if not root then return end
+  local state=Data.get(player);local id=state and state.NPC.ReturnNPC;local npc=id and Actions.NPCs[id]
+  if not npc or not npc.PrimaryPart then return end
+  -- Return beside the inn only if a fresh floor/clearance query succeeds.
+  local position=npc.PrimaryPart.Position+npc.PrimaryPart.CFrame.LookVector*5-Vector3.new(0,3,0)
+  local safe=Placement.safe(position,{folder,character},position.Y)
+  if safe then root.CFrame=CFrame.new(safe+Vector3.new(0,3,0))end
+ end
+ local function joined(player)
+  local ok,message=Data.load(player)
+  if player.Parent~=Players then return end
+  if not ok then view:FireClient(player,{Notice=message});return end
+  local state=Data.get(player)
+  if state and state.NPC.PendingHeal then
+   Data.change(player,function(s)s.Gold=math.min(C.MaxGold,s.Gold+s.NPC.PendingHeal);s.NPC.PendingHeal=nil;return true end)
+  end
+  player.CharacterAdded:Connect(function(character)onCharacter(player,character)end)
+  if player.Character then onCharacter(player,player.Character)end
+  view:FireClient(player,{Notice=if Data.Persistent then 'Perfil NPC carregado.' else 'Prévia Studio: progresso temporário, sem persistência ou compras Robux.'})
+ end
+ Players.PlayerAdded:Connect(joined);Players.PlayerRemoving:Connect(Data.remove)
+ for _,player in Players:GetPlayers()do task.spawn(joined,player)end
+ -- A single low-frequency scheduler. Only meaningful progress writes to the profile.
+ task.spawn(function()
+  local visits={}
+  while Service.Started do
+   task.wait(2)
+   for _,player in Players:GetPlayers()do
+    local character=player.Character;local root=character and character:FindFirstChild('HumanoidRootPart')
+    local hum=character and character:FindFirstChildOfClass('Humanoid')
+    if root and hum and hum.Health>0 and Data.get(player) then
+     local previous=visits[player] or {};local current={}
+     for id,region in regions do
+      if (root.Position-region.Position).Magnitude<region.Radius then
+       current[id]=true;if previous[id] then Data.event(player,'Visit:'..id,'Exploration')end
+      end
+     end
+     visits[player]=current
+    end
+    local session=Dialogue.Sessions[player]
+    if session and not session.Busy and (os.clock()>session.Expires or not Dialogue.near(player,session.NPC)) then Dialogue.close(player)end
+   end
+   for player in visits do if player.Parent~=Players then visits[player]=nil end end
+  end
+ end)
+ print('[NPC] Etapa 2 iniciada. Combate, conjuração, fusões e interiores de dungeon permanecem fora desta etapa.')
+end
+return Service
+]]></string>
+            </Properties>
+          </Item>
+        </Item>
+        <Item class="Folder" referent="24">
+          <Properties>
+            <string name="Name">Server</string>
+          </Properties>
+          <Item class="ModuleScript" referent="25">
+            <Properties>
+              <string name="Name">NPCBehaviorController</string>
+              <string name="Source"><![CDATA[-- One authoritative cosmetic-behavior scheduler; never mutates data, quests or services.
+local Players=game:GetService('Players')
+local Run=game:GetService('RunService')
+local Tween=game:GetService('TweenService')
+local Shared=game.ReplicatedStorage.EldravynNPCVisualV2
+local Config=require(Shared.NPCVisualConfig).Behavior
+local Appearance=require(Shared.NPCAppearanceConfig)
+local Behavior={Current=nil}
+function Behavior.start(npcs,folder)
+ if Behavior.Current and not Behavior.Current.Stopped then return Behavior.Current end
+ local Placement=require(script.Parent.Placement);local Dialogue=require(script.Parent.DialogueService)
+ local self={Entries={},Connections={},Stopped=false,Accum=0};Behavior.Current=self
+ local function state(e,name)if e.State~=name then e.State=name;e.NPC:SetAttribute('NPCV2State',name)end end
+ function self:cancel(e)
+  if e.Tween then e.Tween:Cancel();e.Tween:Destroy();e.Tween=nil end;e.Moving=false
+ end
+ function self:speaker(e,now)
+  local candidates={}
+  for player,s in Dialogue.Sessions do
+   if player.Parent==Players and s.NPC==e.NPC and (s.Busy or (s.Expires or 0)>now) then table.insert(candidates,player)end
+  end
+  table.sort(candidates,function(a,b)return a.UserId<b.UserId end)
+  for _,player in candidates do if player.UserId==e.Speaker then return player.UserId end end
+  return candidates[1] and candidates[1].UserId
+ end
+ function self:interaction(e,now)
+  local speaker=self:speaker(e,now)
+  if speaker then self:cancel(e);e.Speaker=speaker;e.NPC:SetAttribute('NPCV2Speaker',speaker);state(e,'Talk');return true end
+  if e.Speaker then e.Speaker=nil;e.NPC:SetAttribute('NPCV2Speaker',nil);e.NextMove=now+1;e.ReturnPending=(e.Root.Position-e.Home.Position).Magnitude>.06;state(e,'Idle')end
+  return false
+ end
+ function self:clear(e,target)
+  if e.NPC:GetAttribute('NPCV2PatrolFloorValid')==false then return false end
+  local origin=e.Root.Position;local delta=target.Position-origin
+  if (target.Position-e.Home.Position).Magnitude>Config.PatrolRadius+.05 then return false end
+  local samples=math.max(1,math.ceil(delta.Magnitude/.35))
+  for i=0,samples do
+   local point=origin+delta*(i/samples)-Vector3.new(0,3,0)
+   local floor=Placement.safe(point,{folder},point.Y)
+   if not floor or math.abs(floor.Y-point.Y)>.65 then return false end
+  end
+  -- Prevent cosmetic actors crossing one another, even with collision disabled.
+  for _,other in self.Entries do
+   if other~=e and other.Root.Parent then
+    local d=other.Root.Position-origin;local length=delta:Dot(delta)
+    local t=if length>0 then math.clamp(d:Dot(delta)/length,0,1) else 0
+    if (other.Root.Position-(origin+delta*t)).Magnitude<4.5 then return false end
+   end
+  end
+  return true
+ end
+ function self:move(e,target,now)
+  if not self:clear(e,target) then state(e,'Observe');e.NextMove=now+Config.Pause;return false end
+  local distance=(target.Position-e.Root.Position).Magnitude
+  if distance<.06 then e.ReturnPending=false;return false end
+  local duration=distance/Config.Speed
+  e.Tween=Tween:Create(e.Root,TweenInfo.new(duration,Enum.EasingStyle.Linear),{CFrame=target});e.Tween:Play()
+  e.Target=target;e.EndAt=now+duration;e.Moving=true;state(e,'Walk');return true
+ end
+ function self:step(now)
+  if self.Stopped then return end
+  local people={};for _,player in Players:GetPlayers()do local char=player.Character;local root=char and char:FindFirstChild('HumanoidRootPart');local hum=char and char:FindFirstChildOfClass('Humanoid');if root and hum and hum.Health>0 then table.insert(people,root.Position)end end
+  local moving=0;for _,e in self.Entries do if e.Moving then moving+=1 end end
+  for _,e in self.Entries do
+   if not e.NPC:IsDescendantOf(folder) or e.Humanoid.Health<=0 then self:cancel(e);state(e,'Idle');continue end
+   if self:interaction(e,now) then continue end
+   local near=false;for _,point in people do if (e.Root.Position-point).Magnitude<=Config.ActiveDistance then near=true;break end end
+   if not near then self:cancel(e);state(e,'Idle');continue end
+   if e.Moving then
+    -- Re-query the remaining path so a new obstacle cancels movement.
+    if not self:clear(e,e.Target) then self:cancel(e);e.NextMove=now+Config.Pause;state(e,'Observe')
+    elseif now>=e.EndAt then
+     self:cancel(e);e.ReturnPending=(e.Root.Position-e.Home.Position).Magnitude>.06;e.NextMove=now+Config.Pause;state(e,'Observe')
+    end
+   elseif e.Style.Patrol and now>=e.NextMove and moving<Config.MaxMoving then
+    local away=(e.Root.Position-e.Home.Position).Magnitude>.06
+    local target=if away or e.ReturnPending then e.Home else e.Home*CFrame.new(if e.Direction==1 then 2.5 else -2.5,0,0)
+    if self:move(e,target,now) then moving+=1;if not away then e.Direction=-e.Direction end end
+   else state(e,if e.Style.Patrol then 'Observe' else 'Work')end
+  end
+ end
+ function self:destroy()
+  if self.Stopped then return end;self.Stopped=true
+  for _,c in self.Connections do c:Disconnect()end
+  for _,e in self.Entries do self:cancel(e);if e.NPC.Parent then e.NPC:SetAttribute('NPCV2State',nil);e.NPC:SetAttribute('NPCV2Speaker',nil)end end
+  table.clear(self.Entries);table.clear(self.Connections);if Behavior.Current==self then Behavior.Current=nil end
+ end
+ local ordered={};for id,npc in npcs do if npc:GetAttribute('NPCVisualVersion')==2 then table.insert(ordered,{Id=id,NPC=npc})end end
+ table.sort(ordered,function(a,b)return a.Id<b.Id end)
+ for index,row in ordered do
+  local npc=row.NPC;local root=npc.PrimaryPart;local hum=npc:FindFirstChildOfClass('Humanoid')
+  if root and hum then
+   local e={NPC=npc,Root=root,Humanoid=hum,Home=root.CFrame,Style=Appearance.forNPC(row.Id,npc:GetAttribute('NPCRole'),npc:GetAttribute('City')),NextMove=os.clock()+2+(index%5),Direction=1}
+   table.insert(self.Entries,e);state(e,'Idle')
+   local prompt=npc:FindFirstChild('NPCInteraction',true)
+   if prompt then table.insert(self.Connections,prompt.Triggered:Connect(function(player)
+    local now=os.clock()
+    if not self:interaction(e,now) and player and Dialogue.near(player,npc) then
+     -- Listener order is not a contract: the original handler may not yet have
+     -- opened its session. Pause only cosmetics after its existing proximity check.
+     self:cancel(e);e.NextMove=now+Config.Tick*2;state(e,'Idle')
+    end
+   end))end
+  end
+ end
+ table.insert(self.Connections,Run.Heartbeat:Connect(function(dt)self.Accum+=dt;if self.Accum>=Config.Tick then self.Accum=0;self:step(os.clock())end end))
+ table.insert(self.Connections,folder.Destroying:Connect(function()self:destroy()end))
+ return self
+end
+return Behavior
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="ModuleScript" referent="26">
+            <Properties>
+              <string name="Name">NPCPositionAdapter</string>
+              <string name="Source"><![CDATA[-- Preserve the installed position. This adapter never calls PivotTo or changes CFrame.
+local Adapter={}
+function Adapter.frame(npc,world,entry,folder,placement)
+ if npc:GetAttribute('NPCVisualVersion')~=2 then return entry and placement.frame(world,entry,folder,true)end
+ local root=npc:FindFirstChild('HumanoidRootPart');if not root then return nil end
+ local frame=root.CFrame*CFrame.new(0,-3,0)
+ local floor=placement.safe(frame.Position,{folder},frame.Position.Y)
+ local valid=floor~=nil and math.abs(floor.Y-frame.Position.Y)<=.8
+ npc:SetAttribute('NPCV2PatrolFloorValid',valid)
+ if not valid then warn('[NPC V2] Piso incompatível em '..npc.Name..'; posição preservada e patrulha bloqueada. Revise a cópia manualmente.')end
+ return frame
+end
+return Adapter
+]]></string>
+            </Properties>
+          </Item>
+        </Item>
+        <Item class="Folder" referent="27">
+          <Properties>
+            <string name="Name">Shared</string>
+          </Properties>
+          <Item class="ModuleScript" referent="28">
+            <Properties>
+              <string name="Name">NPCAppearanceConfig</string>
+              <string name="Source"><![CDATA[-- Original designs made from native Roblox geometry. No uploaded asset dependency.
+local C={Version=2,MaxVisualParts=150,DetailDistance=42}
+C.Cities={
+ Valoria={Cloth={29,49,69},Accent={194,158,87},Metal={132,143,154}},
+ Arkheim={Cloth={94,43,44},Accent={179,135,84},Metal={95,106,116}},
+ Eldoria={Cloth={39,88,78},Accent={175,192,160},Metal={149,167,164}},
+ Durakh={Cloth={105,74,46},Accent={184,125,72},Metal={111,119,124}},
+ Asterion={Cloth={70,58,105},Accent={191,183,215},Metal={153,158,181}},
+ MalgorthDepths={Cloth={65,39,48},Accent={171,115,77},Metal={104,112,127}},
+ FallenSanctum={Cloth={55,67,87},Accent={173,183,194},Metal={136,151,168}},
+}
+C.Roles={
+ GuildMaster={Style='Commander',Hair='Swept',Cape=true,Armor=true,Book=true,Sword=true,Work='Documents',HairColor={224,215,192}},
+ Reception={Style='Scribe',Hair='Braided',Book=true,Work='Documents'},
+ Guard={Style='Guard',Hair='Short',Cape=true,Armor=true,Sword=true,Shield=true,Helmet=true,Work='Observe',Patrol=true},
+ Classes={Style='Veteran',Hair='Swept',Armor=true,Sword=true,Cape=true,Work='Inspect'},
+ Skills={Style='Duelist',Hair='Short',Sword=true,Work='Inspect'},
+ Blacksmith={Style='Smith',Hair='Short',Apron=true,Hammer=true,Work='Forge',HairColor={56,45,39}},
+ Armor={Style='Armorer',Hair='Braided',Armor=true,Apron=true,Work='Organize'},
+ Weapons={Style='Quartermaster',Hair='Swept',Sword=true,Work='Organize'},
+ General={Style='Merchant',Hair='Swept',Work='Trade'},
+ TravelShop={Style='Nomad',Hair='Braided',Cape=true,Backpack=true,Work='Trade'},
+ Magic={Style='Mage',Hair='Long',Cape=true,Robe=true,Staff=true,Book=true,Work='Study'},
+ Races={Style='Lorekeeper',Hair='Long',Robe=true,Cape=true,Book=true,Work='Study'},
+ Fusions={Style='Artificer',Hair='Swept',Robe=true,Staff=true,Monocle=true,Work='Study'},
+ Inn={Style='Host',Hair='Braided',Apron=true,Cup=true,Work='Serve'},
+ Healer={Style='Healer',Hair='Long',Robe=true,Work='Study'},
+ Bank={Style='Clerk',Hair='Short',Book=true,Monocle=true,Work='Documents'},
+ Guide={Style='Scout',Hair='Swept',Cape=true,Work='Orient'},
+ Tutorial={Style='Page',Hair='Swept',Work='Orient'},
+ Dungeon={Style='Warden',Hair='Long',Armor=true,Cape=true,Work='Inspect'},
+ Resident={Style='Citizen',Hair='Swept',Work='Observe',Patrol=true},
+ Traveler={Style='Traveler',Hair='Long',Backpack=true,Work='Observe',Patrol=true},
+ Artisan={Style='Artisan',Hair='Short',Apron=true,Hammer=true,Work='Forge'},
+ Employee={Style='Assistant',Hair='Braided',Apron=true,Work='Organize'},
+ Adventurer={Style='Ranger',Hair='Swept',Cape=true,Sword=true,Work='Observe',Patrol=true},
+ Farmer={Style='Farmer',Hair='Short',Apron=true,Hat=true,Work='Observe',Patrol=true},
+}
+local skins={{230,191,160},{198,147,111},{156,107,81},{239,209,184},{174,126,101}}
+local hairs={{65,43,32},{132,92,55},{197,170,118},{42,39,47},{176,182,190},{119,54,41}}
+local eyes={{67,113,112},{121,91,54},{92,101,137},{108,135,89}}
+function C.hash(id)
+ local n=17;for i=1,#id do n=(n*31+string.byte(id,i))%104729 end;return n
+end
+function C.forNPC(id,role,city)
+ assert(type(id)=='string' and C.Roles[role] and C.Cities[city],'Visual V2: identidade/papel/cidade desconhecidos')
+ local n=C.hash(id);local out=table.clone(C.Roles[role]);local palette=C.Cities[city]
+ out.Id=id;out.Role=role;out.City=city;out.Variant=n%3+1
+ out.Skin=skins[n%#skins+1];out.HairColor=out.HairColor or hairs[n%#hairs+1];out.Eyes=eyes[n%#eyes+1]
+ out.Cloth=palette.Cloth;out.Accent=palette.Accent;out.Metal=palette.Metal
+ out.Leather={72+n%12,49+n%8,36+n%6};out.Linen={207,197,170};out.MaxParts=C.MaxVisualParts
+ if role=='Healer' then out.Cloth={202,206,185}end
+ return out
+end
+return C
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="ModuleScript" referent="29">
+            <Properties>
+              <string name="Name">NPCMotion</string>
+              <string name="Source"><![CDATA[-- Authored procedural pose vocabulary. Radians, no assets, Instances or gameplay state.
+local M={}
+function M.pose(state,t,phase,reduced)
+ local p={};local rad=math.rad
+ local function joint(name,x,y,z)p[name]={rad(x or 0),rad(y or 0),rad(z or 0)}end
+ local breath=math.sin(t*1.6+phase)
+ joint('Waist',.6*breath,0,.45*math.sin(t*.65+phase));joint('Neck',.6*breath,2.5*math.sin(t*.38+phase),0)
+ joint('LeftShoulder',1.5*breath,0,-3);joint('RightShoulder',-1.5*breath,0,3)
+ joint('LeftElbow',5,0,0);joint('RightElbow',5,0,0)
+ if reduced and state~='Walk' and state~='Run' then return p end
+ local pulse=math.sin(t*2.6+phase)
+ if state=='Walk' or state=='Run' then
+  local run=state=='Run';local step=math.sin(t*(if run then 9 else 5.5)+phase);local swing=if run then 36 else 22
+  joint('LeftHip',swing*step,0,0);joint('RightHip',-swing*step,0,0)
+  joint('LeftKnee',-math.max(0,-step)*(if run then 46 else 28),0,0);joint('RightKnee',-math.max(0,step)*(if run then 46 else 28),0,0)
+  joint('LeftAnkle',-8*step,0,0);joint('RightAnkle',8*step,0,0)
+  joint('LeftShoulder',-swing*step,0,-4);joint('RightShoulder',swing*step,0,4);joint('Waist',if run then -8 else -2,1.2*step,0)
+ elseif state=='Greet' then
+  joint('RightShoulder',28,0,84);joint('RightElbow',65,0,0);joint('RightWrist',0,0,14*math.sin(t*10));joint('Neck',-3,0,-4)
+ elseif state=='Talk' or state=='Trade' or state=='Orient' then
+  joint('RightShoulder',22+5*pulse,0,12);joint('RightElbow',39+9*pulse,0,0);joint('RightWrist',0,12*math.sin(t*1.4),-8)
+  joint('LeftElbow',15+7*math.sin(t*1.8+phase),0,0);joint('Neck',2*math.sin(t*2.1),0,0)
+ elseif state=='Forge' then
+  local lift=(math.sin(t*3+phase)+1)/2
+  joint('Waist',-8,0,-3);joint('RightShoulder',35+35*lift,0,8);joint('RightElbow',12+53*lift,0,0)
+  joint('RightWrist',12-16*lift,0,0);joint('LeftShoulder',27,0,-5);joint('LeftElbow',24,0,0);joint('Neck',-18,0,0)
+ elseif state=='Study' or state=='Documents' then
+  joint('LeftShoulder',34,0,-9);joint('LeftElbow',65,0,0);joint('LeftWrist',0,0,-8)
+  joint('RightShoulder',23,0,5);joint('RightElbow',45+5*pulse,0,0);joint('RightWrist',0,9*pulse,0);joint('Neck',-16,2*pulse,0)
+ elseif state=='Arcane' then
+  joint('RightShoulder',38,0,24);joint('RightElbow',28-5*pulse,0,0);joint('LeftShoulder',18,0,-23);joint('LeftElbow',55,0,0)
+  joint('LeftWrist',0,18*pulse,0);joint('Neck',-7,0,0)
+ elseif state=='Inspect' then
+  joint('LeftShoulder',30,0,-6);joint('LeftElbow',43,0,0);joint('RightShoulder',28,0,10);joint('RightElbow',48,0,0);joint('Neck',-13,8*pulse,0)
+ elseif state=='Organize' then
+  joint('Waist',-5,5*pulse,0);joint('RightShoulder',36+8*pulse,0,9);joint('RightElbow',21+10*pulse,0,0);joint('LeftShoulder',18,0,-5);joint('LeftElbow',35,0,0)
+ elseif state=='Serve' then
+  joint('RightShoulder',45+5*pulse,0,5);joint('RightElbow',20,0,0);joint('LeftShoulder',10,0,-8);joint('LeftElbow',25,0,0);joint('Neck',-2,3*pulse,0)
+ elseif state=='Observe' then joint('Neck',0,10*math.sin(t*.35+phase),0);joint('Waist',0,3*math.sin(t*.35+phase),0)
+ end
+ return p
+end
+function M.work(base,t,phase,cycle)
+ cycle=cycle or 18;local slot=math.floor((t+phase)%cycle/(cycle/3))
+ if base=='Forge' then return ({'Forge','Inspect','Organize'})[slot+1]end
+ if base=='Study' then return ({'Study','Study','Arcane'})[slot+1]end
+ if base=='Trade' then return ({'Trade','Organize','Trade'})[slot+1]end
+ return base
+end
+return M
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="ModuleScript" referent="30">
+            <Properties>
+              <string name="Name">NPCVisualConfig</string>
+              <string name="Source"><![CDATA[return {
+ Version=2,
+ Attention={Distance=22,HalfField=80,HeadYaw=44,HeadPitch=20,TorsoYaw=11,Response=7,GreetingCooldown=14},
+ Performance={ScanSeconds=0.5,FullDistance=48,ReducedDistance=100,DesktopFull=12,MobileFull=8,Reduced=8,DesktopHz=30,MobileHz=20,ReducedHz=6,Effects=3,Particles=0},
+ Behavior={Tick=0.2,ActiveDistance=90,MaxMoving=4,PatrolRadius=3,Speed=1.6,Pause=5,WorkCycle=12},
+ -- Empty IDs intentionally use authored procedural poses. Configure ONLY owned/authorized published assets.
+ Animations={
+  Idle={Id='',Priority='Idle',Looped=true},Walk={Id='',Priority='Movement',Looped=true},Run={Id='',Priority='Movement',Looped=true},
+  Greet={Id='',Priority='Action2',Looped=false},Talk={Id='',Priority='Action2',Looped=true},
+  Forge={Id='',Priority='Action',Looped=true},Inspect={Id='',Priority='Action',Looped=true},Organize={Id='',Priority='Action',Looped=true},
+  Study={Id='',Priority='Action',Looped=true},Arcane={Id='',Priority='Action',Looped=true},Trade={Id='',Priority='Action',Looped=true},
+  Documents={Id='',Priority='Action',Looped=true},Serve={Id='',Priority='Action',Looped=true},Orient={Id='',Priority='Action',Looped=true},Observe={Id='',Priority='Idle',Looped=true},
+ },
+ FadeSeconds=0.22,
+}
+]]></string>
+            </Properties>
+          </Item>
+          <Item class="ModuleScript" referent="31">
+            <Properties>
+              <string name="Name">NPCVisualPolicy</string>
+              <string name="Source"><![CDATA[local P={}
+function P.clipId(id)return type(id)=='string' and id:match('^rbxassetid://[1-9]%d*$')~=nil end
+function P.attention(x,y,z,active,c)
+ local distance=math.sqrt(x*x+y*y+z*z)
+ if distance>c.Distance or distance<.01 then return 0,0,0,false end
+ local yaw=math.atan2(-x,-z);local pitch=math.atan2(y,math.sqrt(x*x+z*z))
+ if not active and math.abs(yaw)>math.rad(c.HalfField) then return 0,0,0,false end
+ return math.clamp(yaw, -math.rad(c.HeadYaw), math.rad(c.HeadYaw)),math.clamp(pitch,-math.rad(c.HeadPitch),math.rad(c.HeadPitch)),math.clamp(yaw*.22,-math.rad(c.TorsoYaw),math.rad(c.TorsoYaw)),true
+end
+function P.select(candidates,mobile,config)
+ table.sort(candidates,function(a,b)if a.Active~=b.Active then return a.Active end;if a.Distance~=b.Distance then return a.Distance<b.Distance end;return a.Id<b.Id end)
+ local result={};local full,reduced=0,0;local cap=if mobile then config.MobileFull else config.DesktopFull
+ for _,entry in candidates do
+  if entry.Distance<=config.FullDistance and full<cap then result[entry.Key]='Full';full+=1
+  elseif entry.Distance<=config.ReducedDistance and reduced<config.Reduced then result[entry.Key]='Reduced';reduced+=1 end
+ end
+ return result
+end
+return P
+]]></string>
+            </Properties>
+          </Item>
+        </Item>
+      </Item>
+    </Item>
+    <Item class="Folder" referent="32">
+      <Properties>
+        <string name="Name">EnemyRuntime</string>
+      </Properties>
+      <Item class="ModuleScript" referent="33">
+        <Properties>
+          <string name="Name">Factory</string>
+          <string name="Source"><![CDATA[-- Visual factory only: EnemyService retains all AI, health, damage and rewards.
+local F={}
+local Catalog=require(script.Parent.AvatarCatalog)
+local Proxy=require(script.Parent.ProxyRig)
+local function frame(v)return CFrame.new(table.unpack(v))end
+function F.create(parent,name,position,_color,hostile,kind)
+ assert(hostile,'Biblioteca de inimigos não cria NPCs de serviço')
+ local key=Catalog.Enemies[kind];local def=key and Catalog.Models[key]
+ local template=def and script.Parent.Templates:FindFirstChild(key);assert(template,'Modelo de inimigo não registrado: '..tostring(kind))
+ local model=Proxy.create(parent,{Id=name,Role='Guard',City='Enemy',Ambient=false},{Name=name,Title='Inimigo'},CFrame.new(position))
+ local root=model.PrimaryPart;local hum=model:FindFirstChildOfClass('Humanoid');local bodies={HumanoidRootPart=root}
+ local ok,err=pcall(function()
+  for bone in Catalog.R15 do bodies[bone]=assert(model:FindFirstChild(bone),'Proxy R15 incompleto')end
+  for _,child in model:GetChildren()do if child:IsA('BasePart') then
+   if not bodies[child.Name] then child:Destroy()else child.Transparency=1;child.CanCollide=child.Name=='UpperTorso';child.CanQuery=child.CanCollide end
+  end end
+  local prompt=model:FindFirstChild('NPCInteraction',true);if prompt then prompt:Destroy()end
+  for _,keyName in {'EldravynNPCId','NPCRole','City','AmbientNPC','NPCVersion'}do model:SetAttribute(keyName,nil)end
+  local visuals=Instance.new('Folder');visuals.Name='AvatarEnemyVisuals';visuals.Parent=model
+  local feet=root.CFrame*CFrame.new(0,-3,0)
+  for _,bone in def.Bones do
+   local source=assert(template:FindFirstChild(bone));local target=bodies[bone]
+   if not target then
+    local p=Instance.new('Part');p.Name='AvatarAnchor_'..bone;p.Size=Vector3.new(.1,.1,.1);p.Transparency=1;p.CanCollide=false;p.CanTouch=false;p.CanQuery=false;p.Massless=true
+    local point=Catalog.Quadruped[bone]or{0,.95,0};p.CFrame=feet*frame(point);p.Parent=model;target=p
+    local pivot=if bone:find('Front')or bone:find('Hind')then{point[1],1.48,point[3]}elseif bone=='BeastHead'then{0,1.80,-.7}elseif bone=='BeastTail'then{0,1.65,1.0}else point
+    local motor=Instance.new('Motor6D');motor.Name='Avatar_'..bone;motor.Part0=root;motor.Part1=p
+    local worldPivot=feet*frame(pivot);motor.C0=root.CFrame:ToObjectSpace(worldPivot);motor.C1=p.CFrame:ToObjectSpace(worldPivot);motor.Parent=root
+   end
+   local mesh=source:Clone();mesh.Name='Avatar_'..bone;mesh.CFrame=feet*source.CFrame;mesh.Anchored=false;mesh.Massless=true;mesh.CanCollide=false;mesh.CanTouch=false;mesh.CanQuery=true;mesh.Parent=visuals
+   if def.Kind=='Blob'then mesh.Transparency=.12 end
+   local weld=Instance.new('WeldConstraint');weld.Part0=target;weld.Part1=mesh;weld.Parent=mesh
+  end
+  hum.AutoRotate=true;root.Anchored=false;root.Massless=false
+  model:SetAttribute('AvatarEnemyKind',kind);model:SetAttribute('AvatarRigKind',def.Kind);model:SetAttribute('EnemyKind',kind);model:SetAttribute('AvatarArtVersion',3)
+  game:GetService('CollectionService'):AddTag(model,'EldravynAvatarEnemy')
+  if game:GetService('RunService'):IsRunning()then root:SetNetworkOwner(nil)end
+ end)
+ if not ok then model:Destroy();error(err)end
+ return model,hum,root
+end
+return F
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="34">
+        <Properties>
+          <string name="Name">ProxyRig</string>
+          <string name="Source"><![CDATA[-- Original native R15 topology, Motor6D joints and decorative clothing. No asset IDs.
+local F={}
+function F.create(parent,definition,role,frame)
+ local m=Instance.new('Model');m.Name=definition.Id;m.ModelStreamingMode=Enum.ModelStreamingMode.Atomic
+ m:SetAttribute('EldravynNPCId',definition.Id);m:SetAttribute('NPCRole',definition.Role);m:SetAttribute('City',definition.City)
+ m:SetAttribute('AmbientNPC',definition.Ambient==true);m:SetAttribute('NPCVersion',1)
+ if definition.Dungeon then m:SetAttribute('DungeonId',definition.Dungeon) end
+ local mage=definition.Role=='Magic' or definition.Role=='Races' or definition.Role=='Fusions'
+ local guard=definition.Role=='Guard' or definition.Role=='Classes' or definition.Role=='GuildMaster'
+ local skin=Color3.fromRGB(190+(definition.Variant or 1)*6,148+(definition.Variant or 1)*5,115+(definition.Variant or 1)*4)
+ local cloth=if mage then Color3.fromRGB(70,71,122) elseif guard then Color3.fromRGB(72,95,117) elseif definition.Role=='Blacksmith' then Color3.fromRGB(95,67,49) else Color3.fromRGB(100,102,72)
+ local pants=Color3.fromRGB(59,51,49);local metal=Color3.fromRGB(153,161,171)
+ local parts,offsets={},{}
+ local function part(name,size,offset,color)
+  local p=Instance.new('Part');p.Name=name;p.Size=size;p.CFrame=frame*CFrame.new(offset);p.Color=color
+  p.Material=Enum.Material.SmoothPlastic;p.CanCollide=false;p.CanTouch=false;p.CanQuery=false;p.Massless=true
+  p.TopSurface=Enum.SurfaceType.Smooth;p.BottomSurface=Enum.SurfaceType.Smooth;p.Parent=m
+  parts[name]=p;offsets[name]=offset;return p
+ end
+ local root=part('HumanoidRootPart',Vector3.new(2,2,1),Vector3.new(0,3,0),cloth);root.Transparency=1;root.Anchored=true
+ part('LowerTorso',Vector3.new(1.8,0.9,0.9),Vector3.new(0,3,0),cloth)
+ part('UpperTorso',Vector3.new(2,1.4,1),Vector3.new(0,4,0),cloth)
+ local head=part('Head',Vector3.new(1.4,1.1,1),Vector3.new(0,5.25,0),skin)
+ for _,side in {'Left','Right'} do
+  local x=if side=='Left' then -1 else 1
+  part(side..'UpperArm',Vector3.new(0.65,1.1,0.75),Vector3.new(x*1.35,4,0),cloth)
+  part(side..'LowerArm',Vector3.new(0.6,0.9,0.65),Vector3.new(x*1.35,3,0),if definition.Role=='Blacksmith' then skin else cloth)
+  part(side..'Hand',Vector3.new(0.6,0.5,0.65),Vector3.new(x*1.35,2.3,0),if guard or definition.Role=='Blacksmith' then pants else skin)
+  part(side..'UpperLeg',Vector3.new(0.8,1.2,0.8),Vector3.new(x*0.5,1.95,0),pants)
+  part(side..'LowerLeg',Vector3.new(0.7,1,0.7),Vector3.new(x*0.5,0.9,0),pants)
+  part(side..'Foot',Vector3.new(0.8,0.5,1.2),Vector3.new(x*0.5,0.25,-0.1),Color3.fromRGB(45,37,33))
+ end
+ local function joint(name,a,b,pivot)
+  local motor=Instance.new('Motor6D');motor.Name=name;motor.Part0=parts[a];motor.Part1=parts[b]
+  motor.C0=CFrame.new(pivot-offsets[a]);motor.C1=CFrame.new(pivot-offsets[b]);motor.Parent=parts[a]
+  for _,body in {a,b} do local at=Instance.new('Attachment');at.Name=name..'RigAttachment';at.CFrame=CFrame.new(pivot-offsets[body]);at.Parent=parts[body] end
+ end
+ joint('Root','HumanoidRootPart','LowerTorso',Vector3.new(0,3,0));joint('Waist','LowerTorso','UpperTorso',Vector3.new(0,3.4,0));joint('Neck','UpperTorso','Head',Vector3.new(0,4.7,0))
+ for _,side in {'Left','Right'} do local x=if side=='Left' then -1 else 1
+  joint(side..'Shoulder','UpperTorso',side..'UpperArm',Vector3.new(x,4.4,0))
+  joint(side..'Elbow',side..'UpperArm',side..'LowerArm',Vector3.new(x*1.35,3.45,0))
+  joint(side..'Wrist',side..'LowerArm',side..'Hand',Vector3.new(x*1.35,2.55,0))
+  joint(side..'Hip','LowerTorso',side..'UpperLeg',Vector3.new(x*0.5,2.55,0))
+  joint(side..'Knee',side..'UpperLeg',side..'LowerLeg',Vector3.new(x*0.5,1.35,0))
+  joint(side..'Ankle',side..'LowerLeg',side..'Foot',Vector3.new(x*0.5,0.4,0))
+ end
+ local function adorn(name,size,offset,color,body)
+  body=body or 'UpperTorso';local p=part(name,size,offsets[body]+offset,color)
+  local weld=Instance.new('WeldConstraint');weld.Part0=parts[body];weld.Part1=p;weld.Parent=p;return p
+ end
+ for _,x in {-0.3,0.3} do adorn('Eye'..x,Vector3.new(0.13,0.17,0.08),Vector3.new(x,0,-0.54),Color3.fromRGB(28,24,31),'Head') end
+ adorn('Hair',Vector3.new(1.5,0.35,1.1),Vector3.new(0,0.5,0.05),pants,'Head')
+ adorn('Mouth',Vector3.new(0.3,0.06,0.06),Vector3.new(0,-0.3,-0.54),pants,'Head')
+ adorn('Belt',Vector3.new(1.95,0.22,1),Vector3.new(0,-0.1,0),pants,'LowerTorso')
+ if mage then
+  adorn('Robe',Vector3.new(1.9,1.5,1),Vector3.new(0,-0.5,0),cloth,'LowerTorso')
+  adorn('HatBrim',Vector3.new(2,0.2,1.6),Vector3.new(0,0.6,0),cloth,'Head')
+  adorn('HatCrown',Vector3.new(1,1.2,0.9),Vector3.new(0,1.1,0),cloth,'Head')
+  adorn('DecorativeStaff',Vector3.new(0.22,4.8,0.22),Vector3.new(0.5,0.8,0),Color3.fromRGB(102,75,46),'RightHand')
+ elseif guard then
+  adorn('Breastplate',Vector3.new(1.85,1.2,0.2),Vector3.new(0,0,-0.6),metal)
+  for _,x in {-1,1} do adorn('Pauldron'..x,Vector3.new(0.9,0.35,1),Vector3.new(x*1.2,0.5,0),metal) end
+ elseif definition.Role=='Blacksmith' then
+  adorn('Apron',Vector3.new(1.6,2,0.15),Vector3.new(0,-0.4,-0.6),Color3.fromRGB(84,51,32))
+  adorn('HammerHandle',Vector3.new(0.2,1.3,0.2),Vector3.new(0,-0.3,0),pants,'RightHand')
+  adorn('HammerHead',Vector3.new(0.9,0.4,0.4),Vector3.new(0,0.35,0),metal,'RightHand')
+ else
+  adorn('VestTrim',Vector3.new(0.2,1.3,0.15),Vector3.new(-0.5,0,-0.6),Color3.fromRGB(204,178,106))
+  adorn('Satchel',Vector3.new(0.8,0.8,0.5),Vector3.new(0.9,-0.3,0.1),pants,'LowerTorso')
+ end
+ local hum=Instance.new('Humanoid');hum.RigType=Enum.HumanoidRigType.R15;hum.DisplayName=role.Name..' • '..role.Title;hum.HipHeight=2
+ hum.MaxHealth=100;hum.Health=100;hum.BreakJointsOnDeath=false;hum.AutoRotate=false;hum.Parent=m
+ local animator=Instance.new('Animator');animator.Parent=hum
+ local prompt=Instance.new('ProximityPrompt');prompt.Name='NPCInteraction';prompt.ActionText='Conversar';prompt.ObjectText=role.Name..' • '..role.Title
+ prompt.MaxActivationDistance=12;prompt.RequiresLineOfSight=true;prompt.HoldDuration=0;prompt.KeyboardKeyCode=Enum.KeyCode.E;prompt.Parent=head
+ m.PrimaryPart=root;m.Parent=parent;return m
+end
+return F
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="ModuleScript" referent="35">
+      <Properties>
+        <string name="Name">EnemyServiceBaseline</string>
+        <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Pathfinding=game:GetService('PathfindingService')
+local Shared=game.ReplicatedStorage.MedievalRPG
+local Rig=require(Shared.RigFactory)
+local Catalog=require(Shared.Config.ContentConfig)
+local Config=require(Shared.Config.WorldConfig)
+local Security=require(script.Parent.AntiExploitService)
+local Patterns=require(Shared.Core.ActionMath)
+local E={Active={},Spawns={},SpawnSet={},OnKill=nil,Running=false}
+local function nearest(pos,radius,scope)
+    local best,dist
+    for _,p in Players:GetPlayers() do
+        local root=Security.alive(p)
+        if root and (not E.CanTarget or E.CanTarget(p,scope)) then
+            local d=(root.Position-pos).Magnitude
+            if d<radius and (not dist or d<dist) then best,dist=p,d end
+        end
+    end
+    return best,dist
+end
+function E.scan(root)
+    local folder=root:FindFirstChild('EnemySpawns')
+    if folder then
+        for _,marker in folder:GetChildren() do
+            if marker:IsA('BasePart') and not E.SpawnSet[marker] then
+                E.SpawnSet[marker]=true;table.insert(E.Spawns,{Marker=marker,Next=0,Root=root})
+            end
+        end
+    end
+end
+local function spawnEnemy(s)
+    local kind=s.Marker:GetAttribute('EnemyKind');local def=Catalog.Enemies[kind]
+    if not def then return end
+    local paint=Color3.fromRGB(table.unpack(def.Color))
+    local model,hum,root=Rig.create(s.Root,def.Name,s.Marker.Position,paint,true,kind)
+    model:SetAttribute('EnemyKind',kind);model:SetAttribute('HealthMax',def.Health);model:SetAttribute('Health',def.Health)
+    local health=def.Health;local heightOffset=3
+    if def.Boss then
+        local participants=0;for _,p in Players:GetPlayers()do local r=Security.alive(p);if r and (r.Position-s.Marker.Position).Magnitude<100 then participants+=1 end end
+        health=math.floor(def.Health*(1+0.35*(math.clamp(participants,1,4)-1)))
+        local scale=if kind=='Malgorth' then 2.2 else 1.7
+        model:ScaleTo(scale);heightOffset=3*scale
+        model:PivotTo(CFrame.new(s.Marker.Position+Vector3.new(0,heightOffset,0)))
+        model:SetAttribute('Boss',true);model:SetAttribute('PartyScale',math.clamp(participants,1,4))
+    end
+    model:SetAttribute('HealthMax',health);model:SetAttribute('Health',health)
+    hum.MaxHealth=health;hum.Health=health;hum.WalkSpeed=def.Speed
+    local multiplier=s.Marker:GetAttribute('Difficulty') or 1
+    health=math.floor(health*multiplier);hum.MaxHealth=health;hum.Health=health
+    model:SetAttribute('HealthMax',health);model:SetAttribute('Health',health)
+    local e={Model=model,Hum=hum,Root=root,Kind=kind,Def=def,MaxHealth=health,HeightOffset=heightOffset,Spawn=s,Home=s.Marker.Position,LastAttack=0,Contributors={},State='IDLE',PathAt=0,Waypoints=nil,Waypoint=1,PathBusy=false,Target=nil,LastSpecial=os.clock(),SpecialCooldown=5}
+    e.Damage=math.floor(def.Damage*math.min(2.5,multiplier))
+    s.Enemy=e;E.Active[model]=e
+    hum.HealthChanged:Connect(function(h) if model.Parent then model:SetAttribute('Health',h) end end)
+    hum.Died:Connect(function()
+        e.State='DEAD';model:SetAttribute('State','DEAD')
+        if kind=='Malgorth' then s.Root:SetAttribute('BossDefeated',true) end
+        if s.Marker:GetAttribute('Once') then s.Marker:SetAttribute('Defeated',true) end
+        if E.OnKill then local ok,err=xpcall(function()E.OnKill(e)end,debug.traceback);if not ok then warn(err)end end
+        E.Active[model]=nil;s.Enemy=nil;s.Next=os.clock()+(if kind=='Malgorth' or kind=='Knight' then 300 else 25)
+        task.delay(4,function() if model.Parent then model:Destroy() end end)
+    end)
+end
+function E.damage(model,player,damage)
+    local e=E.Active[model]
+    if not e or e.Hum.Health<=0 then return false end
+    if E.CanTarget and not E.CanTarget(player,e.Spawn and e.Spawn.Root) then return false end
+    if type(damage)~='number' or damage~=damage or damage<=0 or damage>100000 then return false end
+    local actual=math.min(damage,e.Hum.Health)
+    if e.Spawn and e.Spawn.Marker:GetAttribute('Training') then
+        e.Hum.Health=e.Hum.MaxHealth;e.ReactionUntil=os.clock()+0.15;return true
+    end
+    e.Contributors[player]=(e.Contributors[player] or 0)+actual
+    e.Hum:TakeDamage(actual);e.ReactionUntil=os.clock()+0.15;return true
+end
+local function pathTo(e,target)
+    if e.PathBusy or os.clock()-e.PathAt<2 then return end
+    e.PathAt=os.clock();e.PathBusy=true
+    task.spawn(function()
+        local path=Pathfinding:CreatePath({AgentRadius=2,AgentHeight=6,AgentCanJump=true})
+        local ok=pcall(function() path:ComputeAsync(e.Root.Position,target) end)
+        if e.Model.Parent and ok and path.Status==Enum.PathStatus.Success then
+            e.Waypoints=path:GetWaypoints();e.Waypoint=2;e.PathGoal=target
+        end
+        e.PathBusy=false
+    end)
+end
+function E.resolveSwing(e,now)
+    local swing=e.Swing
+    if not swing then return end
+    if e.Hum.Health<=0 or now<(e.StunnedUntil or 0) or (e.Root.Position-e.Home).Magnitude>95 then e.Swing=nil;return end
+    if now<swing.At then return end
+    e.Swing=nil
+    local r=Security.alive(swing.Player)
+    local delta=r and r.Position-e.Root.Position
+    if not delta or delta.Magnitude>swing.Range or (delta.Magnitude>0.01 and swing.Direction and delta.Unit:Dot(swing.Direction)<0.1) then return end
+    if E.CanTarget and not E.CanTarget(swing.Player,e.Spawn and e.Spawn.Root) then return end
+    local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={e.Model}
+    local hit=workspace:Raycast(e.Root.Position,delta,params)
+    if E.OnPlayerHit and (not hit or hit.Instance:IsDescendantOf(swing.Player.Character)) then
+        E.OnPlayerHit(swing.Player,e.Damage or e.Def.Damage,e.Root.Position,e,true)
+    end
+end
+function E.step()
+    local now=os.clock();local count=0
+    for _ in E.Active do count+=1 end
+    local cap=Config.QualityProfiles[Config.Quality].ActiveEnemies
+    for _,s in E.Spawns do
+        if s.Marker.Parent and s.Marker:GetAttribute('Enabled')~=false and not s.Marker:GetAttribute('Defeated') and not s.Enemy and now>=s.Next and count<cap and nearest(s.Marker.Position,220,s.Root) then
+            if not (s.Marker:GetAttribute('EnemyKind')=='Malgorth' and s.Root:GetAttribute('BossDefeated')) then spawnEnemy(s);count+=1 end
+        end
+    end
+    for model,e in E.Active do
+        if e.Spawn and e.Spawn.Marker:GetAttribute('Enabled')==false then
+            E.Active[model]=nil;e.Spawn.Enemy=nil;model:Destroy();continue
+        end
+        if not model.Parent or not e.Root.Parent then E.Active[model]=nil;e.Spawn.Enemy=nil;continue end
+        if now<(e.BurnUntil or 0) and now-(e.LastBurn or 0)>0.75 and e.BurnOwner then e.LastBurn=now;E.damage(model,e.BurnOwner,5) end
+        if e.Hum.Health<=0 then continue end
+        e.Hum.WalkSpeed=if now<(e.SlowUntil or 0) then e.Def.Speed*0.5 else e.Def.Speed
+        if now-(e.LastPressure or 0)>2 then e.Posture=math.max(0,(e.Posture or 0)-4) end
+        model:SetAttribute('Posture',e.Posture or 0)
+        if now<(e.StunnedUntil or 0) then e.Pending=nil;e.Swing=nil;e.Hum:MoveTo(e.Root.Position);model:SetAttribute('State','STAGGER');continue end
+        local homeDist=(e.Root.Position-e.Home).Magnitude
+        if e.Pending and (homeDist>95 or now<(e.StunnedUntil or 0)) then e.Pending=nil end
+        if e.Def.Boss and homeDist<=95 then
+            local phase=if e.Hum.Health<(e.MaxHealth or e.Def.Health)*0.5 then 2 else 1;model:SetAttribute('Phase',phase)
+            if not e.Pending and not e.Swing and nearest(e.Root.Position,45,e.Spawn and e.Spawn.Root) and now-(e.LastSpecial or now-2)>e.SpecialCooldown then
+                e.PatternIndex=(e.PatternIndex or 0)+1
+                local pattern=Patterns.boss(e.Kind,phase,e.PatternIndex)
+                e.LastSpecial=now;e.SpecialCooldown=pattern.Cooldown
+                e.Pending={At=now+pattern.Windup,Origin=e.Root.Position,Pattern=pattern}
+                if E.OnWarning then E.OnWarning({Kind='Warning',Position=e.Root.Position,Radius=pattern.Radius,InnerRadius=pattern.InnerRadius,Seconds=pattern.Windup,HeightOffset=e.HeightOffset or 3,Name=pattern.Name,Phase=phase}) end
+            end
+            if e.Pending then
+                e.Hum:MoveTo(e.Root.Position);model:SetAttribute('State','WINDUP')
+                if now>=e.Pending.At then
+                    local pending=e.Pending;e.Pending=nil
+                    for _,p in Players:GetPlayers() do
+                        local pr=Security.alive(p)
+                        local delta=pr and pr.Position-pending.Origin
+                        if delta and (not E.CanTarget or E.CanTarget(p,e.Spawn and e.Spawn.Root)) and Patterns.inArea(Vector2.new(delta.X,delta.Z).Magnitude,delta.Y,pending.Pattern) then
+                            local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={model}
+                            local hit=workspace:Raycast(pending.Origin,pr.Position-pending.Origin,params)
+                            if E.OnPlayerHit and (not hit or hit.Instance:IsDescendantOf(p.Character))then E.OnPlayerHit(p,(e.Damage or e.Def.Damage)*pending.Pattern.Multiplier,pending.Origin,e,false)end
+                        end
+                    end
+                end
+                continue
+            end
+        end
+        if e.Swing then
+            e.Hum:MoveTo(e.Root.Position);model:SetAttribute('State','WINDUP')
+            E.resolveSwing(e,now)
+            continue
+        end
+        local player,dist=nearest(e.Root.Position,90,e.Spawn and e.Spawn.Root)
+        local homeDist=(e.Root.Position-e.Home).Magnitude
+        local target
+        if homeDist>95 or not player then
+            e.State=if homeDist>8 then 'RETURN' elseif math.floor(now/4)%2==0 then 'IDLE' else 'PATROL'
+            target=e.Home+Vector3.new(math.sin(now*0.12)*5,3,math.cos(now*0.12)*5)
+        elseif dist<7+(if e.Kind=='Malgorth' then 3 else 0) then
+            e.State='ATTACK';e.Hum:MoveTo(e.Root.Position)
+            local pRoot=Security.alive(player)
+            local rayParams=RaycastParams.new();rayParams.FilterType=Enum.RaycastFilterType.Exclude;rayParams.FilterDescendantsInstances={model}
+            local hit=pRoot and workspace:Raycast(e.Root.Position,pRoot.Position-e.Root.Position,rayParams)
+            if pRoot and now-e.LastAttack>1.3 and (not hit or hit.Instance:IsDescendantOf(player.Character)) then
+                e.LastAttack=now
+                local delta=pRoot.Position-e.Root.Position
+                e.Swing={Player=player,At=now+(e.Def.Windup or 0.65),Direction=if delta.Magnitude>0.01 then delta.Unit else nil,Range=7+(if e.Kind=='Malgorth' then 3 else 0)}
+                if E.OnWarning then E.OnWarning({Kind='MeleeWarning',Position=e.Root.Position,Seconds=e.Def.Windup or 0.65,Name=e.Def.Name,Target=player.UserId}) end
+            end
+        else e.State='CHASE';local r=Security.alive(player);target=r and r.Position end
+        model:SetAttribute('State',e.State)
+        if target and e.State~='IDLE' then
+            if e.Waypoints and e.PathGoal and (target-e.PathGoal).Magnitude>18 then e.Waypoints=nil end
+            pathTo(e,target)
+            local points=e.Waypoints
+            local wp=points and points[e.Waypoint]
+            if wp then
+                if (wp.Position-e.Root.Position).Magnitude<5 then e.Waypoint+=1;wp=points[e.Waypoint] end
+                if wp then if wp.Action==Enum.PathWaypointAction.Jump then e.Hum.Jump=true end;e.Hum:MoveTo(wp.Position) end
+            end
+            -- Sem caminho válido não atravessa paredes tentando mover o CFrame.
+        end
+        if not nearest(e.Home,300,e.Spawn and e.Spawn.Root) then
+            E.Active[model]=nil;e.Spawn.Enemy=nil;e.Spawn.Next=now+3;model:Destroy()
+        end
+    end
+    for _,d in workspace:GetChildren() do
+        if d.Name=='GeneratedDungeon' and d:FindFirstChild('Traps') then
+            for _,trap in d.Traps:GetChildren() do
+                local active=math.floor(now/2)%2==0
+                trap.Transparency=if active then 0 else 0.7
+                if active then
+                    for _,p in Players:GetPlayers() do
+                        if Security.near(p,trap,7) and Security.allow(p,'trap',1) then if E.OnPlayerHit then E.OnPlayerHit(p,12,trap.Position) end end
+                    end
+                end
+            end
+        end
+    end
+end
+function E.clearScope(scope)
+    for model,e in E.Active do
+        if e.Spawn and e.Spawn.Root==scope then e.Spawn.Enemy=nil;E.Active[model]=nil;model:Destroy() end
+    end
+end
+function E.start()
+    if E.Running then return end;E.Running=true
+    local last=0
+    game:GetService('RunService').Heartbeat:Connect(function()
+        local now=os.clock();if now-last<0.03 then return end;last=now
+        for _,e in E.Active do if e.Swing then E.resolveSwing(e,now) end end
+    end)
+    task.spawn(function() while task.wait(0.25) do local ok,err=xpcall(E.step,debug.traceback);if not ok then warn(err) end end end)
+end
+return E
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="36">
+      <Properties>
+        <string name="Name">EnemyServiceTemplate</string>
+        <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Pathfinding=game:GetService('PathfindingService')
+local Shared=game.ReplicatedStorage.MedievalRPG
+local Rig=require(Shared.RigFactory)
+local Catalog=require(Shared.Config.ContentConfig)
+local Config=require(Shared.Config.WorldConfig)
+local Security=require(script.Parent.AntiExploitService)
+local Patterns=require(Shared.Core.ActionMath)
+local E={Active={},Spawns={},SpawnSet={},OnKill=nil,Running=false}
+local function nearest(pos,radius,scope)
+    local best,dist
+    for _,p in Players:GetPlayers() do
+        local root=Security.alive(p)
+        if root and (not E.CanTarget or E.CanTarget(p,scope)) then
+            local d=(root.Position-pos).Magnitude
+            if d<radius and (not dist or d<dist) then best,dist=p,d end
+        end
+    end
+    return best,dist
+end
+function E.scan(root)
+    local folder=root:FindFirstChild('EnemySpawns')
+    if folder then
+        for _,marker in folder:GetChildren() do
+            if marker:IsA('BasePart') and not E.SpawnSet[marker] then
+                E.SpawnSet[marker]=true;table.insert(E.Spawns,{Marker=marker,Next=0,Root=root})
+            end
+        end
+    end
+end
+local function spawnEnemy(s)
+    local kind=s.Marker:GetAttribute('EnemyKind');local def=Catalog.Enemies[kind]
+    if not def then return end
+    local paint=Color3.fromRGB(table.unpack(def.Color))
+    local avatar=game:GetService('ServerStorage'):FindFirstChild('EldravynEnemyAvatarLibrary')
+    local factory=if avatar and avatar:GetAttribute('Ready')==true then require(avatar.Factory)else Rig
+    local model,hum,root=factory.create(s.Root,def.Name,s.Marker.Position,paint,true,kind)
+    model:SetAttribute('EnemyKind',kind);model:SetAttribute('HealthMax',def.Health);model:SetAttribute('Health',def.Health)
+    local health=def.Health;local heightOffset=3
+    if def.Boss then
+        local participants=0;for _,p in Players:GetPlayers()do local r=Security.alive(p);if r and (r.Position-s.Marker.Position).Magnitude<100 then participants+=1 end end
+        health=math.floor(def.Health*(1+0.35*(math.clamp(participants,1,4)-1)))
+        local scale=if kind=='Malgorth' then 2.2 else 1.7
+        model:ScaleTo(scale);heightOffset=3*scale
+        model:PivotTo(CFrame.new(s.Marker.Position+Vector3.new(0,heightOffset,0)))
+        model:SetAttribute('Boss',true);model:SetAttribute('PartyScale',math.clamp(participants,1,4))
+    end
+    model:SetAttribute('HealthMax',health);model:SetAttribute('Health',health)
+    hum.MaxHealth=health;hum.Health=health;hum.WalkSpeed=def.Speed
+    local multiplier=s.Marker:GetAttribute('Difficulty') or 1
+    health=math.floor(health*multiplier);hum.MaxHealth=health;hum.Health=health
+    model:SetAttribute('HealthMax',health);model:SetAttribute('Health',health)
+    local e={Model=model,Hum=hum,Root=root,Kind=kind,Def=def,MaxHealth=health,HeightOffset=heightOffset,Spawn=s,Home=s.Marker.Position,LastAttack=0,Contributors={},State='IDLE',PathAt=0,Waypoints=nil,Waypoint=1,PathBusy=false,Target=nil,LastSpecial=os.clock(),SpecialCooldown=5}
+    e.Damage=math.floor(def.Damage*math.min(2.5,multiplier))
+    s.Enemy=e;E.Active[model]=e
+    hum.HealthChanged:Connect(function(h) if model.Parent then model:SetAttribute('Health',h) end end)
+    hum.Died:Connect(function()
+        e.State='DEAD';model:SetAttribute('State','DEAD')
+        if kind=='Malgorth' then s.Root:SetAttribute('BossDefeated',true) end
+        if s.Marker:GetAttribute('Once') then s.Marker:SetAttribute('Defeated',true) end
+        if E.OnKill then local ok,err=xpcall(function()E.OnKill(e)end,debug.traceback);if not ok then warn(err)end end
+        E.Active[model]=nil;s.Enemy=nil;s.Next=os.clock()+(if kind=='Malgorth' or kind=='Knight' then 300 else 25)
+        task.delay(4,function() if model.Parent then model:Destroy() end end)
+    end)
+end
+function E.damage(model,player,damage)
+    local e=E.Active[model]
+    if not e or e.Hum.Health<=0 then return false end
+    if E.CanTarget and not E.CanTarget(player,e.Spawn and e.Spawn.Root) then return false end
+    if type(damage)~='number' or damage~=damage or damage<=0 or damage>100000 then return false end
+    local actual=math.min(damage,e.Hum.Health)
+    if e.Spawn and e.Spawn.Marker:GetAttribute('Training') then
+        e.Hum.Health=e.Hum.MaxHealth;e.ReactionUntil=os.clock()+0.15;return true
+    end
+    e.Contributors[player]=(e.Contributors[player] or 0)+actual
+    e.Hum:TakeDamage(actual);e.ReactionUntil=os.clock()+0.15;return true
+end
+local function pathTo(e,target)
+    if e.PathBusy or os.clock()-e.PathAt<2 then return end
+    e.PathAt=os.clock();e.PathBusy=true
+    task.spawn(function()
+        local path=Pathfinding:CreatePath({AgentRadius=2,AgentHeight=6,AgentCanJump=true})
+        local ok=pcall(function() path:ComputeAsync(e.Root.Position,target) end)
+        if e.Model.Parent and ok and path.Status==Enum.PathStatus.Success then
+            e.Waypoints=path:GetWaypoints();e.Waypoint=2;e.PathGoal=target
+        end
+        e.PathBusy=false
+    end)
+end
+function E.resolveSwing(e,now)
+    local swing=e.Swing
+    if not swing then return end
+    if e.Hum.Health<=0 or now<(e.StunnedUntil or 0) or (e.Root.Position-e.Home).Magnitude>95 then e.Swing=nil;return end
+    if now<swing.At then return end
+    e.Swing=nil
+    local r=Security.alive(swing.Player)
+    local delta=r and r.Position-e.Root.Position
+    if not delta or delta.Magnitude>swing.Range or (delta.Magnitude>0.01 and swing.Direction and delta.Unit:Dot(swing.Direction)<0.1) then return end
+    if E.CanTarget and not E.CanTarget(swing.Player,e.Spawn and e.Spawn.Root) then return end
+    local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={e.Model}
+    local hit=workspace:Raycast(e.Root.Position,delta,params)
+    if E.OnPlayerHit and (not hit or hit.Instance:IsDescendantOf(swing.Player.Character)) then
+        E.OnPlayerHit(swing.Player,e.Damage or e.Def.Damage,e.Root.Position,e,true)
+    end
+end
+function E.step()
+    local now=os.clock();local count=0
+    for _ in E.Active do count+=1 end
+    local cap=Config.QualityProfiles[Config.Quality].ActiveEnemies
+    for _,s in E.Spawns do
+        if s.Marker.Parent and s.Marker:GetAttribute('Enabled')~=false and not s.Marker:GetAttribute('Defeated') and not s.Enemy and now>=s.Next and count<cap and nearest(s.Marker.Position,220,s.Root) then
+            if not (s.Marker:GetAttribute('EnemyKind')=='Malgorth' and s.Root:GetAttribute('BossDefeated')) then spawnEnemy(s);count+=1 end
+        end
+    end
+    for model,e in E.Active do
+        if e.Spawn and e.Spawn.Marker:GetAttribute('Enabled')==false then
+            E.Active[model]=nil;e.Spawn.Enemy=nil;model:Destroy();continue
+        end
+        if not model.Parent or not e.Root.Parent then E.Active[model]=nil;e.Spawn.Enemy=nil;continue end
+        if now<(e.BurnUntil or 0) and now-(e.LastBurn or 0)>0.75 and e.BurnOwner then e.LastBurn=now;E.damage(model,e.BurnOwner,5) end
+        if e.Hum.Health<=0 then continue end
+        e.Hum.WalkSpeed=if now<(e.SlowUntil or 0) then e.Def.Speed*0.5 else e.Def.Speed
+        if now-(e.LastPressure or 0)>2 then e.Posture=math.max(0,(e.Posture or 0)-4) end
+        model:SetAttribute('Posture',e.Posture or 0)
+        if now<(e.StunnedUntil or 0) then e.Pending=nil;e.Swing=nil;e.Hum:MoveTo(e.Root.Position);model:SetAttribute('State','STAGGER');continue end
+        local homeDist=(e.Root.Position-e.Home).Magnitude
+        if e.Pending and (homeDist>95 or now<(e.StunnedUntil or 0)) then e.Pending=nil end
+        if e.Def.Boss and homeDist<=95 then
+            local phase=if e.Hum.Health<(e.MaxHealth or e.Def.Health)*0.5 then 2 else 1;model:SetAttribute('Phase',phase)
+            if not e.Pending and not e.Swing and nearest(e.Root.Position,45,e.Spawn and e.Spawn.Root) and now-(e.LastSpecial or now-2)>e.SpecialCooldown then
+                e.PatternIndex=(e.PatternIndex or 0)+1
+                local pattern=Patterns.boss(e.Kind,phase,e.PatternIndex)
+                e.LastSpecial=now;e.SpecialCooldown=pattern.Cooldown
+                e.Pending={At=now+pattern.Windup,Origin=e.Root.Position,Pattern=pattern}
+                if E.OnWarning then E.OnWarning({Kind='Warning',Position=e.Root.Position,Radius=pattern.Radius,InnerRadius=pattern.InnerRadius,Seconds=pattern.Windup,HeightOffset=e.HeightOffset or 3,Name=pattern.Name,Phase=phase}) end
+            end
+            if e.Pending then
+                e.Hum:MoveTo(e.Root.Position);model:SetAttribute('State','WINDUP')
+                if now>=e.Pending.At then
+                    local pending=e.Pending;e.Pending=nil
+                    for _,p in Players:GetPlayers() do
+                        local pr=Security.alive(p)
+                        local delta=pr and pr.Position-pending.Origin
+                        if delta and (not E.CanTarget or E.CanTarget(p,e.Spawn and e.Spawn.Root)) and Patterns.inArea(Vector2.new(delta.X,delta.Z).Magnitude,delta.Y,pending.Pattern) then
+                            local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={model}
+                            local hit=workspace:Raycast(pending.Origin,pr.Position-pending.Origin,params)
+                            if E.OnPlayerHit and (not hit or hit.Instance:IsDescendantOf(p.Character))then E.OnPlayerHit(p,(e.Damage or e.Def.Damage)*pending.Pattern.Multiplier,pending.Origin,e,false)end
+                        end
+                    end
+                end
+                continue
+            end
+        end
+        if e.Swing then
+            e.Hum:MoveTo(e.Root.Position);model:SetAttribute('State','WINDUP')
+            E.resolveSwing(e,now)
+            continue
+        end
+        local player,dist=nearest(e.Root.Position,90,e.Spawn and e.Spawn.Root)
+        local homeDist=(e.Root.Position-e.Home).Magnitude
+        local target
+        if homeDist>95 or not player then
+            e.State=if homeDist>8 then 'RETURN' elseif math.floor(now/4)%2==0 then 'IDLE' else 'PATROL'
+            target=e.Home+Vector3.new(math.sin(now*0.12)*5,3,math.cos(now*0.12)*5)
+        elseif dist<7+(if e.Kind=='Malgorth' then 3 else 0) then
+            e.State='ATTACK';e.Hum:MoveTo(e.Root.Position)
+            local pRoot=Security.alive(player)
+            local rayParams=RaycastParams.new();rayParams.FilterType=Enum.RaycastFilterType.Exclude;rayParams.FilterDescendantsInstances={model}
+            local hit=pRoot and workspace:Raycast(e.Root.Position,pRoot.Position-e.Root.Position,rayParams)
+            if pRoot and now-e.LastAttack>1.3 and (not hit or hit.Instance:IsDescendantOf(player.Character)) then
+                e.LastAttack=now
+                local delta=pRoot.Position-e.Root.Position
+                e.Swing={Player=player,At=now+(e.Def.Windup or 0.65),Direction=if delta.Magnitude>0.01 then delta.Unit else nil,Range=7+(if e.Kind=='Malgorth' then 3 else 0)}
+                if E.OnWarning then E.OnWarning({Kind='MeleeWarning',Position=e.Root.Position,Seconds=e.Def.Windup or 0.65,Name=e.Def.Name,Target=player.UserId}) end
+            end
+        else e.State='CHASE';local r=Security.alive(player);target=r and r.Position end
+        model:SetAttribute('State',e.State)
+        if target and e.State~='IDLE' then
+            if e.Waypoints and e.PathGoal and (target-e.PathGoal).Magnitude>18 then e.Waypoints=nil end
+            pathTo(e,target)
+            local points=e.Waypoints
+            local wp=points and points[e.Waypoint]
+            if wp then
+                if (wp.Position-e.Root.Position).Magnitude<5 then e.Waypoint+=1;wp=points[e.Waypoint] end
+                if wp then if wp.Action==Enum.PathWaypointAction.Jump then e.Hum.Jump=true end;e.Hum:MoveTo(wp.Position) end
+            end
+            -- Sem caminho válido não atravessa paredes tentando mover o CFrame.
+        end
+        if not nearest(e.Home,300,e.Spawn and e.Spawn.Root) then
+            E.Active[model]=nil;e.Spawn.Enemy=nil;e.Spawn.Next=now+3;model:Destroy()
+        end
+    end
+    for _,d in workspace:GetChildren() do
+        if d.Name=='GeneratedDungeon' and d:FindFirstChild('Traps') then
+            for _,trap in d.Traps:GetChildren() do
+                local active=math.floor(now/2)%2==0
+                trap.Transparency=if active then 0 else 0.7
+                if active then
+                    for _,p in Players:GetPlayers() do
+                        if Security.near(p,trap,7) and Security.allow(p,'trap',1) then if E.OnPlayerHit then E.OnPlayerHit(p,12,trap.Position) end end
+                    end
+                end
+            end
+        end
+    end
+end
+function E.clearScope(scope)
+    for model,e in E.Active do
+        if e.Spawn and e.Spawn.Root==scope then e.Spawn.Enemy=nil;E.Active[model]=nil;model:Destroy() end
+    end
+end
+function E.start()
+    if E.Running then return end;E.Running=true
+    local last=0
+    game:GetService('RunService').Heartbeat:Connect(function()
+        local now=os.clock();if now-last<0.03 then return end;last=now
+        for _,e in E.Active do if e.Swing then E.resolveSwing(e,now) end end
+    end)
+    task.spawn(function() while task.wait(0.25) do local ok,err=xpcall(E.step,debug.traceback);if not ok then warn(err) end end end)
+end
+return E
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="37">
+      <Properties>
+        <string name="Name">RegisterImported</string>
+        <string name="Source"><![CDATA[-- Studio authoring only; geometry is imported/published by Roblox's 3D Importer.
+-- Never loads catalog models, executes imported code, or invents asset IDs.
+local Register={}
+local Catalog=require(script.Parent.Shared.AvatarCatalog)
+local Frame=require(script.Parent.Shared.ImportFrame)
+local function editor()local r=game:GetService('RunService');assert(r:IsStudio() and not r:IsRunning(),'Use o editor do Studio, com Play/Run parado.')end
+local function vec(v)return {v.X,v.Y,v.Z}end
+local function folder(name,parent)local f=Instance.new('Folder');f.Name=name;f.Parent=parent;return f end
+local function normalized(part,basis,origin)
+ local p=Frame.point(basis,vec(part.Position));local c={part.CFrame:GetComponents()}
+ local x=Frame.direction(basis,{c[4],c[7],c[10]});local y=Frame.direction(basis,{c[5],c[8],c[11]});local z=Frame.direction(basis,{c[6],c[9],c[12]})
+ return CFrame.new(p[1]-origin[1],p[2]-origin[2],p[3]-origin[3],x[1],y[1],z[1],x[2],y[2],z[2],x[3],y[3],z[3])
+end
+local function texture(part)
+ local sa=part:FindFirstChildOfClass('SurfaceAppearance');local id=if sa then sa.ColorMap else part.TextureID
+ assert(Frame.asset(id),'Atlas não publicado/importado em '..part.Name..'. Importe as texturas no Studio junto do FBX.')
+ if sa then for _,key in {'NormalMap','MetalnessMap','RoughnessMap'}do local value=sa[key];assert(value=='' or Frame.asset(value),'Mapa PBR inválido: '..part.Name..'/'..key)end end
+ return sa
+end
+function Register.Apply(imported)
+ editor();assert(typeof(imported)=='Instance' and imported~=workspace and imported:IsDescendantOf(game),'Selecione o Model de UM arquivo FBX importado, não o Workspace inteiro.')
+ local samples,parts,seen,group={},{},{},nil
+ local revisionName='ELDRAVYN_ART_'..Catalog.ArtRevision:gsub('%W','_');local revisionFound=false
+ for _,node in imported:GetDescendants()do
+  assert(not node:IsA('LuaSourceContainer'),'O grupo importado contém scripts; somente o FBX original é aceito.')
+  local marker=node.Name:match('^ELDRAVYN_CAL_([OXYZ])$')
+  if node.Name==revisionName then assert(node:IsA('BasePart')and not revisionFound,'Marcador de revisão duplicado/inválido');revisionFound=true
+  elseif marker then assert(node:IsA('BasePart') and not samples[marker],'Marcador duplicado/inválido');samples[marker]=vec(node.Position)
+  elseif node:IsA('MeshPart') then
+   local key,bone=node.Name:match('^(.-)__(.+)$');local def=key and Catalog.Models[key]
+   assert(def and table.find(def.Bones,bone),'Nome de mesh desconhecido: '..node.Name..'. Preserve os nomes durante a importação.')
+   assert(group==nil or group==def.Group,'Mais de um grupo FBX selecionado; registre cada arquivo separadamente.');group=def.Group
+   assert(not seen[node.Name],'Mesh duplicado: '..node.Name);seen[node.Name]=true
+   assert(Frame.asset(node.MeshId),'Mesh sem ID publicado: '..node.Name);texture(node)
+   parts[key]=parts[key]or{};parts[key][bone]=node
+  end
+ end
+ assert(group,'Nenhuma malha de avatar encontrada');assert(revisionFound,'Revisão do FBX incompatível. Importe os arquivos arredondados desta entrega, preservando o marcador de revisão.');local basis=Frame.basis(samples)
+ local count=0
+ for key,def in Catalog.Models do if def.Group==group then
+  assert(parts[key],'Modelo ausente: '..key);for _,bone in def.Bones do assert(parts[key][bone],'Peça ausente: '..key..'/'..bone)end;count+=1
+ end end
+ local root=script.Parent;local installed=root:FindFirstChild('ImportedTemplates')
+ if installed then
+  for key in parts do assert(not installed:FindFirstChild(key),'Grupo já registrado: '..group..'. Mantenha a biblioteca existente ou importe uma nova cópia do pacote para atualizar assets.')end
+ end
+ local prepared=folder('PreparedAvatarTemplates')
+ local ok,err=pcall(function()
+  for key,nodes in parts do
+   local model=folder(key,prepared);local def=Catalog.Models[key];model:SetAttribute('AvatarGroup',group);model:SetAttribute('AvatarRigKind',def.Kind)
+   for bone,node in nodes do
+    local clone=node:Clone();clone.Name=bone
+    -- MeshPart content is retained; only audited appearance children survive.
+    for _,child in clone:GetChildren()do if not child:IsA('SurfaceAppearance') then child:Destroy()end end
+    clone.Size=node.Size/basis.Scale;clone.CFrame=normalized(node,basis,def.Origin)
+    clone.Anchored=false;clone.Massless=true;clone.CanCollide=false;clone.CanQuery=false;clone.CanTouch=false;clone.DoubleSided=true
+    clone:SetAttribute('AvatarBone',bone);clone:SetAttribute('AvatarTemplate',key);clone:SetAttribute('VisualDetail',1);clone.Parent=model
+   end
+  end
+ end)
+ if not ok then prepared:Destroy();error(err)end
+ if not installed then installed=folder('ImportedTemplates',root);installed:SetAttribute('AvatarVersion',3)end
+ for _,model in prepared:GetChildren()do model.Parent=installed end;prepared:Destroy()
+ print('[Avatar] '..count..' modelos registrados do grupo '..group..'. Nenhum NPC/mapa foi alterado.')
+ return {Group=group,Registered=count}
+end
+function Register.Report()
+ local installed=script.Parent:FindFirstChild('ImportedTemplates');local missing={};local ready=0
+ for key in Catalog.Models do if installed and installed:FindFirstChild(key) then ready+=1 else table.insert(missing,key)end end
+ table.sort(missing);print('[Avatar] '..ready..' modelos registrados; '..#missing..' pendentes de Import 3D.');return {Ready=ready,Missing=missing}
+end
+function Register.SetPBR(colorMap,metalnessMap,roughnessMap)
+ editor();assert(workspace:GetAttribute('EldravynAvatarArtVersion')==nil,'Configure PBR antes de Apply; reverta a camada Avatar para editar os templates.')
+ for _,id in {colorMap,metalnessMap,roughnessMap}do assert(Frame.asset(id),'Use o ID real de cada PNG publicado na sua conta.')end
+ local templates=script.Parent:FindFirstChild('ImportedTemplates');assert(templates,'Registre os FBX antes dos mapas PBR')
+ local count=0
+ for _,p in templates:GetDescendants()do if p:IsA('MeshPart')then
+  local surface=p:FindFirstChildOfClass('SurfaceAppearance')or Instance.new('SurfaceAppearance');surface.Name='AvatarPBR';surface.ColorMap=colorMap;surface.MetalnessMap=metalnessMap;surface.RoughnessMap=roughnessMap;surface.Parent=p;count+=1
+ end end
+ return{Meshes=count}
+end
+return Register
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="Folder" referent="38">
+      <Properties>
+        <string name="Name">Shared</string>
+      </Properties>
+      <Item class="ModuleScript" referent="39">
+        <Properties>
+          <string name="Name">AvatarCatalog</string>
+          <string name="Source"><![CDATA[-- Generated from original mesh authoring; gameplay catalog remains unchanged.
+return {["Version"]=3,["ArtRevision"]="rounded-1",["Models"]={["NPC_Valoria_GuildMaster"]={["Key"]="NPC_Valoria_GuildMaster",["Label"]="Valoria_GuildMaster",["Kind"]="R15",["Origin"]={6,0,6},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_GuildMaster",["Role"]="GuildMaster",["City"]="Valoria"},["NPC_Valoria_Reception"]={["Key"]="NPC_Valoria_Reception",["Label"]="Valoria_Reception",["Kind"]="R15",["Origin"]={13,0,6},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Reception",["Role"]="Reception",["City"]="Valoria"},["NPC_Valoria_Blacksmith"]={["Key"]="NPC_Valoria_Blacksmith",["Label"]="Valoria_Blacksmith",["Kind"]="R15",["Origin"]={20,0,6},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Blacksmith",["Role"]="Blacksmith",["City"]="Valoria"},["NPC_Valoria_Weapons"]={["Key"]="NPC_Valoria_Weapons",["Label"]="Valoria_Weapons",["Kind"]="R15",["Origin"]={27,0,6},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Weapons",["Role"]="Weapons",["City"]="Valoria"},["NPC_Valoria_Armor"]={["Key"]="NPC_Valoria_Armor",["Label"]="Valoria_Armor",["Kind"]="R15",["Origin"]={34,0,6},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Armor",["Role"]="Armor",["City"]="Valoria"},["NPC_Valoria_General"]={["Key"]="NPC_Valoria_General",["Label"]="Valoria_General",["Kind"]="R15",["Origin"]={6,0,14},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_General",["Role"]="General",["City"]="Valoria"},["NPC_Valoria_Classes"]={["Key"]="NPC_Valoria_Classes",["Label"]="Valoria_Classes",["Kind"]="R15",["Origin"]={13,0,14},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Classes",["Role"]="Classes",["City"]="Valoria"},["NPC_Valoria_Magic"]={["Key"]="NPC_Valoria_Magic",["Label"]="Valoria_Magic",["Kind"]="R15",["Origin"]={20,0,14},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Magic",["Role"]="Magic",["City"]="Valoria"},["NPC_Valoria_Skills"]={["Key"]="NPC_Valoria_Skills",["Label"]="Valoria_Skills",["Kind"]="R15",["Origin"]={27,0,14},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Skills",["Role"]="Skills",["City"]="Valoria"},["NPC_Valoria_Races"]={["Key"]="NPC_Valoria_Races",["Label"]="Valoria_Races",["Kind"]="R15",["Origin"]={34,0,14},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Races",["Role"]="Races",["City"]="Valoria"},["NPC_Valoria_Fusions"]={["Key"]="NPC_Valoria_Fusions",["Label"]="Valoria_Fusions",["Kind"]="R15",["Origin"]={6,0,22},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Fusions",["Role"]="Fusions",["City"]="Valoria"},["NPC_Valoria_Inn"]={["Key"]="NPC_Valoria_Inn",["Label"]="Valoria_Inn",["Kind"]="R15",["Origin"]={13,0,22},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Inn",["Role"]="Inn",["City"]="Valoria"},["NPC_Valoria_Healer"]={["Key"]="NPC_Valoria_Healer",["Label"]="Valoria_Healer",["Kind"]="R15",["Origin"]={20,0,22},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Healer",["Role"]="Healer",["City"]="Valoria"},["NPC_Valoria_Bank"]={["Key"]="NPC_Valoria_Bank",["Label"]="Valoria_Bank",["Kind"]="R15",["Origin"]={27,0,22},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Bank",["Role"]="Bank",["City"]="Valoria"},["NPC_Valoria_Guide"]={["Key"]="NPC_Valoria_Guide",["Label"]="Valoria_Guide",["Kind"]="R15",["Origin"]={34,0,22},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Guide",["Role"]="Guide",["City"]="Valoria"},["NPC_Valoria_Tutorial"]={["Key"]="NPC_Valoria_Tutorial",["Label"]="Valoria_Tutorial",["Kind"]="R15",["Origin"]={6,0,30},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Tutorial",["Role"]="Tutorial",["City"]="Valoria"},["NPC_Valoria_TravelShop"]={["Key"]="NPC_Valoria_TravelShop",["Label"]="Valoria_TravelShop",["Kind"]="R15",["Origin"]={13,0,30},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_TravelShop",["Role"]="TravelShop",["City"]="Valoria"},["NPC_Arkheim_Guide"]={["Key"]="NPC_Arkheim_Guide",["Label"]="Arkheim_Guide",["Kind"]="R15",["Origin"]={6,0,6},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_Guide",["Role"]="Guide",["City"]="Arkheim"},["NPC_Arkheim_General"]={["Key"]="NPC_Arkheim_General",["Label"]="Arkheim_General",["Kind"]="R15",["Origin"]={13,0,6},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_General",["Role"]="General",["City"]="Arkheim"},["NPC_Arkheim_Inn"]={["Key"]="NPC_Arkheim_Inn",["Label"]="Arkheim_Inn",["Kind"]="R15",["Origin"]={20,0,6},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_Inn",["Role"]="Inn",["City"]="Arkheim"},["NPC_Eldoria_Guide"]={["Key"]="NPC_Eldoria_Guide",["Label"]="Eldoria_Guide",["Kind"]="R15",["Origin"]={27,0,6},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_Guide",["Role"]="Guide",["City"]="Eldoria"},["NPC_Eldoria_General"]={["Key"]="NPC_Eldoria_General",["Label"]="Eldoria_General",["Kind"]="R15",["Origin"]={34,0,6},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_General",["Role"]="General",["City"]="Eldoria"},["NPC_Eldoria_Inn"]={["Key"]="NPC_Eldoria_Inn",["Label"]="Eldoria_Inn",["Kind"]="R15",["Origin"]={6,0,14},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_Inn",["Role"]="Inn",["City"]="Eldoria"},["NPC_Durakh_Guide"]={["Key"]="NPC_Durakh_Guide",["Label"]="Durakh_Guide",["Kind"]="R15",["Origin"]={6,0,6},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_Guide",["Role"]="Guide",["City"]="Durakh"},["NPC_Durakh_General"]={["Key"]="NPC_Durakh_General",["Label"]="Durakh_General",["Kind"]="R15",["Origin"]={13,0,6},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_General",["Role"]="General",["City"]="Durakh"},["NPC_Durakh_Inn"]={["Key"]="NPC_Durakh_Inn",["Label"]="Durakh_Inn",["Kind"]="R15",["Origin"]={20,0,6},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_Inn",["Role"]="Inn",["City"]="Durakh"},["NPC_Asterion_Guide"]={["Key"]="NPC_Asterion_Guide",["Label"]="Asterion_Guide",["Kind"]="R15",["Origin"]={27,0,6},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_Guide",["Role"]="Guide",["City"]="Asterion"},["NPC_Asterion_General"]={["Key"]="NPC_Asterion_General",["Label"]="Asterion_General",["Kind"]="R15",["Origin"]={34,0,6},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_General",["Role"]="General",["City"]="Asterion"},["NPC_Asterion_Inn"]={["Key"]="NPC_Asterion_Inn",["Label"]="Asterion_Inn",["Kind"]="R15",["Origin"]={6,0,14},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_Inn",["Role"]="Inn",["City"]="Asterion"},["NPC_Valoria_Ambient_Guard"]={["Key"]="NPC_Valoria_Ambient_Guard",["Label"]="Valoria_Ambient_Guard",["Kind"]="R15",["Origin"]={20,0,30},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Ambient_Guard",["Role"]="Guard",["City"]="Valoria"},["NPC_Valoria_Ambient_Resident"]={["Key"]="NPC_Valoria_Ambient_Resident",["Label"]="Valoria_Ambient_Resident",["Kind"]="R15",["Origin"]={27,0,30},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Ambient_Resident",["Role"]="Resident",["City"]="Valoria"},["NPC_Valoria_Ambient_Traveler"]={["Key"]="NPC_Valoria_Ambient_Traveler",["Label"]="Valoria_Ambient_Traveler",["Kind"]="R15",["Origin"]={34,0,30},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Ambient_Traveler",["Role"]="Traveler",["City"]="Valoria"},["NPC_Valoria_Ambient_Artisan"]={["Key"]="NPC_Valoria_Ambient_Artisan",["Label"]="Valoria_Ambient_Artisan",["Kind"]="R15",["Origin"]={6,0,38},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Ambient_Artisan",["Role"]="Artisan",["City"]="Valoria"},["NPC_Valoria_Ambient_Employee"]={["Key"]="NPC_Valoria_Ambient_Employee",["Label"]="Valoria_Ambient_Employee",["Kind"]="R15",["Origin"]={13,0,38},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Ambient_Employee",["Role"]="Employee",["City"]="Valoria"},["NPC_Valoria_Ambient_Adventurer"]={["Key"]="NPC_Valoria_Ambient_Adventurer",["Label"]="Valoria_Ambient_Adventurer",["Kind"]="R15",["Origin"]={20,0,38},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Ambient_Adventurer",["Role"]="Adventurer",["City"]="Valoria"},["NPC_Valoria_Ambient_Farmer"]={["Key"]="NPC_Valoria_Ambient_Farmer",["Label"]="Valoria_Ambient_Farmer",["Kind"]="R15",["Origin"]={27,0,38},["Group"]="Valoria",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Valoria_Ambient_Farmer",["Role"]="Farmer",["City"]="Valoria"},["NPC_Arkheim_Ambient_Guard"]={["Key"]="NPC_Arkheim_Ambient_Guard",["Label"]="Arkheim_Ambient_Guard",["Kind"]="R15",["Origin"]={13,0,14},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_Ambient_Guard",["Role"]="Guard",["City"]="Arkheim"},["NPC_Arkheim_Ambient_Resident"]={["Key"]="NPC_Arkheim_Ambient_Resident",["Label"]="Arkheim_Ambient_Resident",["Kind"]="R15",["Origin"]={20,0,14},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_Ambient_Resident",["Role"]="Resident",["City"]="Arkheim"},["NPC_Arkheim_Ambient_Traveler"]={["Key"]="NPC_Arkheim_Ambient_Traveler",["Label"]="Arkheim_Ambient_Traveler",["Kind"]="R15",["Origin"]={27,0,14},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_Ambient_Traveler",["Role"]="Traveler",["City"]="Arkheim"},["NPC_Arkheim_Ambient_Artisan"]={["Key"]="NPC_Arkheim_Ambient_Artisan",["Label"]="Arkheim_Ambient_Artisan",["Kind"]="R15",["Origin"]={34,0,14},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_Ambient_Artisan",["Role"]="Artisan",["City"]="Arkheim"},["NPC_Arkheim_Ambient_Employee"]={["Key"]="NPC_Arkheim_Ambient_Employee",["Label"]="Arkheim_Ambient_Employee",["Kind"]="R15",["Origin"]={6,0,22},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_Ambient_Employee",["Role"]="Employee",["City"]="Arkheim"},["NPC_Arkheim_Ambient_Adventurer"]={["Key"]="NPC_Arkheim_Ambient_Adventurer",["Label"]="Arkheim_Ambient_Adventurer",["Kind"]="R15",["Origin"]={13,0,22},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_Ambient_Adventurer",["Role"]="Adventurer",["City"]="Arkheim"},["NPC_Arkheim_Ambient_Farmer"]={["Key"]="NPC_Arkheim_Ambient_Farmer",["Label"]="Arkheim_Ambient_Farmer",["Kind"]="R15",["Origin"]={20,0,22},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Arkheim_Ambient_Farmer",["Role"]="Farmer",["City"]="Arkheim"},["NPC_Eldoria_Ambient_Guard"]={["Key"]="NPC_Eldoria_Ambient_Guard",["Label"]="Eldoria_Ambient_Guard",["Kind"]="R15",["Origin"]={27,0,22},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_Ambient_Guard",["Role"]="Guard",["City"]="Eldoria"},["NPC_Eldoria_Ambient_Resident"]={["Key"]="NPC_Eldoria_Ambient_Resident",["Label"]="Eldoria_Ambient_Resident",["Kind"]="R15",["Origin"]={34,0,22},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_Ambient_Resident",["Role"]="Resident",["City"]="Eldoria"},["NPC_Eldoria_Ambient_Traveler"]={["Key"]="NPC_Eldoria_Ambient_Traveler",["Label"]="Eldoria_Ambient_Traveler",["Kind"]="R15",["Origin"]={6,0,30},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_Ambient_Traveler",["Role"]="Traveler",["City"]="Eldoria"},["NPC_Eldoria_Ambient_Artisan"]={["Key"]="NPC_Eldoria_Ambient_Artisan",["Label"]="Eldoria_Ambient_Artisan",["Kind"]="R15",["Origin"]={13,0,30},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_Ambient_Artisan",["Role"]="Artisan",["City"]="Eldoria"},["NPC_Eldoria_Ambient_Employee"]={["Key"]="NPC_Eldoria_Ambient_Employee",["Label"]="Eldoria_Ambient_Employee",["Kind"]="R15",["Origin"]={20,0,30},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_Ambient_Employee",["Role"]="Employee",["City"]="Eldoria"},["NPC_Eldoria_Ambient_Adventurer"]={["Key"]="NPC_Eldoria_Ambient_Adventurer",["Label"]="Eldoria_Ambient_Adventurer",["Kind"]="R15",["Origin"]={27,0,30},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_Ambient_Adventurer",["Role"]="Adventurer",["City"]="Eldoria"},["NPC_Eldoria_Ambient_Farmer"]={["Key"]="NPC_Eldoria_Ambient_Farmer",["Label"]="Eldoria_Ambient_Farmer",["Kind"]="R15",["Origin"]={34,0,30},["Group"]="North",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Eldoria_Ambient_Farmer",["Role"]="Farmer",["City"]="Eldoria"},["NPC_Durakh_Ambient_Guard"]={["Key"]="NPC_Durakh_Ambient_Guard",["Label"]="Durakh_Ambient_Guard",["Kind"]="R15",["Origin"]={13,0,14},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_Ambient_Guard",["Role"]="Guard",["City"]="Durakh"},["NPC_Durakh_Ambient_Resident"]={["Key"]="NPC_Durakh_Ambient_Resident",["Label"]="Durakh_Ambient_Resident",["Kind"]="R15",["Origin"]={20,0,14},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_Ambient_Resident",["Role"]="Resident",["City"]="Durakh"},["NPC_Durakh_Ambient_Traveler"]={["Key"]="NPC_Durakh_Ambient_Traveler",["Label"]="Durakh_Ambient_Traveler",["Kind"]="R15",["Origin"]={27,0,14},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_Ambient_Traveler",["Role"]="Traveler",["City"]="Durakh"},["NPC_Durakh_Ambient_Artisan"]={["Key"]="NPC_Durakh_Ambient_Artisan",["Label"]="Durakh_Ambient_Artisan",["Kind"]="R15",["Origin"]={34,0,14},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_Ambient_Artisan",["Role"]="Artisan",["City"]="Durakh"},["NPC_Durakh_Ambient_Employee"]={["Key"]="NPC_Durakh_Ambient_Employee",["Label"]="Durakh_Ambient_Employee",["Kind"]="R15",["Origin"]={6,0,22},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_Ambient_Employee",["Role"]="Employee",["City"]="Durakh"},["NPC_Durakh_Ambient_Adventurer"]={["Key"]="NPC_Durakh_Ambient_Adventurer",["Label"]="Durakh_Ambient_Adventurer",["Kind"]="R15",["Origin"]={13,0,22},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_Ambient_Adventurer",["Role"]="Adventurer",["City"]="Durakh"},["NPC_Durakh_Ambient_Farmer"]={["Key"]="NPC_Durakh_Ambient_Farmer",["Label"]="Durakh_Ambient_Farmer",["Kind"]="R15",["Origin"]={20,0,22},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Durakh_Ambient_Farmer",["Role"]="Farmer",["City"]="Durakh"},["NPC_Asterion_Ambient_Guard"]={["Key"]="NPC_Asterion_Ambient_Guard",["Label"]="Asterion_Ambient_Guard",["Kind"]="R15",["Origin"]={27,0,22},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_Ambient_Guard",["Role"]="Guard",["City"]="Asterion"},["NPC_Asterion_Ambient_Resident"]={["Key"]="NPC_Asterion_Ambient_Resident",["Label"]="Asterion_Ambient_Resident",["Kind"]="R15",["Origin"]={34,0,22},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_Ambient_Resident",["Role"]="Resident",["City"]="Asterion"},["NPC_Asterion_Ambient_Traveler"]={["Key"]="NPC_Asterion_Ambient_Traveler",["Label"]="Asterion_Ambient_Traveler",["Kind"]="R15",["Origin"]={6,0,30},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_Ambient_Traveler",["Role"]="Traveler",["City"]="Asterion"},["NPC_Asterion_Ambient_Artisan"]={["Key"]="NPC_Asterion_Ambient_Artisan",["Label"]="Asterion_Ambient_Artisan",["Kind"]="R15",["Origin"]={13,0,30},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_Ambient_Artisan",["Role"]="Artisan",["City"]="Asterion"},["NPC_Asterion_Ambient_Employee"]={["Key"]="NPC_Asterion_Ambient_Employee",["Label"]="Asterion_Ambient_Employee",["Kind"]="R15",["Origin"]={20,0,30},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_Ambient_Employee",["Role"]="Employee",["City"]="Asterion"},["NPC_Asterion_Ambient_Adventurer"]={["Key"]="NPC_Asterion_Ambient_Adventurer",["Label"]="Asterion_Ambient_Adventurer",["Kind"]="R15",["Origin"]={27,0,30},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_Ambient_Adventurer",["Role"]="Adventurer",["City"]="Asterion"},["NPC_Asterion_Ambient_Farmer"]={["Key"]="NPC_Asterion_Ambient_Farmer",["Label"]="Asterion_Ambient_Farmer",["Kind"]="R15",["Origin"]={34,0,30},["Group"]="South",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="Asterion_Ambient_Farmer",["Role"]="Farmer",["City"]="Asterion"},["NPC_MalgorthDepths_Administrator"]={["Key"]="NPC_MalgorthDepths_Administrator",["Label"]="MalgorthDepths_Administrator",["Kind"]="R15",["Origin"]={6,0,6},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="MalgorthDepths_Administrator",["Role"]="Dungeon",["City"]="MalgorthDepths"},["NPC_FallenSanctum_Administrator"]={["Key"]="NPC_FallenSanctum_Administrator",["Label"]="FallenSanctum_Administrator",["Kind"]="R15",["Origin"]={13,0,6},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["NPCId"]="FallenSanctum_Administrator",["Role"]="Dungeon",["City"]="FallenSanctum"},["ENEMY_Bandit"]={["Key"]="ENEMY_Bandit",["Label"]="Bandido",["Kind"]="R15",["Origin"]={22,0,6},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="Bandit"},["ENEMY_DarkWolf"]={["Key"]="ENEMY_DarkWolf",["Label"]="Lobo Sombrio",["Kind"]="Quadruped",["Origin"]={30,0,6},["Group"]="Dungeons",["Bones"]={"BeastBody","BeastHead","FrontLeft","HindLeft","FrontRight","HindRight","BeastTail"},["EnemyKind"]="DarkWolf"},["ENEMY_Demon"]={["Key"]="ENEMY_Demon",["Label"]="Soldado Demoníaco",["Kind"]="R15",["Origin"]={38,0,6},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="Demon"},["ENEMY_FallenRegent"]={["Key"]="ENEMY_FallenRegent",["Label"]="Regente do Reino Caído",["Kind"]="R15",["Origin"]={6,0,15},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="FallenRegent"},["ENEMY_Knight"]={["Key"]="ENEMY_Knight",["Label"]="Cavaleiro Corrompido",["Kind"]="R15",["Origin"]={14,0,15},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="Knight"},["ENEMY_Malgorth"]={["Key"]="ENEMY_Malgorth",["Label"]="Lorde Malgorth",["Kind"]="R15",["Origin"]={22,0,15},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="Malgorth"},["ENEMY_NoctharBoss"]={["Key"]="ENEMY_NoctharBoss",["Label"]="Sentinela de Nocthar",["Kind"]="R15",["Origin"]={30,0,15},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="NoctharBoss"},["ENEMY_Shadow"]={["Key"]="ENEMY_Shadow",["Label"]="Guardião das Sombras",["Kind"]="R15",["Origin"]={38,0,15},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="Shadow"},["ENEMY_Skeleton"]={["Key"]="ENEMY_Skeleton",["Label"]="Esqueleto Corrompido",["Kind"]="R15",["Origin"]={6,0,24},["Group"]="Dungeons",["Bones"]={"Head","LowerTorso","UpperTorso","LeftUpperArm","LeftLowerArm","LeftHand","RightUpperArm","RightLowerArm","RightHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="Skeleton"},["ENEMY_Slime"]={["Key"]="ENEMY_Slime",["Label"]="Slime",["Kind"]="Blob",["Origin"]={14,0,24},["Group"]="Dungeons",["Bones"]={"Blob"},["EnemyKind"]="Slime"},["ENEMY_SylvarinBoss"]={["Key"]="ENEMY_SylvarinBoss",["Label"]="Cervo Ancestral de Sylvarin",["Kind"]="Quadruped",["Origin"]={22,0,24},["Group"]="Dungeons",["Bones"]={"BeastBody","BeastHead","FrontLeft","HindLeft","FrontRight","HindRight","BeastTail"},["EnemyKind"]="SylvarinBoss"},["ENEMY_Training"]={["Key"]="ENEMY_Training",["Label"]="Parceiro de Treino",["Kind"]="R15",["Origin"]={30,0,24},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="Training"},["ENEMY_VesperaBoss"]={["Key"]="ENEMY_VesperaBoss",["Label"]="Arauto de Véspera",["Kind"]="R15",["Origin"]={38,0,24},["Group"]="Dungeons",["Bones"]={"UpperTorso","LowerTorso","Head","LeftUpperArm","LeftLowerArm","LeftHand","LeftUpperLeg","LeftLowerLeg","LeftFoot","RightUpperArm","RightLowerArm","RightHand","RightUpperLeg","RightLowerLeg","RightFoot"},["EnemyKind"]="VesperaBoss"},["ENEMY_Wolf"]={["Key"]="ENEMY_Wolf",["Label"]="Lobo",["Kind"]="Quadruped",["Origin"]={6,0,33},["Group"]="Dungeons",["Bones"]={"BeastBody","BeastHead","FrontLeft","HindLeft","FrontRight","HindRight","BeastTail"},["EnemyKind"]="Wolf"}},["R15"]={["LowerTorso"]={0,3,0},["UpperTorso"]={0,4,0},["Head"]={0,5.25,0},["LeftUpperArm"]={-1.35,4,0},["LeftLowerArm"]={-1.35,3,0},["LeftHand"]={-1.35,2.3,0},["RightUpperArm"]={1.35,4,0},["RightLowerArm"]={1.35,3,0},["RightHand"]={1.35,2.3,0},["LeftUpperLeg"]={-0.5,1.95,0},["LeftLowerLeg"]={-0.5,0.9,0},["LeftFoot"]={-0.5,0.25,-0.1},["RightUpperLeg"]={0.5,1.95,0},["RightLowerLeg"]={0.5,0.9,0},["RightFoot"]={0.5,0.25,-0.1}},["Quadruped"]={["BeastBody"]={0,1.5,0},["BeastHead"]={0,1.7,-1.15},["FrontLeft"]={-0.48,0.7,-0.75},["FrontRight"]={0.48,0.7,-0.75},["HindLeft"]={-0.48,0.7,0.85},["HindRight"]={0.48,0.7,0.85},["BeastTail"]={0,1.6,1.4}},["NPCs"]={["Valoria_GuildMaster"]="NPC_Valoria_GuildMaster",["Valoria_Reception"]="NPC_Valoria_Reception",["Valoria_Blacksmith"]="NPC_Valoria_Blacksmith",["Valoria_Weapons"]="NPC_Valoria_Weapons",["Valoria_Armor"]="NPC_Valoria_Armor",["Valoria_General"]="NPC_Valoria_General",["Valoria_Classes"]="NPC_Valoria_Classes",["Valoria_Magic"]="NPC_Valoria_Magic",["Valoria_Skills"]="NPC_Valoria_Skills",["Valoria_Races"]="NPC_Valoria_Races",["Valoria_Fusions"]="NPC_Valoria_Fusions",["Valoria_Inn"]="NPC_Valoria_Inn",["Valoria_Healer"]="NPC_Valoria_Healer",["Valoria_Bank"]="NPC_Valoria_Bank",["Valoria_Guide"]="NPC_Valoria_Guide",["Valoria_Tutorial"]="NPC_Valoria_Tutorial",["Valoria_TravelShop"]="NPC_Valoria_TravelShop",["Arkheim_Guide"]="NPC_Arkheim_Guide",["Arkheim_General"]="NPC_Arkheim_General",["Arkheim_Inn"]="NPC_Arkheim_Inn",["Eldoria_Guide"]="NPC_Eldoria_Guide",["Eldoria_General"]="NPC_Eldoria_General",["Eldoria_Inn"]="NPC_Eldoria_Inn",["Durakh_Guide"]="NPC_Durakh_Guide",["Durakh_General"]="NPC_Durakh_General",["Durakh_Inn"]="NPC_Durakh_Inn",["Asterion_Guide"]="NPC_Asterion_Guide",["Asterion_General"]="NPC_Asterion_General",["Asterion_Inn"]="NPC_Asterion_Inn",["Valoria_Ambient_Guard"]="NPC_Valoria_Ambient_Guard",["Valoria_Ambient_Resident"]="NPC_Valoria_Ambient_Resident",["Valoria_Ambient_Traveler"]="NPC_Valoria_Ambient_Traveler",["Valoria_Ambient_Artisan"]="NPC_Valoria_Ambient_Artisan",["Valoria_Ambient_Employee"]="NPC_Valoria_Ambient_Employee",["Valoria_Ambient_Adventurer"]="NPC_Valoria_Ambient_Adventurer",["Valoria_Ambient_Farmer"]="NPC_Valoria_Ambient_Farmer",["Arkheim_Ambient_Guard"]="NPC_Arkheim_Ambient_Guard",["Arkheim_Ambient_Resident"]="NPC_Arkheim_Ambient_Resident",["Arkheim_Ambient_Traveler"]="NPC_Arkheim_Ambient_Traveler",["Arkheim_Ambient_Artisan"]="NPC_Arkheim_Ambient_Artisan",["Arkheim_Ambient_Employee"]="NPC_Arkheim_Ambient_Employee",["Arkheim_Ambient_Adventurer"]="NPC_Arkheim_Ambient_Adventurer",["Arkheim_Ambient_Farmer"]="NPC_Arkheim_Ambient_Farmer",["Eldoria_Ambient_Guard"]="NPC_Eldoria_Ambient_Guard",["Eldoria_Ambient_Resident"]="NPC_Eldoria_Ambient_Resident",["Eldoria_Ambient_Traveler"]="NPC_Eldoria_Ambient_Traveler",["Eldoria_Ambient_Artisan"]="NPC_Eldoria_Ambient_Artisan",["Eldoria_Ambient_Employee"]="NPC_Eldoria_Ambient_Employee",["Eldoria_Ambient_Adventurer"]="NPC_Eldoria_Ambient_Adventurer",["Eldoria_Ambient_Farmer"]="NPC_Eldoria_Ambient_Farmer",["Durakh_Ambient_Guard"]="NPC_Durakh_Ambient_Guard",["Durakh_Ambient_Resident"]="NPC_Durakh_Ambient_Resident",["Durakh_Ambient_Traveler"]="NPC_Durakh_Ambient_Traveler",["Durakh_Ambient_Artisan"]="NPC_Durakh_Ambient_Artisan",["Durakh_Ambient_Employee"]="NPC_Durakh_Ambient_Employee",["Durakh_Ambient_Adventurer"]="NPC_Durakh_Ambient_Adventurer",["Durakh_Ambient_Farmer"]="NPC_Durakh_Ambient_Farmer",["Asterion_Ambient_Guard"]="NPC_Asterion_Ambient_Guard",["Asterion_Ambient_Resident"]="NPC_Asterion_Ambient_Resident",["Asterion_Ambient_Traveler"]="NPC_Asterion_Ambient_Traveler",["Asterion_Ambient_Artisan"]="NPC_Asterion_Ambient_Artisan",["Asterion_Ambient_Employee"]="NPC_Asterion_Ambient_Employee",["Asterion_Ambient_Adventurer"]="NPC_Asterion_Ambient_Adventurer",["Asterion_Ambient_Farmer"]="NPC_Asterion_Ambient_Farmer",["MalgorthDepths_Administrator"]="NPC_MalgorthDepths_Administrator",["FallenSanctum_Administrator"]="NPC_FallenSanctum_Administrator"},["Enemies"]={["Bandit"]="ENEMY_Bandit",["DarkWolf"]="ENEMY_DarkWolf",["Demon"]="ENEMY_Demon",["FallenRegent"]="ENEMY_FallenRegent",["Knight"]="ENEMY_Knight",["Malgorth"]="ENEMY_Malgorth",["NoctharBoss"]="ENEMY_NoctharBoss",["Shadow"]="ENEMY_Shadow",["Skeleton"]="ENEMY_Skeleton",["Slime"]="ENEMY_Slime",["SylvarinBoss"]="ENEMY_SylvarinBoss",["Training"]="ENEMY_Training",["VesperaBoss"]="ENEMY_VesperaBoss",["Wolf"]="ENEMY_Wolf"}}
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="40">
+        <Properties>
+          <string name="Name">ImportFrame</string>
+          <string name="Source"><![CDATA[-- Pure normalization of the four calibration markers exported with every FBX.
+local F={}
+local function add(a,b)return {a[1]+b[1],a[2]+b[2],a[3]+b[3]}end
+local function sub(a,b)return {a[1]-b[1],a[2]-b[2],a[3]-b[3]}end
+local function dot(a,b)return a[1]*b[1]+a[2]*b[2]+a[3]*b[3]end
+local function cross(a,b)return {a[2]*b[3]-a[3]*b[2],a[3]*b[1]-a[1]*b[3],a[1]*b[2]-a[2]*b[1]}end
+function F.finite(v)return type(v)=='number' and v==v and math.abs(v)<1e8 end
+local function vector(a)assert(type(a)=='table' and #a==3,'Vetor de importação inválido');for _,v in a do assert(F.finite(v),'Coordenada não finita')end;return a end
+function F.basis(points)
+ for _,name in {'O','X','Y','Z'}do vector(points[name])end
+ local basis={Origin=points.O,Axes={},Scale=0};local lengths={}
+ for i,name in {'X','Y','Z'}do
+  local v=sub(points[name],points.O);local length=math.sqrt(dot(v,v));assert(length>.0001,'Marcadores coincidentes')
+  lengths[i]=length;basis.Axes[i]={v[1]/length,v[2]/length,v[3]/length};basis.Scale+=length/3
+ end
+ for _,v in lengths do assert(math.abs(v/basis.Scale-1)<.01,'Escala não uniforme no FBX')end
+ for i=1,3 do for j=i+1,3 do assert(math.abs(dot(basis.Axes[i],basis.Axes[j]))<.01,'Eixos da importação não são ortogonais')end end
+ assert(dot(cross(basis.Axes[1],basis.Axes[2]),basis.Axes[3])>.99,'Importação espelhada; confira os eixos do FBX')
+ return basis
+end
+function F.point(basis,position)
+ local delta=sub(vector(position),basis.Origin);local p={}
+ for i=1,3 do p[i]=dot(delta,basis.Axes[i])/basis.Scale end
+ return add(p,{0,.5,0})
+end
+function F.direction(basis,direction)local out={};for i=1,3 do out[i]=dot(vector(direction),basis.Axes[i])end;return out end
+function F.asset(id)
+ if type(id)~='string' then return false end
+ return id:match('^rbxassetid://[1-9]%d*$')~=nil or id:match('^https?://www%.roblox%.com/asset/%?id=[1-9]%d*$')~=nil
+end
+return F
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="ModuleScript" referent="41">
+      <Properties>
+        <string name="Name">Upgrade</string>
+        <string name="Source"><![CDATA[-- Editor-only mesh art migration, preserving the existing instances and gameplay.
+local Upgrade={Version=3}
+local root=script.Parent
+local Catalog=require(root.Shared.AvatarCatalog)
+local Appearance=require(root.AvatarAppearance)
+local Run=game:GetService('RunService')
+local SS=game:GetService('ServerStorage')
+local function editor()assert(Run:IsStudio()and not Run:IsRunning(),'Pare Play/Run e use a Command Bar do Studio em Edit.')end
+local function folder(name,parent)local f=Instance.new('Folder');f.Name=name;f.Parent=parent;return f end
+local function ref(name,value,parent)local r=Instance.new('ObjectValue');r.Name=name;r.Value=value;r.Parent=parent;return r end
+local function source(node)return(node.Source:gsub('\r\n','\n'))end
+local function npcs()
+ local group=workspace:FindFirstChild('EldravynNPCs');assert(group and group:GetAttribute('NPCInstallVersion')==1,'Instalação Stage 2 ausente; não será recriada.')
+ local out,ids={},{}
+ for _,npc in group:GetDescendants()do if npc:IsA('Model')and npc:GetAttribute('EldravynNPCId')then
+  local id=npc:GetAttribute('EldravynNPCId');assert(not ids[id],'NPC duplicado: '..id);ids[id]=true
+  local key=Catalog.NPCs[id];local def=key and Catalog.Models[key];assert(def and def.Role==npc:GetAttribute('NPCRole')and def.City==npc:GetAttribute('City'),'Tema/identidade incompatível: '..id)
+  table.insert(out,{NPC=npc,Id=id})
+ end end
+ assert(#out>0,'Nenhum NPC existente');table.sort(out,function(a,b)return a.Id<b.Id end);return out
+end
+local function templateReady(key)
+ local templates=root:FindFirstChild('ImportedTemplates');local t=templates and templates:FindFirstChild(key);assert(t,'Falta importar/registrar: '..key)
+ for _,bone in Catalog.Models[key].Bones do local p=t:FindFirstChild(bone);assert(p and p:IsA('MeshPart'),'Mesh registrado incompleto: '..key..'/'..bone)end
+end
+local function extraPlan()
+ local server=game:GetService('ServerScriptService'):FindFirstChild('MedievalServer');local services=server and server:FindFirstChild('Services');local enemy=services and services:FindFirstChild('EnemyService')
+ if enemy then assert(enemy:IsA('ModuleScript')and(source(enemy)==source(root.EnemyServiceBaseline)or source(enemy)==source(root.EnemyServiceTemplate)),'EnemyService personalizado: revise o adaptador antes de aplicar; nenhuma alteração realizada.')end
+ for parent,name in {[game:GetService('ReplicatedStorage')]='EldravynAvatarShared',[SS]='EldravynEnemyAvatarLibrary',[game:GetService('StarterPlayer').StarterPlayerScripts]='EldravynAvatarClient'}do assert(not parent:FindFirstChild(name),'Nome da camada Avatar já ocupado: '..name)end
+ return enemy
+end
+function Upgrade.Report()
+ editor();local items=npcs();local registered=require(root.RegisterImported).Report()
+ print('[Avatar] '..#items..' NPCs existentes. Aplique somente após registrar todos os grupos FBX.')
+ return{NPCs=#items,Registered=registered,ArtVersion=workspace:GetAttribute('EldravynAvatarArtVersion'),ArtRevision=workspace:GetAttribute('EldravynAvatarRevision'),StudioValidated=false}
+end
+local function rollback(backup,strict)
+ if strict then
+  assert(backup:GetAttribute('State')=='Applied','Backup Avatar incompleto')
+  assert(backup:GetAttribute('ArtRevision')==Catalog.ArtRevision,'Use o pacote da revisão anterior para reverter antes de instalar a revisão arredondada.')
+  for _,record in backup.Modules:GetChildren()do assert(record.Installed.Value and record.Installed.Value.Parent==record.TargetParent.Value and source(record.Installed.Value)==record:GetAttribute('InstalledSource'),'Módulo modificado após atualização; exporte suas mudanças antes de reverter.')end
+  for _,record in backup.Models:GetChildren()do assert(record.NPC.Value and record.Visuals.Value and record.Visuals.Value.Parent==record.NPC.Value,'Camada V2 alterada depois do upgrade; restaure sua cópia antes de reverter.')end
+  for _,record in backup.Sources:GetChildren()do assert(record.Value and record.Value.Parent and source(record.Value)==record:GetAttribute('Source'),'Biblioteca Avatar personalizada; exporte suas alterações antes de reverter.')end
+ end
+ for _,record in backup.Models:GetChildren()do
+  for _,item in record.Installed:GetChildren()do if item.Value then item.Value:Destroy()end end
+  for _,body in record.Bodies:GetChildren()do if body.Value then body.Value.Transparency=body:GetAttribute('Transparency')end end
+  for _,old in record.Decor:GetChildren()do old.Parent=record.Visuals.Value end
+  for _,key in {'VisualPartCount','VisualStyle','AvatarArtVersion'}do record.Visuals.Value:SetAttribute(key,record.VisualAttributes:GetAttribute(key))end
+  record.NPC.Value:SetAttribute('AvatarArtVersion',nil)
+ end
+ if backup:GetAttribute('Mode')=='Stage2'and workspace:GetAttribute('EldravynNPCVisualVersion')==2 then
+  require(root.CoreV2.NPCVisualUpgrade).Rollback()
+  for _,row in npcs()do row.NPC:SetAttribute('AvatarArtVersion',nil)end
+ end
+ for _,record in backup.Modules:GetChildren()do
+  if record.Installed.Value then record.Installed.Value:Destroy()end
+  local original=record:FindFirstChild('Original');if original then original.Name='EnemyService';original.Parent=record.TargetParent.Value end
+ end
+ for _,record in backup.Additions:GetChildren()do if record.Value then record.Value:Destroy()end end
+ workspace:SetAttribute('EldravynAvatarArtVersion',nil);workspace:SetAttribute('EldravynAvatarRevision',nil);backup:SetAttribute('State','RolledBack');backup.Name='EldravynAvatarRollback_'..game:GetService('HttpService'):GenerateGUID(false)
+end
+function Upgrade.Rollback()
+ editor();local backup=SS:FindFirstChild('EldravynAvatarBackupV3');assert(backup,'Backup Avatar não encontrado');rollback(backup,true)
+ print('[Avatar] Aparência anterior restaurada; NPCs, posições, serviços e mapa preservados.');return{Restored=true}
+end
+function Upgrade.Apply()
+ editor();local rows=npcs();local version=workspace:GetAttribute('EldravynAvatarArtVersion')
+ if version==3 then
+  assert(workspace:GetAttribute('EldravynAvatarRevision')==Catalog.ArtRevision,'Outra revisão Avatar está instalada. Reverta pelo pacote anterior, depois registre as malhas arredondadas e aplique este pacote.')
+  local backup=SS:FindFirstChild('EldravynAvatarBackupV3');assert(backup and backup:GetAttribute('State')=='Applied','Backup Avatar ausente')
+  for _,row in rows do assert(row.NPC:GetAttribute('AvatarArtVersion')==3 and row.NPC:FindFirstChild('NPCV2Visuals'),'Instalação Avatar parcial')end
+  assert(SS:FindFirstChild('EldravynEnemyAvatarLibrary')and game:GetService('ReplicatedStorage'):FindFirstChild('EldravynAvatarShared')and game:GetService('StarterPlayer').StarterPlayerScripts:FindFirstChild('EldravynAvatarClient'),'Dependência Avatar ausente; instalação parcial não será reaplicada.')
+  return{Already=true,Count=#rows}
+ end
+ assert(version==nil and not SS:FindFirstChild('EldravynAvatarBackupV3'),'Versão/backup Avatar incompatível')
+ for _,row in rows do assert(row.NPC:GetAttribute('AvatarArtVersion')==nil,'Atributo Avatar já ocupado');templateReady(Catalog.NPCs[row.Id])end
+ for _,key in Catalog.Enemies do templateReady(key)end
+ local enemy=extraPlan();local base=workspace:GetAttribute('EldravynNPCVisualVersion');assert(base==nil or base==2,'Base visual incompatível')
+ local core=require(root.CoreV2.NPCVisualUpgrade);core.Plan()
+ local rig=require(root.CoreV2.Authoring.NPCRigAdapter);local styles=require(root.CoreV2.Runtime.Shared.NPCAppearanceConfig)
+ local prepared={}
+ if base==2 then
+  local ok,err=pcall(function()for _,row in rows do
+   row.Rig=rig.inspect(row.NPC);row.Visual=Appearance.build(row.Rig,styles.forNPC(row.Id,row.NPC:GetAttribute('NPCRole'),row.NPC:GetAttribute('City')));table.insert(prepared,row.Visual.Folder)
+  end end)
+  if not ok then for _,p in prepared do p:Destroy()end;error(err)end
+ end
+ local backup=folder('EldravynAvatarBackupV3',SS);backup:SetAttribute('State','Preparing');backup:SetAttribute('ArtRevision',Catalog.ArtRevision);backup:SetAttribute('Mode',if base==nil then'Stage2'else'V2')
+ folder('Models',backup);folder('Modules',backup);folder('Additions',backup);folder('Sources',backup)
+ local ok,err=pcall(function()
+  if base==nil then core.Apply()
+  else for _,row in rows do
+   local npc=row.NPC;local record=folder(row.Id,backup.Models);ref('NPC',npc,record);ref('Visuals',npc.NPCV2Visuals,record);folder('Decor',record);folder('Bodies',record);folder('Installed',record)
+   local attributes=folder('VisualAttributes',record);for _,key in {'VisualPartCount','VisualStyle','AvatarArtVersion'}do attributes:SetAttribute(key,npc.NPCV2Visuals:GetAttribute(key))end
+   for body,changes in row.Visual.Changes do local r=ref(body.Name,body,record.Bodies);r:SetAttribute('Transparency',body.Transparency);body.Transparency=changes.Transparency end
+   for _,child in npc.NPCV2Visuals:GetChildren()do child.Parent=record.Decor end
+   for _,child in row.Visual.Folder:GetChildren()do ref(child.Name,child,record.Installed);child.Parent=npc.NPCV2Visuals end;row.Visual.Folder:Destroy()
+   npc.NPCV2Visuals:SetAttribute('VisualPartCount',row.Visual.Count);npc.NPCV2Visuals:SetAttribute('VisualStyle',Catalog.NPCs[row.Id]);npc.NPCV2Visuals:SetAttribute('AvatarArtVersion',3)
+  end end
+  for _,row in rows do row.NPC:SetAttribute('AvatarArtVersion',3)end
+  local shared=root.Shared:Clone();shared.Name='EldravynAvatarShared';ref('Shared',shared,backup.Additions);shared.Parent=game:GetService('ReplicatedStorage')
+  local library=folder('EldravynEnemyAvatarLibrary');ref('Enemies',library,backup.Additions)
+  local templates=folder('Templates',library)
+  for _,key in Catalog.Enemies do root.ImportedTemplates[key]:Clone().Parent=templates end
+  root.EnemyRuntime.Factory:Clone().Parent=library;root.EnemyRuntime.ProxyRig:Clone().Parent=library;root.Shared.AvatarCatalog:Clone().Parent=library
+  library:SetAttribute('Ready',true);library.Parent=SS
+  local client=root.Client:Clone();client.Name='EldravynAvatarClient';ref('Client',client,backup.Additions);client.Parent=game:GetService('StarterPlayer').StarterPlayerScripts
+  client.Bootstrap.Disabled=false
+  for _,addition in {shared,library,client}do for _,node in addition:GetDescendants()do if node:IsA('LuaSourceContainer')then local r=ref(node.Name,node,backup.Sources);r:SetAttribute('Source',source(node))end end end
+  if enemy and source(enemy)~=source(root.EnemyServiceTemplate)then
+   local record=folder('EnemyService',backup.Modules);ref('TargetParent',enemy.Parent,record)
+   local new=root.EnemyServiceTemplate:Clone();new.Name='EnemyService';ref('Installed',new,record);record:SetAttribute('InstalledSource',source(new))
+   local parent=enemy.Parent;enemy.Name='Original';enemy.Parent=record;new.Parent=parent
+  end
+  backup:SetAttribute('State','Applied');workspace:SetAttribute('EldravynAvatarArtVersion',3);workspace:SetAttribute('EldravynAvatarRevision',Catalog.ArtRevision)
+ end)
+ if not ok then
+  local restored,reason=pcall(rollback,backup,false);for _,f in prepared do if not f.Parent then f:Destroy()end end
+  assert(restored,tostring(err)..' | Falha de reversão: '..tostring(reason));error('Atualização Avatar cancelada e revertida: '..tostring(err))
+ end
+ print('[Avatar] '..#rows..' NPCs atualizados com meshes importados. Biblioteca de inimigos instalada; spawns/combate não iniciados.')
+ return{Updated=#rows,EnemyModels=14,EnemyServiceAdapted=enemy~=nil,Backup=backup.Name}
+end
+function Upgrade.PreviewEnemy(kind)
+ editor();local library=SS:FindFirstChild('EldravynEnemyAvatarLibrary');assert(library and library:GetAttribute('Ready'),'Aplique após registrar as malhas')
+ local previews=workspace:FindFirstChild('EldravynAvatarPreviews')or folder('EldravynAvatarPreviews',workspace)
+ local model=require(library.Factory).create(previews,Catalog.Models[assert(Catalog.Enemies[kind],'Tipo desconhecido')].Label,Vector3.new(0,20,0),Color3.new(1,1,1),true,kind)
+ model.PrimaryPart.Anchored=true;model:SetAttribute('AvatarPreviewOnly',true);return model
+end
+return Upgrade
+]]></string>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>
