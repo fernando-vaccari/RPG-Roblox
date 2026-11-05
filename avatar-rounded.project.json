@@ -1,0 +1,93 @@
+{
+  "name": "EldravynRoundedAvatarUpgrade",
+  "tree": {
+    "$className": "Model",
+    "Upgrade": {
+      "$path": "src/avatar/install/Upgrade.luau"
+    },
+    "RegisterImported": {
+      "$path": "src/avatar/install/RegisterImported.luau"
+    },
+    "AvatarAppearance": {
+      "$path": "src/avatar/install/AvatarAppearance.luau"
+    },
+    "Shared": {
+      "$path": "src/avatar/shared"
+    },
+    "CoreV2": {
+      "$className": "Model",
+      "NPCVisualUpgrade": {
+        "$path": "src/npc-v2/install/NPCVisualUpgrade.luau"
+      },
+      "Authoring": {
+        "$className": "Folder",
+        "NPCRigAdapter": {
+          "$path": "src/npc-v2/install/NPCRigAdapter.luau"
+        },
+        "NPCVisualFactory": {
+          "$path": "src/avatar/install/CoreVisualFactory.luau"
+        }
+      },
+      "Baselines": {
+        "$path": "src/npc-v2/baseline"
+      },
+      "Runtime": {
+        "$className": "Folder",
+        "Shared": {
+          "$path": "src/npc-v2/shared"
+        },
+        "Server": {
+          "$path": "src/npc-v2/server"
+        },
+        "Client": {
+          "$path": "src/npc-v2/client"
+        },
+        "Replacements": {
+          "$className": "Folder",
+          "NPCService": {
+            "$path": "src/npc/server/NPCService.luau"
+          },
+          "AmbientService": {
+            "$path": "src/npc/server/AmbientService.luau"
+          },
+          "NPCInteractionClient": {
+            "$path": "src/npc/client/NPCInteractionClient.client.luau",
+            "$properties": {
+              "Disabled": true
+            }
+          }
+        }
+      }
+    },
+    "EnemyServiceBaseline": {
+      "$path": "src/avatar/install/EnemyServiceBaseline.luau"
+    },
+    "EnemyServiceTemplate": {
+      "$path": "src/server/Services/EnemyService.luau"
+    },
+    "EnemyRuntime": {
+      "$className": "Folder",
+      "Factory": {
+        "$path": "src/avatar/server/EnemyFactory.luau"
+      },
+      "ProxyRig": {
+        "$path": "src/npc/install/R15Factory.luau"
+      }
+    },
+    "Client": {
+      "$className": "Folder",
+      "EnemyAnimationClient": {
+        "$path": "src/avatar/client/EnemyAnimationClient.luau"
+      },
+      "NPCAnimationController": {
+        "$path": "src/npc-v2/client/NPCAnimationController.luau"
+      },
+      "Bootstrap": {
+        "$path": "src/avatar/client/Bootstrap.client.luau",
+        "$properties": {
+          "Disabled": true
+        }
+      }
+    }
+  }
+}

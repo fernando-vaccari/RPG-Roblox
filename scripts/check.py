@@ -15,6 +15,9 @@ files=sorted(ROOT.glob('src/**/*.luau'))+sorted(ROOT.glob('tests/**/*.luau'))+so
 for path in files:run('luau-compile',str(path.relative_to(ROOT)),stdout=subprocess.DEVNULL)
 print(f'Compilados {len(files)} arquivos Luau',flush=True)
 pure=sorted(ROOT.glob('src/shared/Core/*.luau'))+sorted(ROOT.glob('src/shared/Config/*.luau'))+[ROOT/'src/worldgen/TerrainMath.luau',ROOT/'src/worldgen/WorldPlan.luau']
+pure += [ROOT/'src/npc/shared'/f'{name}.luau' for name in ('NPCConfig','ShopConfig','DungeonTicketConfig','QuestConfig','DialogueConfig','Rules','PlacementConfig')]
+pure += sorted(ROOT.glob('src/npc-v2/shared/*.luau'))
+pure += sorted(ROOT.glob('src/avatar/shared/*.luau'))
 run('luau-analyze',*[str(p.relative_to(ROOT)) for p in pure])
 for path in sorted(ROOT.glob('tests/*.spec.luau')):run('luau',str(path.relative_to(ROOT)))
 result=subprocess.run([sys.executable,'scripts/integration.py'],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
@@ -29,6 +32,9 @@ if result.returncode:
     print(result.stdout);raise SystemExit(result.returncode)
 for line in result.stdout.splitlines():
     if line.startswith(('PASSOU MOCK:','PASSOU MAPA:')):print(line,flush=True)
+subprocess.run([sys.executable,'scripts/test_npc_stage2.py'],cwd=ROOT,check=True)
+subprocess.run([sys.executable,'scripts/test_npc_v2.py'],cwd=ROOT,check=True)
+subprocess.run([sys.executable,'scripts/test_avatar.py'],cwd=ROOT,check=True)
 for project,output in [('default.project.json','ProjectMedievalRPG.rbxlx'),('dungeon.project.json','ProjectMedievalRPG_Dungeon.rbxlx')]:
     run('rojo','build',project,'--output','build/'+output)
 run('rojo','sourcemap','default.project.json','--output','build/sourcemap.json')

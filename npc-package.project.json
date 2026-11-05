@@ -1,0 +1,69 @@
+{
+  "name": "EldravynNPCPackage",
+  "tree": {
+    "$className": "Model",
+    "Installer": {
+      "$path": "src/npc/install/Installer.luau"
+    },
+    "Authoring": {
+      "$className": "Folder",
+      "Placement": {
+        "$path": "src/npc/install/Placement.luau"
+      },
+      "R15Factory": {
+        "$path": "src/npc/install/R15Factory.luau"
+      }
+    },
+    "Shared": {
+      "$path": "src/npc/shared"
+    },
+    "Server": {
+      "$className": "Folder",
+      "Bootstrap": {
+        "$path": "src/npc/server/Bootstrap.server.luau",
+        "$properties": {
+          "Disabled": true
+        }
+      },
+      "DialogueService": {
+        "$path": "src/npc/server/DialogueService.luau"
+      },
+      "NPCActionService": {
+        "$path": "src/npc/server/NPCActionService.luau"
+      },
+      "NPCDataService": {
+        "$path": "src/npc/server/NPCDataService.luau"
+      },
+      "NPCService": {
+        "$path": "src/npc/server/NPCService.luau"
+      },
+      "QuestService": {
+        "$path": "src/npc/server/QuestService.luau"
+      },
+      "DataService": {
+        "$path": "src/server/Services/DataService.luau"
+      },
+      "PurchaseService": {
+        "$path": "src/server/Services/PurchaseService.luau"
+      },
+      "Placement": {
+        "$path": "src/npc/install/Placement.luau"
+      },
+      "AmbientService": {
+        "$path": "src/npc/server/AmbientService.luau"
+      }
+    },
+    "Client": {
+      "$className": "Folder",
+      "NPCDialogueClient": {
+        "$path": "src/npc/client/NPCDialogueClient.luau"
+      },
+      "NPCInteractionClient": {
+        "$path": "src/npc/client/NPCInteractionClient.client.luau",
+        "$properties": {
+          "Disabled": true
+        }
+      }
+    }
+  }
+}

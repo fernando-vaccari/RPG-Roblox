@@ -1,0 +1,1460 @@
+[
+  {
+    "City": "Valoria",
+    "Id": "Valoria_GuildMaster",
+    "Role": "GuildMaster",
+    "Anchor": "Cities/Valoria/Valoria_1/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      25.0,
+      44.12,
+      2545.0
+    ],
+    "Yaw": 1.5707963267948966,
+    "Location": "Guilda dos Aventureiros • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Maelis",
+    "Title": "Mestre da Guilda"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Reception",
+    "Role": "Reception",
+    "Anchor": "Cities/Valoria/Valoria_1/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      25.0,
+      44.12,
+      2525.0
+    ],
+    "Yaw": 1.5707963267948966,
+    "Location": "Guilda dos Aventureiros • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Iria",
+    "Title": "Recepcionista da Guilda"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Blacksmith",
+    "Role": "Blacksmith",
+    "Anchor": "Cities/Valoria/Valoria_3/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      175.5067684,
+      44.12,
+      1707.2737572
+    ],
+    "Yaw": 0.768921264224879,
+    "Location": "Ferreiro • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Borin",
+    "Title": "Ferreiro"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Weapons",
+    "Role": "Weapons",
+    "Anchor": "Cities/Valoria/Valoria_4/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -200.41861075999998,
+      44.12,
+      1315.8359976
+    ],
+    "Yaw": -2.3507021804700186,
+    "Location": "Armas • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Aren",
+    "Title": "Comerciante de Armas"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Armor",
+    "Role": "Armor",
+    "Anchor": "Cities/Valoria/Valoria_20/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -264.7578734,
+      44.12,
+      1302.7608083
+    ],
+    "Yaw": -2.2413702129651982,
+    "Location": "Oficina • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Helga",
+    "Title": "Comerciante de Armaduras"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_General",
+    "Role": "General",
+    "Anchor": "Cities/Valoria/Valoria_7/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      -114.78053969999999,
+      44.12,
+      1395.35572875
+    ],
+    "Yaw": -2.374459557710717,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Nilo",
+    "Title": "Comerciante Geral"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Classes",
+    "Role": "Classes",
+    "Anchor": "Cities/Valoria/Valoria_8/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -169.06474939999998,
+      44.12,
+      1368.4207282
+    ],
+    "Yaw": -2.185455736921065,
+    "Location": "Campo de Treino • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Kael",
+    "Title": "Mestre de Classes"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Magic",
+    "Role": "Magic",
+    "Anchor": "Cities/Valoria/Valoria_5/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      185.64338099999998,
+      44.12,
+      1302.3196148999998
+    ],
+    "Yaw": 2.3507021804700186,
+    "Location": "Magias • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Seren",
+    "Title": "Mestre de Magia"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Skills",
+    "Role": "Skills",
+    "Anchor": "Cities/Valoria/Valoria_8/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -180.5983554,
+      44.12,
+      1384.7601262
+    ],
+    "Yaw": -2.185455736921065,
+    "Location": "Campo de Treino • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Darian",
+    "Title": "Mentor de Habilidades"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Races",
+    "Role": "Races",
+    "Anchor": "Cities/Valoria/Valoria_9/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      -176.582296,
+      44.12,
+      1619.5311559
+    ],
+    "Yaw": -0.9288187146084507,
+    "Location": "Templo • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Liora",
+    "Title": "Especialista em Raças"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Fusions",
+    "Role": "Fusions",
+    "Anchor": "Cities/Valoria/Valoria_20/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -247.3576738,
+      44.12,
+      1280.8237841
+    ],
+    "Yaw": -2.2413702129651982,
+    "Location": "Oficina • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Orin",
+    "Title": "Especialista em Fusões"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Inn",
+    "Role": "Inn",
+    "Anchor": "Cities/Valoria/Valoria_2/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      115.4746139,
+      44.12,
+      1394.63582528
+    ],
+    "Yaw": 2.374459557710717,
+    "Location": "Taverna • Hospedaria • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Mira",
+    "Title": "Estalajadeira"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Healer",
+    "Role": "Healer",
+    "Anchor": "Cities/Valoria/Valoria_9/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      -164.606686,
+      44.12,
+      1635.5494191
+    ],
+    "Yaw": -0.9288187146084507,
+    "Location": "Templo • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Elian",
+    "Title": "Curandeiro"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Bank",
+    "Role": "Bank",
+    "Anchor": "Cities/Valoria/Valoria_7/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      -94.62324253999999,
+      44.12,
+      1375.9216511500001
+    ],
+    "Yaw": -2.374459557710717,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Cedric",
+    "Title": "Banqueiro"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Guide",
+    "Role": "Guide",
+    "Anchor": "Cities/Valoria/Valoria_12/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -107.74479636000001,
+      44.12,
+      1314.8323156
+    ],
+    "Yaw": -2.5679105464612797,
+    "Location": "Estábulo • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Nara",
+    "Title": "Guia da Cidade"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_Tutorial",
+    "Role": "Tutorial",
+    "Anchor": "Spawns/ValoriaSpawn",
+    "Offset": [
+      16,
+      -0.5,
+      8
+    ],
+    "Position": [
+      16.0,
+      44.5,
+      1508.0
+    ],
+    "Yaw": 0.0,
+    "Location": "Exterior do spawn ValoriaSpawn",
+    "FutureBuilding": false,
+    "Name": "Theo",
+    "Title": "Guia de Novos Aventureiros"
+  },
+  {
+    "City": "Valoria",
+    "Id": "Valoria_TravelShop",
+    "Role": "TravelShop",
+    "Anchor": "Cities/Valoria/Valoria_7/Foundation",
+    "Offset": [
+      26,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      -126.29899522,
+      44.12,
+      1406.46091595
+    ],
+    "Yaw": -2.374459557710717,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Veyra",
+    "Title": "Mercadora Viajante"
+  },
+  {
+    "City": "Arkheim",
+    "Id": "Arkheim_Guide",
+    "Role": "Guide",
+    "Anchor": "Cities/Arkheim/Arkheim_11/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      112.196931,
+      48.12,
+      -1093.669282
+    ],
+    "Yaw": 0.6010003159296513,
+    "Location": "Estábulo • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Nara",
+    "Title": "Guia da Cidade"
+  },
+  {
+    "City": "Arkheim",
+    "Id": "Arkheim_General",
+    "Role": "General",
+    "Anchor": "Cities/Arkheim/Arkheim_12/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -122.8576452,
+      48.12,
+      -1371.6540268
+    ],
+    "Yaw": -2.3013992496167868,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Nilo",
+    "Title": "Comerciante Geral"
+  },
+  {
+    "City": "Arkheim",
+    "Id": "Arkheim_Inn",
+    "Role": "Inn",
+    "Anchor": "Cities/Arkheim/Arkheim_7/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      114.78053969999999,
+      48.12,
+      -1379.64427125
+    ],
+    "Yaw": 2.374459557710717,
+    "Location": "Taverna • Hospedaria • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Mira",
+    "Title": "Estalajadeira"
+  },
+  {
+    "City": "Eldoria",
+    "Id": "Eldoria_Guide",
+    "Role": "Guide",
+    "Anchor": "Cities/Eldoria/Eldoria_7/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1610.2195203,
+      48.12,
+      -329.64427125000003
+    ],
+    "Yaw": -2.374459557710717,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Nara",
+    "Title": "Guia da Cidade"
+  },
+  {
+    "City": "Eldoria",
+    "Id": "Eldoria_General",
+    "Role": "General",
+    "Anchor": "Cities/Eldoria/Eldoria_7/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1630.37681746,
+      48.12,
+      -349.07834885
+    ],
+    "Yaw": -2.374459557710717,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Nilo",
+    "Title": "Comerciante Geral"
+  },
+  {
+    "City": "Eldoria",
+    "Id": "Eldoria_Inn",
+    "Role": "Inn",
+    "Anchor": "Cities/Eldoria/Eldoria_8/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      1832.4754193,
+      48.12,
+      -338.51221888
+    ],
+    "Yaw": 2.4475198683453745,
+    "Location": "Taverna • Hospedaria • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Mira",
+    "Title": "Estalajadeira"
+  },
+  {
+    "City": "Durakh",
+    "Id": "Durakh_Guide",
+    "Role": "Guide",
+    "Anchor": "Cities/Durakh/Durakh_8/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -1823.90288328,
+      52.12,
+      -346.05460646
+    ],
+    "Yaw": -2.520580151762402,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Nara",
+    "Title": "Guia da Cidade"
+  },
+  {
+    "City": "Durakh",
+    "Id": "Durakh_General",
+    "Role": "General",
+    "Anchor": "Cities/Durakh/Durakh_8/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -1801.13077,
+      52.12,
+      -362.3466565
+    ],
+    "Yaw": -2.520580151762402,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Nilo",
+    "Title": "Comerciante Geral"
+  },
+  {
+    "City": "Durakh",
+    "Id": "Durakh_Inn",
+    "Role": "Inn",
+    "Anchor": "Cities/Durakh/Durakh_6/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -1609.5254461000002,
+      52.12,
+      -330.36417472
+    ],
+    "Yaw": 2.374459557710717,
+    "Location": "Taverna • Hospedaria • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Mira",
+    "Title": "Estalajadeira"
+  },
+  {
+    "City": "Asterion",
+    "Id": "Asterion_Guide",
+    "Role": "Guide",
+    "Anchor": "Cities/Asterion/Asterion_12/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      1609.5254461000002,
+      64.12,
+      1694.63582528
+    ],
+    "Yaw": -2.374459557710717,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Nara",
+    "Title": "Guia da Cidade"
+  },
+  {
+    "City": "Asterion",
+    "Id": "Asterion_General",
+    "Role": "General",
+    "Anchor": "Cities/Asterion/Asterion_12/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      1629.68274326,
+      64.12,
+      1675.2017476800002
+    ],
+    "Yaw": -2.374459557710717,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Nilo",
+    "Title": "Comerciante Geral"
+  },
+  {
+    "City": "Asterion",
+    "Id": "Asterion_Inn",
+    "Role": "Inn",
+    "Anchor": "Cities/Asterion/Asterion_6/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      1832.4754193,
+      64.12,
+      1686.4878611200002
+    ],
+    "Yaw": 2.4475198683453745,
+    "Location": "Taverna • Hospedaria • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Mira",
+    "Title": "Estalajadeira"
+  },
+  {
+    "Ambient": true,
+    "City": "Valoria",
+    "Id": "Valoria_Ambient_Guard",
+    "Role": "Guard",
+    "Variant": 1,
+    "Anchor": "Cities/Valoria/Valoria_13/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -30.0
+    ],
+    "Position": [
+      46.4885545,
+      44.12,
+      1702.9847495
+    ],
+    "Yaw": 0.2731819638144619,
+    "Location": "Castelo Real • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Sentinela",
+    "Title": "Guarda"
+  },
+  {
+    "Ambient": true,
+    "City": "Valoria",
+    "Id": "Valoria_Ambient_Resident",
+    "Role": "Resident",
+    "Variant": 2,
+    "Anchor": "Cities/Valoria/Valoria_16/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -23.5
+    ],
+    "Position": [
+      -199.97712589,
+      44.12,
+      1236.67624435
+    ],
+    "Yaw": -2.461832812155844,
+    "Location": "Casa do Carvalho • 016 • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Morador",
+    "Title": "Morador"
+  },
+  {
+    "Ambient": true,
+    "City": "Valoria",
+    "Id": "Valoria_Ambient_Traveler",
+    "Role": "Traveler",
+    "Variant": 3,
+    "Anchor": "Cities/Valoria/Valoria_12/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -124.54296236000002,
+      44.12,
+      1325.6868828
+    ],
+    "Yaw": -2.5679105464612797,
+    "Location": "Estábulo • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Viajante",
+    "Title": "Viajante"
+  },
+  {
+    "Ambient": true,
+    "City": "Valoria",
+    "Id": "Valoria_Ambient_Artisan",
+    "Role": "Artisan",
+    "Variant": 4,
+    "Anchor": "Cities/Valoria/Valoria_25/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      199.0342165,
+      44.12,
+      1237.8428299
+    ],
+    "Yaw": 2.461832812155844,
+    "Location": "Oficina • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Artesão",
+    "Title": "Artesão"
+  },
+  {
+    "Ambient": true,
+    "City": "Valoria",
+    "Id": "Valoria_Ambient_Employee",
+    "Role": "Employee",
+    "Variant": 5,
+    "Anchor": "Cities/Valoria/Valoria_19/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      -148.34480649999998,
+      44.12,
+      1453.9694335
+    ],
+    "Yaw": -1.9360978107879891,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Assistente",
+    "Title": "Funcionário de loja"
+  },
+  {
+    "Ambient": true,
+    "City": "Valoria",
+    "Id": "Valoria_Ambient_Adventurer",
+    "Role": "Adventurer",
+    "Variant": 6,
+    "Anchor": "Cities/Valoria/Valoria_8/Foundation",
+    "Offset": [
+      -26,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -159.8378646,
+      44.12,
+      1355.3492098
+    ],
+    "Yaw": -2.185455736921065,
+    "Location": "Campo de Treino • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Aventureiro",
+    "Title": "Aventureiro"
+  },
+  {
+    "Ambient": true,
+    "City": "Valoria",
+    "Id": "Valoria_Ambient_Farmer",
+    "Role": "Farmer",
+    "Variant": 7,
+    "Anchor": "Cities/Valoria/Valoria_10/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -129.2578068,
+      44.12,
+      1670.8461324
+    ],
+    "Yaw": -0.6010003159296513,
+    "Location": "Celeiro • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Camponês",
+    "Title": "Camponês"
+  },
+  {
+    "Ambient": true,
+    "City": "Arkheim",
+    "Id": "Arkheim_Ambient_Guard",
+    "Role": "Guard",
+    "Variant": 1,
+    "Anchor": "Cities/Arkheim/Arkheim_1/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -30.0
+    ],
+    "Position": [
+      46.4885545,
+      48.12,
+      -1072.0152505
+    ],
+    "Yaw": 0.2731819638144619,
+    "Location": "Castelo Real • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Sentinela",
+    "Title": "Guarda"
+  },
+  {
+    "Ambient": true,
+    "City": "Arkheim",
+    "Id": "Arkheim_Ambient_Resident",
+    "Role": "Resident",
+    "Variant": 2,
+    "Anchor": "Cities/Arkheim/Arkheim_21/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      215.21729676,
+      48.12,
+      -1525.3627686
+    ],
+    "Yaw": 2.461832812155844,
+    "Location": "Casa da Fonte • 021 • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Morador",
+    "Title": "Morador"
+  },
+  {
+    "Ambient": true,
+    "City": "Arkheim",
+    "Id": "Arkheim_Ambient_Traveler",
+    "Role": "Traveler",
+    "Variant": 3,
+    "Anchor": "Cities/Arkheim/Arkheim_11/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      128.692339,
+      48.12,
+      -1104.978638
+    ],
+    "Yaw": 0.6010003159296513,
+    "Location": "Estábulo • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Viajante",
+    "Title": "Viajante"
+  },
+  {
+    "Ambient": true,
+    "City": "Arkheim",
+    "Id": "Arkheim_Ambient_Artisan",
+    "Role": "Artisan",
+    "Variant": 4,
+    "Anchor": "Cities/Arkheim/Arkheim_25/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      251.54569425,
+      48.12,
+      -1487.287059
+    ],
+    "Yaw": 2.2413702129651982,
+    "Location": "Oficina • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Artesão",
+    "Title": "Artesão"
+  },
+  {
+    "Ambient": true,
+    "City": "Arkheim",
+    "Id": "Arkheim_Ambient_Employee",
+    "Role": "Employee",
+    "Variant": 5,
+    "Anchor": "Cities/Arkheim/Arkheim_19/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      -69.82469375,
+      48.12,
+      -1413.7426977
+    ],
+    "Yaw": -2.7397610327812085,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Assistente",
+    "Title": "Funcionário de loja"
+  },
+  {
+    "Ambient": true,
+    "City": "Arkheim",
+    "Id": "Arkheim_Ambient_Adventurer",
+    "Role": "Adventurer",
+    "Variant": 6,
+    "Anchor": "Cities/Arkheim/Arkheim_3/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      181.256058,
+      48.12,
+      -1073.2891260000001
+    ],
+    "Yaw": 0.768921264224879,
+    "Location": "Campo de Treino • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Aventureiro",
+    "Title": "Aventureiro"
+  },
+  {
+    "Ambient": true,
+    "City": "Arkheim",
+    "Id": "Arkheim_Ambient_Farmer",
+    "Role": "Farmer",
+    "Variant": 7,
+    "Anchor": "Cities/Arkheim/Arkheim_19/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      -44.05500015,
+      48.12,
+      -1424.6936301399999
+    ],
+    "Yaw": -2.7397610327812085,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Camponês",
+    "Title": "Camponês"
+  },
+  {
+    "Ambient": true,
+    "City": "Eldoria",
+    "Id": "Eldoria_Ambient_Guard",
+    "Role": "Guard",
+    "Variant": 1,
+    "Anchor": "Cities/Eldoria/Eldoria_19/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1576.6551935,
+      48.12,
+      -271.0306365
+    ],
+    "Yaw": -1.9360978107879891,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Sentinela",
+    "Title": "Guarda"
+  },
+  {
+    "Ambient": true,
+    "City": "Eldoria",
+    "Id": "Eldoria_Ambient_Resident",
+    "Role": "Resident",
+    "Variant": 2,
+    "Anchor": "Cities/Eldoria/Eldoria_16/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -23.5
+    ],
+    "Position": [
+      1616.98389946,
+      48.12,
+      -410.58759855
+    ],
+    "Yaw": -2.5679105464612797,
+    "Location": "Casa do Carvalho • 016 • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Morador",
+    "Title": "Morador"
+  },
+  {
+    "Ambient": true,
+    "City": "Eldoria",
+    "Id": "Eldoria_Ambient_Traveler",
+    "Role": "Traveler",
+    "Variant": 3,
+    "Anchor": "Cities/Eldoria/Eldoria_19/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1586.6576587,
+      48.12,
+      -297.1830873
+    ],
+    "Yaw": -1.9360978107879891,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Viajante",
+    "Title": "Viajante"
+  },
+  {
+    "Ambient": true,
+    "City": "Eldoria",
+    "Id": "Eldoria_Ambient_Artisan",
+    "Role": "Artisan",
+    "Variant": 4,
+    "Anchor": "Cities/Eldoria/Eldoria_20/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      1509.78271324,
+      48.12,
+      -475.36276860000004
+    ],
+    "Yaw": -2.461832812155844,
+    "Location": "Oficina • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Artesão",
+    "Title": "Artesão"
+  },
+  {
+    "Ambient": true,
+    "City": "Eldoria",
+    "Id": "Eldoria_Ambient_Employee",
+    "Role": "Employee",
+    "Variant": 5,
+    "Anchor": "Cities/Eldoria/Eldoria_19/Foundation",
+    "Offset": [
+      26,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1570.9394991,
+      48.12,
+      -256.0863789
+    ],
+    "Yaw": -1.9360978107879891,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Assistente",
+    "Title": "Funcionário de loja"
+  },
+  {
+    "Ambient": true,
+    "City": "Eldoria",
+    "Id": "Eldoria_Ambient_Adventurer",
+    "Role": "Adventurer",
+    "Variant": 6,
+    "Anchor": "Cities/Eldoria/Eldoria_11/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1889.606666,
+      48.12,
+      -89.4506149
+    ],
+    "Yaw": 0.9288187146084507,
+    "Location": "Campo de Treino • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Aventureiro",
+    "Title": "Aventureiro"
+  },
+  {
+    "Ambient": true,
+    "City": "Eldoria",
+    "Id": "Eldoria_Ambient_Farmer",
+    "Role": "Farmer",
+    "Variant": 7,
+    "Anchor": "Cities/Eldoria/Eldoria_19/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -31.0
+    ],
+    "Position": [
+      1589.4039080999999,
+      48.12,
+      -287.5675731
+    ],
+    "Yaw": -1.9360978107879891,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Camponês",
+    "Title": "Camponês"
+  },
+  {
+    "Ambient": true,
+    "City": "Durakh",
+    "Id": "Durakh_Ambient_Guard",
+    "Role": "Guard",
+    "Variant": 1,
+    "Anchor": "Cities/Durakh/Durakh_14/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -1829.7903876799999,
+      52.12,
+      -411.85552243999996
+    ],
+    "Yaw": -2.677183296630411,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Sentinela",
+    "Title": "Guarda"
+  },
+  {
+    "Ambient": true,
+    "City": "Durakh",
+    "Id": "Durakh_Ambient_Resident",
+    "Role": "Resident",
+    "Variant": 2,
+    "Anchor": "Cities/Durakh/Durakh_16/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -23.5
+    ],
+    "Position": [
+      -1915.16881095,
+      52.12,
+      -495.49228191
+    ],
+    "Yaw": -2.498576588810855,
+    "Location": "Casa do Carvalho • 016 • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Morador",
+    "Title": "Morador"
+  },
+  {
+    "Ambient": true,
+    "City": "Durakh",
+    "Id": "Durakh_Ambient_Traveler",
+    "Role": "Traveler",
+    "Variant": 3,
+    "Anchor": "Cities/Durakh/Durakh_14/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -1804.75597296,
+      52.12,
+      -424.39657628
+    ],
+    "Yaw": -2.677183296630411,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Viajante",
+    "Title": "Viajante"
+  },
+  {
+    "Ambient": true,
+    "City": "Durakh",
+    "Id": "Durakh_Ambient_Artisan",
+    "Role": "Artisan",
+    "Variant": 4,
+    "Anchor": "Cities/Durakh/Durakh_15/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      -1464.6821773000001,
+      52.12,
+      -23.566053385
+    ],
+    "Yaw": 0.8818505202399097,
+    "Location": "Oficina • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Artesão",
+    "Title": "Artesão"
+  },
+  {
+    "Ambient": true,
+    "City": "Durakh",
+    "Id": "Durakh_Ambient_Employee",
+    "Role": "Employee",
+    "Variant": 5,
+    "Anchor": "Cities/Durakh/Durakh_14/Foundation",
+    "Offset": [
+      26,
+      0.9199999999999972,
+      -24.0
+    ],
+    "Position": [
+      -1844.09576752,
+      52.12,
+      -404.68920596
+    ],
+    "Yaw": -2.677183296630411,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Assistente",
+    "Title": "Funcionário de loja"
+  },
+  {
+    "Ambient": true,
+    "City": "Durakh",
+    "Id": "Durakh_Ambient_Adventurer",
+    "Role": "Adventurer",
+    "Variant": 6,
+    "Anchor": "Cities/Durakh/Durakh_14/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -30.0
+    ],
+    "Position": [
+      -1809.2212941999999,
+      52.12,
+      -415.4489006
+    ],
+    "Yaw": -2.677183296630411,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Aventureiro",
+    "Title": "Aventureiro"
+  },
+  {
+    "Ambient": true,
+    "City": "Durakh",
+    "Id": "Durakh_Ambient_Farmer",
+    "Role": "Farmer",
+    "Variant": 7,
+    "Anchor": "Cities/Durakh/Durakh_14/Foundation",
+    "Offset": [
+      18,
+      0.9199999999999972,
+      -30.0
+    ],
+    "Position": [
+      -1834.25570892,
+      52.12,
+      -402.90784676
+    ],
+    "Yaw": -2.677183296630411,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Camponês",
+    "Title": "Camponês"
+  },
+  {
+    "Ambient": true,
+    "City": "Asterion",
+    "Id": "Asterion_Ambient_Guard",
+    "Role": "Guard",
+    "Variant": 1,
+    "Anchor": "Cities/Asterion/Asterion_1/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -30.0
+    ],
+    "Position": [
+      1771.4886245,
+      64.12,
+      2002.9847495
+    ],
+    "Yaw": 0.2731819638144619,
+    "Location": "Castelo Real • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Sentinela",
+    "Title": "Guarda"
+  },
+  {
+    "Ambient": true,
+    "City": "Asterion",
+    "Id": "Asterion_Ambient_Resident",
+    "Role": "Resident",
+    "Variant": 2,
+    "Anchor": "Cities/Asterion/Asterion_26/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -23.5
+    ],
+    "Position": [
+      1521.3175885,
+      64.12,
+      1867.99790848
+    ],
+    "Yaw": -1.2020006851218812,
+    "Location": "Casa da Lua Clara • 026 • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Morador",
+    "Title": "Morador"
+  },
+  {
+    "Ambient": true,
+    "City": "Asterion",
+    "Id": "Asterion_Ambient_Traveler",
+    "Role": "Traveler",
+    "Variant": 3,
+    "Anchor": "Cities/Asterion/Asterion_19/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1600.999826,
+      64.12,
+      1626.5267910999999
+    ],
+    "Yaw": -2.5679105464612797,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Viajante",
+    "Title": "Viajante"
+  },
+  {
+    "Ambient": true,
+    "City": "Asterion",
+    "Id": "Asterion_Ambient_Artisan",
+    "Role": "Artisan",
+    "Variant": 4,
+    "Anchor": "Cities/Asterion/Asterion_25/Foundation",
+    "Offset": [
+      10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1820.1661709,
+      64.12,
+      1546.0622380000002
+    ],
+    "Yaw": 2.746147426161197,
+    "Location": "Oficina • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Artesão",
+    "Title": "Artesão"
+  },
+  {
+    "Ambient": true,
+    "City": "Asterion",
+    "Id": "Asterion_Ambient_Employee",
+    "Role": "Employee",
+    "Variant": 5,
+    "Anchor": "Cities/Asterion/Asterion_19/Foundation",
+    "Offset": [
+      -18,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1624.5172584,
+      64.12,
+      1611.33039702
+    ],
+    "Yaw": -2.5679105464612797,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Assistente",
+    "Title": "Funcionário de loja"
+  },
+  {
+    "Ambient": true,
+    "City": "Asterion",
+    "Id": "Asterion_Ambient_Adventurer",
+    "Role": "Adventurer",
+    "Variant": 6,
+    "Anchor": "Cities/Asterion/Asterion_13/Foundation",
+    "Offset": [
+      -10,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1839.341934,
+      64.12,
+      1620.0141405
+    ],
+    "Yaw": 2.6225468834463066,
+    "Location": "Campo de Treino • exterior, lateral da fachada",
+    "FutureBuilding": false,
+    "Name": "Aventureiro",
+    "Title": "Aventureiro"
+  },
+  {
+    "Ambient": true,
+    "City": "Asterion",
+    "Id": "Asterion_Ambient_Farmer",
+    "Role": "Farmer",
+    "Variant": 7,
+    "Anchor": "Cities/Asterion/Asterion_19/Foundation",
+    "Offset": [
+      26,
+      0.9199999999999972,
+      -25.0
+    ],
+    "Position": [
+      1587.5612932,
+      64.12,
+      1635.2104448599998
+    ],
+    "Yaw": -2.5679105464612797,
+    "Location": "Mercado • exterior, lateral da fachada",
+    "FutureBuilding": true,
+    "Name": "Camponês",
+    "Title": "Camponês"
+  },
+  {
+    "City": "MalgorthDepths",
+    "Dungeon": "MalgorthDepths",
+    "Id": "MalgorthDepths_Administrator",
+    "Role": "Dungeon",
+    "Anchor": "DungeonEntrance/MalgorthGate/Forecourt",
+    "Offset": [
+      -16,
+      1.12,
+      -16
+    ],
+    "Position": [
+      -16.0,
+      49.12,
+      -2566.0
+    ],
+    "Yaw": 0.0,
+    "Location": "Pátio existente da entrada MalgorthGate",
+    "FutureBuilding": false,
+    "Name": "Selwyn",
+    "Title": "Administrador de Dungeon"
+  },
+  {
+    "City": "FallenSanctum",
+    "Dungeon": "FallenSanctum",
+    "Id": "FallenSanctum_Administrator",
+    "Role": "Dungeon",
+    "Anchor": "DungeonEntrance/FallenSanctumGate/Forecourt",
+    "Offset": [
+      -16,
+      1.12,
+      -16
+    ],
+    "Position": [
+      -1366.0,
+      65.12,
+      -2536.0
+    ],
+    "Yaw": 0.0,
+    "Location": "Pátio existente da entrada FallenSanctumGate",
+    "FutureBuilding": false,
+    "Name": "Selwyn",
+    "Title": "Administrador de Dungeon"
+  }
+]

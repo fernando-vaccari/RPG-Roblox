@@ -1,8 +1,18 @@
 # Eldravyn: Rise of Shadows
 
+**Revisão vigente: avatares arredondados (`rounded-1`).** Cabeça/membros com perfis curvos e peitoral convexo: [comparação e instalação](docs/avatar-rounded/README.md), [FBX e integrador](delivery-npcs/avatar-rounded/README.md), [progresso](PROGRESSO_AVATARES_ARREDONDADOS.md). Mesmos NPCs, rigs e sistemas; importação real no Studio ainda necessária. A entrega Avatar anterior abaixo foi preservada.
+
+**Biblioteca Avatar anterior (04/11/2026).** Malhas originais com visual de avatar Roblox para 66 NPCs e 14 tipos de inimigo: [FBX, integrador e instalação](docs/avatar-style/README.md), [prévia NPC](docs/avatar-style/previews/npcs.png), [criaturas](docs/avatar-style/previews/inimigos.png), [testes](docs/avatar-style/TESTS.md), [progresso](PROGRESSO_AVATARES.md). Importação/publicação dos assets no Studio do dono é necessária; nenhum ID foi inventado. Mapa e sistemas anteriores preservados.
+
+**NPC Overhaul V2 (31/10/2026):** [pacote anterior `.rbxmx`](delivery-npcs/visual-v2/README.md), [instalação e rollback V2](docs/npc-v2/README.md), [progresso anterior](PROGRESSO_NPC_V2.md). Esta entrega foi preservada.
+
+**Base NPCs Stage 2 (30/10/2026):** [entrega e instalação original](delivery-npcs/stage-02/README.md), [serviços e limites](docs/npc-stage2/README.md), [progresso anterior](PROGRESSO_NPCS.md). As etapas abaixo são histórico.
+
+**Revisão monumental de 30/10/2026:** continente ampliado para 6.144 × 6.144 studs, bairros em anéis, muralhas de 80–104 studs, casas com placas e florestas monumentais. [Implementação, resultados e limites](docs/MONUMENTAL_MAP.md). A revisão preserva as entregas anteriores. [Entrega `.rbxlx` e instruções](delivery-map/monumental/README.md); Terrain e testes reais do Studio ainda pendentes.
+
 **Novo alerta de segurança:** o Defender também bloqueou o ZIP do continente como `Trojan:Script/Ulthar.A!ml`. Seu uso não é recomendado enquanto a causa permanecer indeterminada. [Registro, verificações e encaminhamento à Microsoft](docs/MAP_DEFENDER_ALERT.md). Nenhum novo pacote foi gerado para tentar eliminar o bloqueio.
 
-**Tarefa atual: somente reconstrução do continente.** A branch `codex/eldravyn-map-20261027` contém o [Place do mapa com geometria materializada](delivery-map/task-01/README.md), [guia de abertura](COMO_ABRIR_MAPA.md) e [progresso específico](PROGRESSO_MAPA.md). Terrain nativo e inspeção no Studio ainda pendentes: não é uma declaração de mapa final. Os sistemas do RPG abaixo são histórico/preservação e não foram ampliados nesta tarefa.
+**Histórico da Tarefa 01: reconstrução do continente.** A branch `codex/eldravyn-map-20261027` contém o [Place do mapa com geometria materializada](delivery-map/task-01/README.md), [guia de abertura](COMO_ABRIR_MAPA.md) e [progresso específico](PROGRESSO_MAPA.md). Terrain nativo e inspeção no Studio ainda pendentes: não é uma declaração de mapa final. Os sistemas do RPG abaixo são histórico/preservação e não foram ampliados nesta tarefa.
 
 Action RPG medieval/anime no projeto **RPG-Roblox**, preservando os dois Places, o DataStore `MedievalRPG_v1`, as raças, classes e conteúdos anteriores.
 

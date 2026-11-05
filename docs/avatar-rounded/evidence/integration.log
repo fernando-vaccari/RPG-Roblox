@@ -1,0 +1,41 @@
+PASSOU AVATAR MOCK: sem FBX registrado, aplicação aborta sem trocar NPC/mapa
+PASSOU AVATAR MOCK: importação rejeita código e assets não publicados sem mutação
+PASSOU AVATAR MOCK: FBX de outra revisão é rejeitado antes de registrar modelos
+[Avatar] 24 modelos registrados do grupo Valoria. Nenhum NPC/mapa foi alterado.
+[Avatar] 20 modelos registrados do grupo North. Nenhum NPC/mapa foi alterado.
+[Avatar] 20 modelos registrados do grupo South. Nenhum NPC/mapa foi alterado.
+[Avatar] 16 modelos registrados do grupo Dungeons. Nenhum NPC/mapa foi alterado.
+[Avatar] 80 modelos registrados; 0 pendentes de Import 3D.
+PASSOU AVATAR MOCK: quatro grupos: 80 modelos normalizados por escala/rotação; fontes intactas
+PASSOU AVATAR MOCK: falha injetada cancela e reverte a migração
+[NPC V2] 66 NPCs atualizados no lugar. Backup criado; mapa e economia não alterados. Salve a cópia e teste Play.
+[Avatar] 66 NPCs atualizados com meshes importados. Biblioteca de inimigos instalada; spawns/combate não iniciados.
+PASSOU AVATAR MOCK: aplica meshes nas mesmas 66 instâncias e conserva serviços/identidade
+PASSOU AVATAR MOCK: reaplicação idempotente e EnemyService original guardado
+PASSOU AVATAR MOCK: 14 inimigos: rigs, meshes, tags e consultas de dano, sem novos spawns/loot
+PASSOU AVATAR MOCK: EnemyService real usa o factory opcional e conserva vida/dano configurados
+PASSOU AVATAR MOCK: cliente limita animação a dez inimigos e libera tags/conexões
+[NPC V2] Visual/controle V1 restaurados. NPCs, posições, serviços e mapa preservados.
+[Avatar] Aparência anterior restaurada; NPCs, posições, serviços e mapa preservados.
+PASSOU AVATAR MOCK: rollback restaura a versão anterior e mantém modelos/NPCs existentes
+PASSOU AVATAR MOCK TOTAL: 11 (base Stage 2; sem Roblox Studio, uploads ou assets reais)
+[NPC V2] 66 NPCs atualizados no lugar. Backup criado; mapa e economia não alterados. Salve a cópia e teste Play.
+PASSOU AVATAR MOCK: sem FBX registrado, aplicação aborta sem trocar NPC/mapa
+PASSOU AVATAR MOCK: importação rejeita código e assets não publicados sem mutação
+PASSOU AVATAR MOCK: FBX de outra revisão é rejeitado antes de registrar modelos
+[Avatar] 24 modelos registrados do grupo Valoria. Nenhum NPC/mapa foi alterado.
+[Avatar] 20 modelos registrados do grupo North. Nenhum NPC/mapa foi alterado.
+[Avatar] 20 modelos registrados do grupo South. Nenhum NPC/mapa foi alterado.
+[Avatar] 16 modelos registrados do grupo Dungeons. Nenhum NPC/mapa foi alterado.
+[Avatar] 80 modelos registrados; 0 pendentes de Import 3D.
+PASSOU AVATAR MOCK: quatro grupos: 80 modelos normalizados por escala/rotação; fontes intactas
+PASSOU AVATAR MOCK: falha injetada cancela e reverte a migração
+[Avatar] 66 NPCs atualizados com meshes importados. Biblioteca de inimigos instalada; spawns/combate não iniciados.
+PASSOU AVATAR MOCK: aplica meshes nas mesmas 66 instâncias e conserva serviços/identidade
+PASSOU AVATAR MOCK: reaplicação idempotente e EnemyService original guardado
+PASSOU AVATAR MOCK: 14 inimigos: rigs, meshes, tags e consultas de dano, sem novos spawns/loot
+PASSOU AVATAR MOCK: EnemyService real usa o factory opcional e conserva vida/dano configurados
+PASSOU AVATAR MOCK: cliente limita animação a dez inimigos e libera tags/conexões
+[Avatar] Aparência anterior restaurada; NPCs, posições, serviços e mapa preservados.
+PASSOU AVATAR MOCK: rollback restaura a versão anterior e mantém modelos/NPCs existentes
+PASSOU AVATAR MOCK TOTAL: 11 (base V2; sem Roblox Studio, uploads ou assets reais)

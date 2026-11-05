@@ -231,7 +231,7 @@ def run_rojo(project, output):
     subprocess.run([str(BIN / ('rojo' + SUFFIX)), 'build', str(project), '--output', str(output)], cwd=ROOT, check=True)
 
 
-def bake(project, output):
+def bake(project, output, compact_xml=False):
     api = json.loads((ROOT / '.tools/roblox-api.json').read_text())
     classes = {c['Name']: c for c in api['Classes']}
     enums = {e['Name'] + '.' + v['Name']: v['Value'] for e in api['Enums'] for v in e['Items']}
@@ -260,7 +260,9 @@ def bake(project, output):
     for prior in root.findall('./Item[@class="Lighting"]'):
         root.remove(prior)
     root.append(scene.find('./Item[@class="Lighting"]'))
-    ET.indent(root, space='  ')
+    # Large maps exceed GitHub's file limit with deeply repeated indentation.
+    # Keep normal XML tags, line breaks and all script text; omit only indentation.
+    ET.indent(root, space='' if compact_xml else '  ')
     ET.ElementTree(root).write(output, encoding='utf-8', xml_declaration=False)
     items = root.findall('.//Item'); ids = [i.get('referent') for i in items]
     assert len(ids) == len(set(ids))
@@ -270,6 +272,7 @@ def bake(project, output):
     count = len(generated.findall('.//Item')) + 1
     manifest = {'file': output.name, 'sha256': hashlib.sha256(output.read_bytes()).hexdigest(),
         'scene_instances_baked': count, 'geometry_baked': True, 'native_terrain_baked': False,
+        'compact_xml': compact_xml,
         'studio_executed': False, 'visual_quality_validated': False, 'requires_editor_completion': True,
         'prepare_command': 'require(game.ServerStorage.MedievalWorldgen.WorldGenerator).PrepareStudio()',
         'report': payload['Report']}
@@ -320,8 +323,9 @@ if __name__ == '__main__':
     parser.add_argument('--project', type=Path, default=ROOT / 'map.project.json')
     parser.add_argument('--output', type=Path, default=BUILD / 'Eldravyn-Continent.rbxlx')
     parser.add_argument('--self-test', action='store_true')
+    parser.add_argument('--compact-xml', action='store_true', help='Omit XML indentation for large maps; preserve script text and line breaks')
     args = parser.parse_args(); BUILD.mkdir(exist_ok=True)
     if args.self_test:
         self_test()
     else:
-        bake(args.project.resolve(), args.output.resolve())
+        bake(args.project.resolve(), args.output.resolve(), args.compact_xml)

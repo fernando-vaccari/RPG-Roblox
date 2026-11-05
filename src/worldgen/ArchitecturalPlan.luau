@@ -22,11 +22,18 @@ function P.build(kind,city,index,lot)
  if kind=='ArcaneTower' then w,d,h=24,24,48+theme.Height end
  if kind=='Forge' then w,d,h=38,34,23+theme.Height end
  if kind=='GuardTower' or kind=='WatchTower' then w,d,h=25,26,30+theme.Height end
+ -- Repeated housing retains a human scale while cities gain hundreds of lots.
+ -- Compact footprints reserve porches/roof overhang within the planned radius.
+ if lot.Residential then w,d,h=22+variant,24+variant%2,19+variant*2+theme.Height end
  local interior=if lot.Interior==nil then important[kind]==true else lot.Interior==true
  local rise=if tower[kind] then 13 elseif theme.Id=='Gothic' or theme.Id=='Arcane' then 11 else 7+variant%2*2
  return {Kind=kind,Theme=theme,Variant=variant,Width=w,Depth=d,Height=h,Rise=rise,
   DoorWidth=8,DoorHeight=10,Interior=interior,Tower=tower[kind]==true,
   District=lot.District or 'Civic',Roof=if tower[kind] then 'Spire' elseif variant==1 then 'CrossGable' elseif variant==3 then 'Dormer' else 'Gable',
   Windows=if theme.Id=='Gothic' then 'Lancet' elseif theme.Id=='Arcane' then 'Crystal' else 'Mullion'}
+end
+local homes={'dos Cedros','da Lua Clara','do Girassol','das Andorinhas','da Fonte','do Viajante','dos Lírios','do Carvalho'}
+function P.residenceName(index)
+ return 'Casa '..homes[(index-1)%#homes+1]..' • '..string.format('%03d',index)
 end
 return P

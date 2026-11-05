@@ -6,7 +6,7 @@ local plan=planner.build(c,terrain,content)
 assert(#plan.Cities==5 and #plan.Roads==10)
 local total=0
 for _,city in plan.Cities do
-    assert(#city.Lots==#content.CityBuildings[city.Id])
+    assert(#city.Lots>=(if city.Id=='Valoria' then 300 else 140))
     total+=#city.Lots
     for i,a in city.Lots do
         assert(a.External or planner.clear(c,terrain,a.X,a.Z,a.Radius))
@@ -62,12 +62,12 @@ print('PASSOU: grafo alcança cinco cidades e todos os perfis de qualidade respe
 local distinct={}
 for _,city in plan.Cities do
     distinct[city.Theme]=true
-    assert(#city.Streets==10)
+    assert(#city.Streets>200)
     for _,lot in city.Lots do
-        assert(lot.Kind==content.CityBuildings[city.Id][tonumber(lot.Id:match('_(%d+)$'))])
+        if not lot.Residential then assert(lot.Kind==content.CityBuildings[city.Id][tonumber(lot.Id:match('_(%d+)$'))]) end
         assert(lot.District and lot.Variation~=nil and type(lot.Interior)=='boolean')
         if not lot.External then
-            assert(math.abs(lot.X-city.X)>=84 and math.abs(lot.Z-city.Z)>=84)
+            assert(math.abs(lot.X-city.X)>=lot.Radius+18 and math.abs(lot.Z-city.Z)>=lot.Radius+18)
             -- Porch segment cannot pass through another building footprint.
             local dx,dz=lot.StreetX-lot.X,lot.StreetZ-lot.Z
             local length=math.sqrt(dx*dx+dz*dz)
@@ -96,3 +96,34 @@ end
 assert(species[0] and species[1] and species[2] and species[3] and species[4])
 local clusters=0;for _ in groves do clusters+=1 end;assert(clusters==12)
 print('PASSOU: cinco temas/quadras planejadas, capital com castelo visual, caminhos de porta livres, curvas e doze bosquetes com cinco espécies.')
+
+-- Expanded districts must stay on their plateau, clear of ramparts/civic reserve
+-- and the physical stair footprint; metadata alone is insufficient.
+assert(c.WorldSize==6144 and #terrain.chunks(c)==2304)
+for _,city in plan.Cities do
+    local original=0
+    for _,lot in city.Lots do
+        if not lot.Residential then original+=1 end
+        if not lot.External then
+            local dx,dz=lot.X-city.X,lot.Z-city.Z
+            local radial=math.sqrt(dx*dx+dz*dz)
+            assert(radial-lot.Radius>=city.CivicRadius-1e-8)
+            assert(radial+lot.Radius<=city.OuterWallRadius-20+1e-8)
+            if city.InnerWallRadius then assert(math.abs(radial-city.InnerWallRadius)>=lot.Radius+20-1e-8) end
+            assert(not(dx+lot.Radius+4>-94 and dx-lot.Radius-4<-36
+                and dz+lot.Radius+4>city.OuterWallRadius-61 and dz-lot.Radius-4<city.OuterWallRadius-21), 'Casa intersecta a escada da muralha')
+        end
+        for _,offset in {{0,0},{lot.Radius,0},{-lot.Radius,0},{0,lot.Radius},{0,-lot.Radius}} do
+            assert(math.abs(terrain.height(c,lot.X+offset[1],lot.Z+offset[2])-lot.H)<0.001, 'Fundação atravessada por relevo: '..lot.Id)
+        end
+    end
+    assert(original==#content.CityBuildings[city.Id], 'Identidades dos serviços legados alteradas')
+end
+for _,tree in plan.Trees do
+    assert(tree.Monumental and tree.Scale>=1 and tree.Scale<=1.4)
+    assert(planner.clear(c,terrain,tree.X,tree.Z,tree.RootRadius))
+    for _,city in c.Cities do
+        assert(math.sqrt((tree.X-city.X)^2+(tree.Z-city.Z)^2)>=city.Radius+tree.RootRadius+20)
+    end
+end
+print('PASSOU: continente6144, fundações planas, corredores de muralhas/escadas livres e raízes fora das cidades/estradas.')

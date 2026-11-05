@@ -1,0 +1,1482 @@
+<roblox version="4">
+  <Item class="Model" referent="0">
+    <Properties>
+      <string name="Name">EldravynNPCPackage</string>
+      <bool name="NeedsPivotMigration">false</bool>
+    </Properties>
+    <Item class="Folder" referent="1">
+      <Properties>
+        <string name="Name">Authoring</string>
+      </Properties>
+      <Item class="ModuleScript" referent="2">
+        <Properties>
+          <string name="Name">Placement</string>
+          <string name="Source"><![CDATA[-- Read-only map queries. Never writes Terrain, moves buildings or guesses interiors.
+local P={}
+function P.resolve(world,path)
+ local node=world;for segment in path:gmatch('[^/]+')do node=node and node:FindFirstChild(segment)end;return node
+end
+function P.safe(position,ignore,expectedY)
+ local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances=ignore;params.IgnoreWater=false;params.RespectCanCollide=true
+ local hit=workspace:Raycast(position+Vector3.new(0,12,0),Vector3.new(0,-40,0),params)
+ if not hit or hit.Material==Enum.Material.Water or (hit.Normal and hit.Normal.Y<0.85) or math.abs(hit.Position.Y-expectedY)>6 then return nil end
+ local feet=hit.Position+Vector3.new(0,0.12,0)
+ local box=OverlapParams.new();box.FilterType=Enum.RaycastFilterType.Exclude;local ignored=table.clone(ignore);table.insert(ignored,workspace.Terrain);box.FilterDescendantsInstances=ignored;box.RespectCanCollide=true
+ for _,part in workspace:GetPartBoundsInBox(CFrame.new(feet+Vector3.new(0,3.7,0)),Vector3.new(4.8,7,4.8),box)do
+  if part.CanCollide then return nil end
+ end
+ return feet
+end
+function P.frame(world,entry,npcs,strict)
+ local anchor=P.resolve(world,entry.Anchor)
+ if not anchor or not anchor:IsA('BasePart') then return nil,'Âncora ausente: '..entry.Anchor end
+ local offset=Vector3.new(table.unpack(entry.Offset));local position=anchor.CFrame:PointToWorldSpace(offset)
+ if strict then
+  local safe=P.safe(position,{npcs},position.Y);if not safe then return nil,'Piso/obstáculo incompatível: '..entry.Id end;position=safe
+ end
+ local look=anchor.CFrame.LookVector
+ return CFrame.lookAt(position,position+Vector3.new(look.X,0,look.Z))
+end
+return P
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="3">
+        <Properties>
+          <string name="Name">R15Factory</string>
+          <string name="Source"><![CDATA[-- Original native R15 topology, Motor6D joints and decorative clothing. No asset IDs.
+local F={}
+function F.create(parent,definition,role,frame)
+ local m=Instance.new('Model');m.Name=definition.Id;m.ModelStreamingMode=Enum.ModelStreamingMode.Atomic
+ m:SetAttribute('EldravynNPCId',definition.Id);m:SetAttribute('NPCRole',definition.Role);m:SetAttribute('City',definition.City)
+ m:SetAttribute('AmbientNPC',definition.Ambient==true);m:SetAttribute('NPCVersion',1)
+ if definition.Dungeon then m:SetAttribute('DungeonId',definition.Dungeon) end
+ local mage=definition.Role=='Magic' or definition.Role=='Races' or definition.Role=='Fusions'
+ local guard=definition.Role=='Guard' or definition.Role=='Classes' or definition.Role=='GuildMaster'
+ local skin=Color3.fromRGB(190+(definition.Variant or 1)*6,148+(definition.Variant or 1)*5,115+(definition.Variant or 1)*4)
+ local cloth=if mage then Color3.fromRGB(70,71,122) elseif guard then Color3.fromRGB(72,95,117) elseif definition.Role=='Blacksmith' then Color3.fromRGB(95,67,49) else Color3.fromRGB(100,102,72)
+ local pants=Color3.fromRGB(59,51,49);local metal=Color3.fromRGB(153,161,171)
+ local parts,offsets={},{}
+ local function part(name,size,offset,color)
+  local p=Instance.new('Part');p.Name=name;p.Size=size;p.CFrame=frame*CFrame.new(offset);p.Color=color
+  p.Material=Enum.Material.SmoothPlastic;p.CanCollide=false;p.CanTouch=false;p.CanQuery=false;p.Massless=true
+  p.TopSurface=Enum.SurfaceType.Smooth;p.BottomSurface=Enum.SurfaceType.Smooth;p.Parent=m
+  parts[name]=p;offsets[name]=offset;return p
+ end
+ local root=part('HumanoidRootPart',Vector3.new(2,2,1),Vector3.new(0,3,0),cloth);root.Transparency=1;root.Anchored=true
+ part('LowerTorso',Vector3.new(1.8,0.9,0.9),Vector3.new(0,3,0),cloth)
+ part('UpperTorso',Vector3.new(2,1.4,1),Vector3.new(0,4,0),cloth)
+ local head=part('Head',Vector3.new(1.4,1.1,1),Vector3.new(0,5.25,0),skin)
+ for _,side in {'Left','Right'} do
+  local x=if side=='Left' then -1 else 1
+  part(side..'UpperArm',Vector3.new(0.65,1.1,0.75),Vector3.new(x*1.35,4,0),cloth)
+  part(side..'LowerArm',Vector3.new(0.6,0.9,0.65),Vector3.new(x*1.35,3,0),if definition.Role=='Blacksmith' then skin else cloth)
+  part(side..'Hand',Vector3.new(0.6,0.5,0.65),Vector3.new(x*1.35,2.3,0),if guard or definition.Role=='Blacksmith' then pants else skin)
+  part(side..'UpperLeg',Vector3.new(0.8,1.2,0.8),Vector3.new(x*0.5,1.95,0),pants)
+  part(side..'LowerLeg',Vector3.new(0.7,1,0.7),Vector3.new(x*0.5,0.9,0),pants)
+  part(side..'Foot',Vector3.new(0.8,0.5,1.2),Vector3.new(x*0.5,0.25,-0.1),Color3.fromRGB(45,37,33))
+ end
+ local function joint(name,a,b,pivot)
+  local motor=Instance.new('Motor6D');motor.Name=name;motor.Part0=parts[a];motor.Part1=parts[b]
+  motor.C0=CFrame.new(pivot-offsets[a]);motor.C1=CFrame.new(pivot-offsets[b]);motor.Parent=parts[a]
+  for _,body in {a,b} do local at=Instance.new('Attachment');at.Name=name..'RigAttachment';at.CFrame=CFrame.new(pivot-offsets[body]);at.Parent=parts[body] end
+ end
+ joint('Root','HumanoidRootPart','LowerTorso',Vector3.new(0,3,0));joint('Waist','LowerTorso','UpperTorso',Vector3.new(0,3.4,0));joint('Neck','UpperTorso','Head',Vector3.new(0,4.7,0))
+ for _,side in {'Left','Right'} do local x=if side=='Left' then -1 else 1
+  joint(side..'Shoulder','UpperTorso',side..'UpperArm',Vector3.new(x,4.4,0))
+  joint(side..'Elbow',side..'UpperArm',side..'LowerArm',Vector3.new(x*1.35,3.45,0))
+  joint(side..'Wrist',side..'LowerArm',side..'Hand',Vector3.new(x*1.35,2.55,0))
+  joint(side..'Hip','LowerTorso',side..'UpperLeg',Vector3.new(x*0.5,2.55,0))
+  joint(side..'Knee',side..'UpperLeg',side..'LowerLeg',Vector3.new(x*0.5,1.35,0))
+  joint(side..'Ankle',side..'LowerLeg',side..'Foot',Vector3.new(x*0.5,0.4,0))
+ end
+ local function adorn(name,size,offset,color,body)
+  body=body or 'UpperTorso';local p=part(name,size,offsets[body]+offset,color)
+  local weld=Instance.new('WeldConstraint');weld.Part0=parts[body];weld.Part1=p;weld.Parent=p;return p
+ end
+ for _,x in {-0.3,0.3} do adorn('Eye'..x,Vector3.new(0.13,0.17,0.08),Vector3.new(x,0,-0.54),Color3.fromRGB(28,24,31),'Head') end
+ adorn('Hair',Vector3.new(1.5,0.35,1.1),Vector3.new(0,0.5,0.05),pants,'Head')
+ adorn('Mouth',Vector3.new(0.3,0.06,0.06),Vector3.new(0,-0.3,-0.54),pants,'Head')
+ adorn('Belt',Vector3.new(1.95,0.22,1),Vector3.new(0,-0.1,0),pants,'LowerTorso')
+ if mage then
+  adorn('Robe',Vector3.new(1.9,1.5,1),Vector3.new(0,-0.5,0),cloth,'LowerTorso')
+  adorn('HatBrim',Vector3.new(2,0.2,1.6),Vector3.new(0,0.6,0),cloth,'Head')
+  adorn('HatCrown',Vector3.new(1,1.2,0.9),Vector3.new(0,1.1,0),cloth,'Head')
+  adorn('DecorativeStaff',Vector3.new(0.22,4.8,0.22),Vector3.new(0.5,0.8,0),Color3.fromRGB(102,75,46),'RightHand')
+ elseif guard then
+  adorn('Breastplate',Vector3.new(1.85,1.2,0.2),Vector3.new(0,0,-0.6),metal)
+  for _,x in {-1,1} do adorn('Pauldron'..x,Vector3.new(0.9,0.35,1),Vector3.new(x*1.2,0.5,0),metal) end
+ elseif definition.Role=='Blacksmith' then
+  adorn('Apron',Vector3.new(1.6,2,0.15),Vector3.new(0,-0.4,-0.6),Color3.fromRGB(84,51,32))
+  adorn('HammerHandle',Vector3.new(0.2,1.3,0.2),Vector3.new(0,-0.3,0),pants,'RightHand')
+  adorn('HammerHead',Vector3.new(0.9,0.4,0.4),Vector3.new(0,0.35,0),metal,'RightHand')
+ else
+  adorn('VestTrim',Vector3.new(0.2,1.3,0.15),Vector3.new(-0.5,0,-0.6),Color3.fromRGB(204,178,106))
+  adorn('Satchel',Vector3.new(0.8,0.8,0.5),Vector3.new(0.9,-0.3,0.1),pants,'LowerTorso')
+ end
+ local hum=Instance.new('Humanoid');hum.RigType=Enum.HumanoidRigType.R15;hum.DisplayName=role.Name..' • '..role.Title;hum.HipHeight=2
+ hum.MaxHealth=100;hum.Health=100;hum.BreakJointsOnDeath=false;hum.AutoRotate=false;hum.Parent=m
+ local animator=Instance.new('Animator');animator.Parent=hum
+ local prompt=Instance.new('ProximityPrompt');prompt.Name='NPCInteraction';prompt.ActionText='Conversar';prompt.ObjectText=role.Name..' • '..role.Title
+ prompt.MaxActivationDistance=12;prompt.RequiresLineOfSight=true;prompt.HoldDuration=0;prompt.KeyboardKeyCode=Enum.KeyCode.E;prompt.Parent=head
+ m.PrimaryPart=root;m.Parent=parent;return m
+end
+return F
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Folder" referent="4">
+      <Properties>
+        <string name="Name">Client</string>
+      </Properties>
+      <Item class="ModuleScript" referent="5">
+        <Properties>
+          <string name="Name">NPCDialogueClient</string>
+          <string name="Source"><![CDATA[-- One responsive interface shared by every role; prices/options arrive from server.
+local UI={}
+function UI.new(playerGui,action)
+ local screen=Instance.new('ScreenGui');screen.Name='EldravynNPCDialogue';screen.ResetOnSpawn=false;screen.DisplayOrder=25;screen.Parent=playerGui
+ local panel=Instance.new('Frame');panel.Name='Dialogue';panel.AnchorPoint=Vector2.new(0.5,0.5);panel.Position=UDim2.fromScale(0.5,0.5);panel.Size=UDim2.fromScale(0.92,0.84);panel.BackgroundColor3=Color3.fromRGB(31,27,24);panel.Visible=false;panel.Parent=screen
+ local cap=Instance.new('UISizeConstraint');cap.MaxSize=Vector2.new(660,720);cap.Parent=panel
+ local border=Instance.new('UIStroke');border.Color=Color3.fromRGB(177,146,83);border.Thickness=2;border.Parent=panel
+ local corner=Instance.new('UICorner');corner.CornerRadius=UDim.new(0,10);corner.Parent=panel
+ local title=Instance.new('TextLabel');title.Name='Title';title.Size=UDim2.new(1,-70,0,58);title.Position=UDim2.fromOffset(16,6);title.BackgroundTransparency=1;title.Font=Enum.Font.Garamond;title.TextColor3=Color3.fromRGB(241,216,165);title.TextSize=23;title.TextWrapped=true;title.TextXAlignment=Enum.TextXAlignment.Left;title.Parent=panel
+ local close=Instance.new('TextButton');close.Name='Close';close.Text='×';close.TextSize=30;close.Size=UDim2.fromOffset(48,48);close.Position=UDim2.new(1,-56,0,8);close.BackgroundColor3=Color3.fromRGB(75,43,37);close.TextColor3=Color3.fromRGB(255,242,219);close.Parent=panel
+ local scroll=Instance.new('ScrollingFrame');scroll.Name='Content';scroll.Position=UDim2.fromOffset(16,72);scroll.Size=UDim2.new(1,-32,1,-88);scroll.BackgroundTransparency=1;scroll.BorderSizePixel=0;scroll.ScrollBarThickness=6;scroll.CanvasSize=UDim2.fromOffset(0,0);scroll.AutomaticCanvasSize=Enum.AutomaticSize.Y;scroll.Parent=panel
+ local layout=Instance.new('UIListLayout');layout.Padding=UDim.new(0,10);layout.SortOrder=Enum.SortOrder.LayoutOrder;layout.Parent=scroll
+ local text=Instance.new('TextLabel');text.Name='Body';text.Size=UDim2.new(1,-10,0,0);text.AutomaticSize=Enum.AutomaticSize.Y;text.BackgroundTransparency=1;text.TextColor3=Color3.fromRGB(237,225,203);text.TextSize=18;text.Font=Enum.Font.SourceSans;text.TextWrapped=true;text.TextXAlignment=Enum.TextXAlignment.Left;text.TextYAlignment=Enum.TextYAlignment.Top;text.LayoutOrder=0;text.Parent=scroll
+ local toast=Instance.new('TextLabel');toast.Name='Notice';toast.AnchorPoint=Vector2.new(0.5,0);toast.Position=UDim2.fromScale(0.5,0.03);toast.Size=UDim2.new(0.9,0,0,64);toast.BackgroundColor3=Color3.fromRGB(39,34,28);toast.TextColor3=Color3.fromRGB(255,226,166);toast.TextSize=18;toast.Font=Enum.Font.SourceSans;toast.TextWrapped=true;toast.Visible=false;toast.Parent=screen
+ local self={Panel=panel,Screen=screen,Token=nil,Options={},Buttons={},Sending=false,NoticeSerial=0}
+ function self:choose(index)
+  if self.Sending or not self.Token or not self.Options[index] or not self.Options[index].Enabled then return end
+  self.Sending=true;action:FireServer({Token=self.Token,Choice=index})
+ end
+ function self:hide()
+  for i,v in self.Options do if v.Label=='Encerrar conversa' or v.Label=='Encerrar' then self:choose(i);break end end
+  panel.Visible=false
+ end
+ close.Activated:Connect(function()self:hide()end)
+ function self:receive(payload)
+  if payload.Notice and not payload.Token then
+   self.NoticeSerial+=1;local serial=self.NoticeSerial;toast.Text=payload.Notice;toast.Visible=true
+   task.delay(6,function()if serial==self.NoticeSerial then toast.Visible=false end end)
+  end
+  if payload.Close then panel.Visible=false;self.Token=nil;return end
+  if not payload.Token then return end
+  self.Sending=false;self.Token=payload.Token;self.Options=payload.Options or {};panel.Visible=true
+  title.Text=payload.Name..' • '..payload.Title;text.Text=(payload.Notice and payload.Notice..'\n\n' or '')..payload.Text
+  for _,b in self.Buttons do b:Destroy()end;self.Buttons={};scroll.CanvasPosition=Vector2.new(0,0)
+  for index,option in self.Options do
+   local button=Instance.new('TextButton');button.Name='Option'..index;button.Size=UDim2.new(1,-10,0,52);button.AutomaticSize=Enum.AutomaticSize.Y
+   button.Text=option.Label;button.TextWrapped=true;button.TextSize=18;button.Font=Enum.Font.SourceSansSemibold;button.LayoutOrder=index;button.AutoButtonColor=option.Enabled
+   button.BackgroundColor3=if option.Enabled then Color3.fromRGB(83,63,38) else Color3.fromRGB(49,46,42)
+   button.TextColor3=if option.Enabled then Color3.fromRGB(255,239,202) else Color3.fromRGB(164,158,145)
+   local padding=Instance.new('UIPadding');padding.PaddingTop=UDim.new(0,12);padding.PaddingBottom=UDim.new(0,12);padding.PaddingLeft=UDim.new(0,10);padding.PaddingRight=UDim.new(0,10);padding.Parent=button
+   button.Parent=scroll;button.Activated:Connect(function()self:choose(index)end);table.insert(self.Buttons,button)
+  end
+ end
+ return self
+end
+return UI
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="LocalScript" referent="6">
+        <Properties>
+          <string name="Name">NPCInteractionClient</string>
+          <bool name="Disabled">true</bool>
+          <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local player=Players.LocalPlayer
+local remotes=game.ReplicatedStorage:WaitForChild('EldravynNPC'):WaitForChild('RemoteEvents')
+local ui=require(script.Parent.NPCDialogueClient).new(player:WaitForChild('PlayerGui'),remotes:WaitForChild('Action'))
+local marker
+remotes:WaitForChild('View').OnClientEvent:Connect(function(payload)
+ ui:receive(payload)
+ if payload.Marker then
+  if marker then marker:Destroy()end
+  marker=Instance.new('Part');marker.Name='NPCDestination';marker.Size=Vector3.new(0.5,0.5,0.5);marker.Transparency=1;marker.Anchored=true;marker.CanCollide=false;marker.CanTouch=false;marker.CanQuery=false;marker.Position=payload.Marker.Position+Vector3.new(0,10,0);marker.Parent=workspace
+  local billboard=Instance.new('BillboardGui');billboard.Size=UDim2.fromOffset(240,64);billboard.AlwaysOnTop=true;billboard.Adornee=marker;billboard.Parent=marker
+  local label=Instance.new('TextLabel');label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=0.2;label.BackgroundColor3=Color3.fromRGB(42,34,24);label.TextColor3=Color3.fromRGB(255,226,145);label.Font=Enum.Font.SourceSansBold;label.TextSize=18;label.TextWrapped=true;label.Text='◆ '..payload.Marker.Name;label.Parent=billboard
+  local this=marker;task.delay(payload.Marker.Seconds,function()if this then this:Destroy()end;if marker==this then marker=nil end end)
+ end
+end)
+game:GetService('UserInputService').InputBegan:Connect(function(input,processed)if not processed and input.KeyCode==Enum.KeyCode.Escape then ui:hide()end end)
+-- Bounded local idle poses; no external Animation IDs or server frame loop.
+local joints={};local elapsed=0
+local function refresh()
+ joints={};local folder=workspace:FindFirstChild('EldravynNPCs');local root=player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+ if not folder or not root then return end
+ local nearest={}
+ for _,npc in folder:GetDescendants()do if npc:IsA('Model') and npc:GetAttribute('EldravynNPCId') and npc.PrimaryPart then
+  local distance=(npc.PrimaryPart.Position-root.Position).Magnitude;if distance<90 then table.insert(nearest,{NPC=npc,Distance=distance})end
+ end end
+ table.sort(nearest,function(a,b)return a.Distance<b.Distance end)
+ for index=1,math.min(#nearest,12)do
+  local npc=nearest[index].NPC;local torso=npc:FindFirstChild('UpperTorso');local neck=torso and torso:FindFirstChild('Neck')
+  if neck then table.insert(joints,neck)end
+ end
+end
+task.spawn(function()while true do refresh();task.wait(2)end end)
+game:GetService('RunService').Heartbeat:Connect(function(dt)
+ elapsed+=dt;for index,joint in joints do if joint.Parent then joint.Transform=CFrame.Angles(math.sin(elapsed*1.3+index)*0.025,math.sin(elapsed*0.8+index)*0.07,0)end end
+end)
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="ModuleScript" referent="7">
+      <Properties>
+        <string name="Name">Installer</string>
+        <string name="Source"><![CDATA[-- Run from Command Bar in Edit mode on a saved COPY of the existing Place.
+local I={Version=1}
+function I.Install()
+ assert(not game:GetService('RunService'):IsRunning(),'Pare Play antes de instalar NPCs.')
+ local package=script.Parent
+ local world=workspace:FindFirstChild('GeneratedWorld')
+ assert(world,'GeneratedWorld não encontrado. Nenhum mapa será criado pelo instalador.')
+ local rs=game:GetService('ReplicatedStorage');local ss=game:GetService('ServerScriptService')
+ local starter=game:GetService('StarterPlayer'):WaitForChild('StarterPlayerScripts')
+ assert(rs:FindFirstChild('MedievalRPG'),'Biblioteca original MedievalRPG ausente; instalação interrompida.')
+ local old=ss:FindFirstChild('MedievalServer')
+ if old then assert(not old:IsA('Script') or old.Disabled,'Runtime RPG já ativo; integração específica necessária.') end
+ if old then for _,v in old:GetDescendants()do assert(not v:IsA('Script') or v.Disabled,'Runtime RPG já ativo: exige integração específica para evitar dois escritores de perfil.')end end
+ local destinations={{Parent=rs,Name='EldravynNPC',Source=package.Shared},{Parent=ss,Name='EldravynNPC',Source=package.Server},{Parent=starter,Name='EldravynNPCClient',Source=package.Client}}
+ local root=workspace:FindFirstChild('EldravynNPCs')
+ if root then
+  assert(root:GetAttribute('NPCInstallVersion')==I.Version,'Pasta EldravynNPCs pertence a outro conteúdo; nada sobrescrito.')
+  for _,d in destinations do assert(d.Parent:FindFirstChild(d.Name) and d.Parent[d.Name]:GetAttribute('NPCInstallVersion')==I.Version,'Instalação incompleta; nenhum conteúdo será substituído automaticamente.')end
+  print('[NPC] Versão '..I.Version..' já instalada. Nenhum NPC duplicado.');return {Existing=true}
+ end
+ for _,d in destinations do assert(not d.Parent:FindFirstChild(d.Name),'Destino já ocupado: '..d.Name..'. Nenhum arquivo será sobrescrito.')end
+ local config=require(package.Shared.NPCConfig);local positions=require(package.Shared.PlacementConfig)
+ local placement=require(package.Authoring.Placement);local factory=require(package.Authoring.R15Factory)
+ local frames,existing={},{}
+ local aliases={Guild='GuildMaster',Merchant='General',Mage='Magic',Blacksmith='Blacksmith',Innkeeper='Inn',Guard='Guard'}
+ for _,model in workspace:GetDescendants()do
+  if model:IsA('Model') and model:FindFirstChildOfClass('Humanoid') then
+   local role=model:GetAttribute('NPCRole') or model:GetAttribute('Role')
+   role=aliases[role] or role;local city=model:GetAttribute('City') or model:GetAttribute('CityId')
+   if not role then for key,entry in config.Roles do if model.Name==entry.Name or model.Name==entry.Title then role=key end end end
+   if not city then local ancestor=model.Parent;while ancestor and ancestor~=workspace do
+    if ({Valoria=true,Arkheim=true,Eldoria=true,Durakh=true,Asterion=true,MalgorthDepths=true,FallenSanctum=true})[ancestor.Name] then city=ancestor.Name;break end
+    ancestor=ancestor.Parent
+   end end
+   assert(role and city,'NPC existente sem identificação: '..model.Name..'. Defina atributos NPCRole e City antes de instalar, para evitar duplicação.')
+   existing[city..':'..role]=model
+  end
+ end
+ -- Check every anchor before creating or enabling anything.
+ local strict=world:GetAttribute('TerrainPending')~=true
+ local staging=Instance.new('Folder');staging.Name='EldravynNPCs';staging:SetAttribute('NPCInstallVersion',I.Version)
+ local skipped={}
+ for _,definition in config.Definitions do
+  if existing[definition.City..':'..definition.Role] then table.insert(skipped,definition.Id)
+  else
+   local frame,reason=placement.frame(world,assert(positions.NPCs[definition.Id]),staging,strict)
+   if not frame then staging:Destroy();error(reason..'. Ajuste PlacementConfig à sua cópia antes de tentar novamente; mapa preservado.')end
+   frames[definition.Id]=frame
+  end
+ end
+ local created={};local previousStage=workspace:GetAttribute('EldravynNPCStage2');local previousPreview=workspace:GetAttribute('StudioSessionPreview')
+ local ok,err=pcall(function()
+  local cities={}
+  for _,definition in config.Definitions do if frames[definition.Id] then
+   local city=cities[definition.City]
+   if not city then city=Instance.new('Folder');city.Name=definition.City;city.Parent=staging;cities[definition.City]=city end
+   factory.create(city,definition,config.Roles[definition.Role],frames[definition.Id])
+  end end
+  for _,d in destinations do
+   local clone=d.Source:Clone();clone.Name=d.Name;clone:SetAttribute('NPCInstallVersion',I.Version);table.insert(created,clone);clone.Parent=d.Parent
+  end
+  staging.Parent=workspace;table.insert(created,staging)
+  workspace:SetAttribute('EldravynNPCStage2',true)
+  if previousPreview==nil then workspace:SetAttribute('StudioSessionPreview',true)end
+  for _,container in created do for _,node in container:GetDescendants()do if node:IsA('BaseScript') then node.Disabled=false end end end
+ end)
+ if not ok then
+  for _,node in created do node:Destroy()end;staging:Destroy()
+  workspace:SetAttribute('EldravynNPCStage2',previousStage);workspace:SetAttribute('StudioSessionPreview',previousPreview);error(err)
+ end
+ for _,id in skipped do warn('[NPC] Equivalente existente preservado, sem duplicar: '..id..'. Integre o diálogo deste personagem manualmente.')end
+ print('[NPC] Instalação concluída sem editar GeneratedWorld/Terrain. Salve outra cópia e teste Play. Prévia Studio pode ser volátil.')
+ return {Installed=#config.Definitions-#skipped,Skipped=skipped,TerrainTouched=false}
+end
+return I
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="Folder" referent="8">
+      <Properties>
+        <string name="Name">Server</string>
+      </Properties>
+      <Item class="ModuleScript" referent="9">
+        <Properties>
+          <string name="Name">AmbientService</string>
+          <string name="Source"><![CDATA[-- Small, bounded patrols for ambient residents only. No pathfinding or combat AI.
+local Players=game:GetService('Players')
+local TweenService=game:GetService('TweenService')
+local Placement=require(script.Parent.Placement)
+local Ambient={}
+local mobile={Resident=true,Traveler=true,Farmer=true,Adventurer=true}
+function Ambient.start(npcs,folder)
+ local homes={};for _,npc in npcs do
+  if npc:GetAttribute('AmbientNPC') and mobile[npc:GetAttribute('NPCRole')] and npc.PrimaryPart then homes[npc]={Frame=npc.PrimaryPart.CFrame,Away=false}end
+ end
+ task.spawn(function()
+  while folder.Parent do
+   task.wait(10);local active=0
+   for npc,home in homes do
+    if active>=4 then break end
+    local root=npc.PrimaryPart;local nearby=false
+    if not root or (npc:GetAttribute('NPCSpeakingUntil') or 0)>os.clock() then continue end
+    for _,player in Players:GetPlayers()do local p=player.Character and player.Character:FindFirstChild('HumanoidRootPart');if p and (p.Position-root.Position).Magnitude<75 then nearby=true;break end end
+    if not nearby then continue end
+    local target=home.Frame*(if home.Away then CFrame.new() else CFrame.new(2.5,0,0))
+    local delta=target.Position-root.Position;local valid=true;local feet
+    for step=0,4 do
+     local point=root.Position+delta*(step/4)-Vector3.new(0,3,0)
+     feet=Placement.safe(point,{folder},point.Y)
+     if not feet or math.abs(feet.Y-point.Y)>0.7 then valid=false;break end
+    end
+    for other in homes do if other~=npc and other.PrimaryPart and (other.PrimaryPart.Position-target.Position).Magnitude<6 then valid=false;break end end
+    if valid and feet then
+     active+=1;home.Away=not home.Away
+     local destination=target+Vector3.new(0,feet.Y+3-target.Position.Y,0)
+     TweenService:Create(root,TweenInfo.new(2,Enum.EasingStyle.Linear),{CFrame=destination}):Play()
+    end
+   end
+  end
+ end)
+end
+return Ambient
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="Script" referent="10">
+        <Properties>
+          <string name="Name">Bootstrap</string>
+          <bool name="Disabled">true</bool>
+          <token name="RunContext">0</token>
+          <string name="Source"><![CDATA[if workspace:GetAttribute('EldravynNPCStage2')~=true then return end
+require(script.Parent.NPCService).start()
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="11">
+        <Properties>
+          <string name="Name">DataService</string>
+          <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Http=game:GetService('HttpService')
+local DSS=game:GetService('DataStoreService')
+local Shared=game.ReplicatedStorage.MedievalRPG
+local Config=require(Shared.Config.WorldConfig)
+local Catalog=require(Shared.Config.ContentConfig)
+local Rules=require(Shared.Core.Progression)
+local Identity=require(Shared.Core.IdentityRules)
+local IdentityConfig=require(Shared.Config.IdentityConfig)
+local Adventure=require(Shared.Core.AdventureRules)
+local AdventureConfig=require(Shared.Config.AdventureConfig)
+local Expeditions=require(Shared.Core.DungeonRules)
+local DungeonConfig=require(Shared.Config.DungeonConfig)
+local npcStage=workspace:GetAttribute('EldravynNPCStage2')==true
+local function clone(t) return Http:JSONDecode(Http:JSONEncode(t)) end
+Identity.validate(IdentityConfig)
+local function prepare(raw)
+    assert(raw==nil or type(raw)=='table','Perfil inválido; defaults não serão gravados')
+    local state=Rules.sanitize(raw,Catalog)
+    Identity.restore(state,type(raw)=='table' and raw.Identity or nil,IdentityConfig)
+    Adventure.restore(state,type(raw)=='table' and raw.Adventure or nil,AdventureConfig)
+    Expeditions.restore(state,type(raw)=='table' and raw.Expedition or nil,DungeonConfig)
+    -- Preserve the NPC extension even when the legacy Place owns the profile.
+    if raw and raw.NPC~=nil then
+        assert(type(raw.NPC)=='table' and raw.NPC.Version==1,'Extensão NPC inválida; preservar perfil')
+        state.NPC=clone(raw.NPC)
+        if table.find(Catalog.Ranks,raw.Rank) then state.Rank=raw.Rank end
+        if IdentityConfig.Advanced[raw.Class] then state.Class=raw.Class end
+        for _,item in Catalog.Items do if item.Class==raw.Class then state.Class=raw.Class end end
+    end
+    if npcStage then
+        local npc=game.ReplicatedStorage:WaitForChild('EldravynNPC')
+        require(npc.Rules).restore(state,raw,require(npc.Registry))
+        -- Buying ownership does not equip armor in the NPC-only stage.
+        state.Armor=if raw and raw.Armor=='Armor' and state.Inventory.Armor then 'Armor' else ''
+    end
+    return state
+end
+local studioPreview=game:GetService('RunService'):IsStudio() and workspace:GetAttribute('StudioSessionPreview')==true
+local Data={Sessions={},Persistent=Config.EnableDataStore and not studioPreview}
+local store=if Data.Persistent then DSS:GetDataStore('MedievalRPG_v1') else nil
+function Data.load(player,reuseToken)
+    local previous=Data.Sessions[player]
+    if previous and (previous.Saving or previous.Loading) then return false,'Perfil ocupado; aguarde a operação atual.' end
+    local slot={Loading=true,PendingDeath=previous and previous.PendingDeath,Token=reuseToken or Http:GenerateGUID(false),State=Rules.new(),Ready=false,Saving=false,Frozen=false}
+    Data.Sessions[player]=slot
+    if not store then slot.State=prepare(nil);slot.Ready=true;slot.Loading=false; return true,'Modo volátil: raça não sorteada. Persistência é obrigatória para identidade permanente.' end
+    local candidate
+    local ok,result
+    for attempt=1,3 do
+        ok,result=pcall(function()
+            return store:UpdateAsync('Player_'..player.UserId,function(old)
+                assert(old==nil or type(old)=='table' and type(old.Data)=='table','Envelope existente inválido; preservar para recuperação')
+                old=old or {}
+                assert(old.Session==nil or type(old.Session)=='table' and type(old.Session.Token)=='string' and type(old.Session.Expires)=='number' and old.Session.Expires==old.Session.Expires,'Lock inválido')
+                local lock=old.Session
+                if lock and lock.Token~=slot.Token and type(lock.Expires)=='number' and lock.Expires>os.time() then return nil end
+                local profile=prepare(old.Data)
+                if profile.Identity.Race=='' and not npcStage then
+                    if not candidate then candidate=math.random(1,100) end
+                    Identity.assign(profile,IdentityConfig,candidate)
+                end
+                Identity.refresh(profile,IdentityConfig,os.time())
+                if slot.PendingDeath then Identity.fail(profile,IdentityConfig,slot.PendingDeath) end
+                return {Data=profile,Session={Token=slot.Token,Expires=os.time()+180}}
+            end)
+        end)
+        if ok and result and result.Session and result.Session.Token==slot.Token then break end
+        if attempt<3 then task.wait(attempt) end
+    end
+    if not ok or not result or not result.Session or result.Session.Token~=slot.Token then
+        slot.Loading=false;slot.Frozen=true
+        warn('Perfil indisponível para '..player.UserId..'; nenhuma gravação de defaults será feita.')
+        return false,'Dados indisponíveis ou sessão ativa em outro servidor. Entre novamente mais tarde.'
+    end
+    slot.State=prepare(result.Data);slot.Ready=true;slot.Loading=false;slot.PendingDeath=nil;slot.LeaseUntil=result.Session.Expires
+    if player.Parent~=Players then Data.save(player,true);Data.Sessions[player]=nil end
+    return true,'Progresso carregado.'
+end
+function Data.get(player)
+    local slot=Data.Sessions[player]
+    if slot and store and slot.Ready and slot.LeaseUntil and os.time()>=slot.LeaseUntil then slot.Frozen=true end
+    return if slot and slot.Ready and not slot.Frozen and not slot.Released then slot.State else nil
+end
+function Data.save(player,release)
+    local slot=Data.Sessions[player]
+    if slot and slot.Released then return true end
+    if not slot or not slot.Ready or slot.Saving or slot.Frozen then return false,'Perfil ocupado/indisponível' end
+    if not store then return true end
+    slot.Saving=true
+    if release then slot.Frozen=true end
+    slot.State.Identity.CurrentClass=slot.State.Class
+    local snapshot=clone(slot.State)
+    local ok,result=pcall(function()
+        return store:UpdateAsync('Player_'..player.UserId,function(old)
+            if type(old)~='table' or not old.Session or old.Session.Token~=slot.Token then return nil end
+            if old.Data and old.Data.Identity and old.Data.Identity.Race~=snapshot.Identity.Race then return nil end
+            return {Data=snapshot,Session=if release then nil else {Token=slot.Token,Expires=os.time()+180}}
+        end)
+    end)
+    slot.Saving=false
+    if not ok or not result then
+        -- Congela em caso de erro ou perda de posse; evita recompensas em perfil sem lock.
+        slot.Frozen=true;warn('Save falhou; perfil congelado para '..player.UserId)
+        return false,'Falha de salvamento. Reconecte para proteger o progresso.'
+    end
+    if release then slot.Released=true else slot.LeaseUntil=result.Session.Expires;Data.flushDeath(player) end
+    return true
+end
+-- Grant + durable receipt marker committed in the SAME owned profile transaction.
+function Data.changeIdentity(player,mutation)
+    local slot=Data.Sessions[player]
+    if not store or not Data.get(player) or slot.Saving or slot.Released then return false,'Perfil ocupado ou sem persistência.' end
+    local snapshot=clone(slot.State)
+    snapshot.Identity.CurrentClass=snapshot.Class
+    local accepted,message=mutation(snapshot)
+    if not accepted then return false,message end
+    snapshot.Identity.CurrentClass=snapshot.Class
+    slot.Saving=true;slot.Frozen=true
+    local ok,result=pcall(function()
+        return store:UpdateAsync('Player_'..player.UserId,function(old)
+            if not old or not old.Session or old.Session.Token~=slot.Token then return nil end
+            if not old.Data or not old.Data.Identity or old.Data.Identity.Race~=snapshot.Identity.Race then return nil end
+            return {Data=snapshot,Session={Token=slot.Token,Expires=os.time()+180}}
+        end)
+    end)
+    slot.Saving=false
+    if not ok or not result then return false,'Gravação incerta; perfil congelado até recarga. Nenhuma compra será confirmada.' end
+    slot.State=prepare(result.Data);slot.Frozen=false;slot.LeaseUntil=result.Session.Expires
+    Data.flushDeath(player)
+    return true,message
+end
+-- Reuses the same atomic profile transaction for expedition tickets/rewards.
+-- Volatile mode is explicit and never used for paid grants or racial rolls.
+function Data.transaction(player,mutation)
+    if store then return Data.changeIdentity(player,mutation) end
+    local state=Data.get(player);if not state then return false,'Perfil indisponível.' end
+    local snapshot=clone(state);local ok,message=mutation(snapshot)
+    if ok then Data.Sessions[player].State=prepare(snapshot) end
+    return ok,message
+end
+function Data.receipt(player,receiptId,productId)
+    local slot=Data.Sessions[player]
+    if not store or not Data.get(player) or slot.Saving or slot.Released then return false end
+    if slot.State.Identity.Receipts[receiptId] then return true end
+    slot.Saving=true;slot.Frozen=true
+    slot.State.Identity.CurrentClass=slot.State.Class
+    local snapshot=clone(slot.State)
+    local ok,result=pcall(function()
+        return store:UpdateAsync('Player_'..player.UserId,function(old)
+            if type(old)~='table' or not old.Session or old.Session.Token~=slot.Token then return nil end
+            if not old.Data or not old.Data.Identity or old.Data.Identity.Race~=snapshot.Identity.Race then return nil end
+            if old.Data.Identity.Receipts[receiptId] then return old end
+            local nextState=clone(snapshot)
+            if not Identity.grantReceipt(nextState,IdentityConfig,receiptId,productId) then return nil end
+            return {Data=nextState,Session={Token=slot.Token,Expires=os.time()+180}}
+        end)
+    end)
+    slot.Saving=false
+    if not ok or not result then
+        -- Keep frozen on uncertainty; Roblox must retry the receipt, never acknowledge a lost grant.
+        warn('Recibo pendente; perfil requer recarga segura: '..player.UserId)
+        return false
+    end
+    slot.State=prepare(result.Data);slot.Frozen=false;slot.LeaseUntil=result.Session.Expires
+    Data.flushDeath(player)
+    return slot.State.Identity.Receipts[receiptId]==true
+end
+function Data.noteDeath(player)
+    local slot=Data.Sessions[player]
+    if not slot or not slot.Ready then return end
+    slot.PendingDeath=os.time()
+    local changed=Identity.fail(slot.State,IdentityConfig,slot.PendingDeath)
+    if not slot.Saving and not slot.Frozen then
+        slot.PendingDeath=nil
+        if changed then Data.save(player,false) end
+    end
+end
+function Data.flushDeath(player)
+    local slot=Data.Sessions[player]
+    if not slot or not slot.PendingDeath then return end
+    local at=slot.PendingDeath;slot.PendingDeath=nil
+    local changed=Identity.fail(slot.State,IdentityConfig,at)
+    if changed or slot.State.Identity.Racial.Status=='Failed' then Data.save(player,false) end
+end
+function Data.remove(player)
+    local slot=Data.Sessions[player]
+    if not slot then return end
+    local limit=os.clock()+8
+    while slot.Saving and os.clock()<limit do task.wait(0.1) end
+    if slot.Frozen then
+        -- Discard uncertain local snapshot; release ONLY our lock, preserving durable receipts/progress.
+        if store and not slot.Saving then pcall(function()
+            store:UpdateAsync('Player_'..player.UserId,function(old)
+                if type(old)=='table' and old.Session and old.Session.Token==slot.Token then return {Data=old.Data} end
+                return nil
+            end)
+        end) end
+    else Data.save(player,true) end
+    if Data.Sessions[player]==slot then Data.Sessions[player]=nil end
+end
+function Data.start()
+    task.spawn(function()
+        while task.wait(45) do
+            for player,slot in Data.Sessions do
+                if slot.Ready and not slot.Saving and not slot.Frozen then Data.save(player,false) end
+            end
+        end
+    end)
+    game:BindToClose(function()
+        local pending=0
+        for player in Data.Sessions do pending+=1;task.spawn(function() Data.remove(player);pending-=1 end) end
+        local deadline=os.clock()+20
+        while pending>0 and os.clock()<deadline do task.wait(0.1) end
+    end)
+end
+return Data
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="12">
+        <Properties>
+          <string name="Name">DialogueService</string>
+          <string name="Source"><![CDATA[-- Client sends only a single-use token and an index into server-owned options.
+local Players=game:GetService('Players')
+local Http=game:GetService('HttpService')
+local Shared=game.ReplicatedStorage.EldravynNPC
+local C=require(Shared.Registry)
+local Data=require(script.Parent.NPCDataService)
+local Actions=require(script.Parent.NPCActionService)
+local D={Sessions={},Limits={}}
+function D.near(player,npc)
+ local character=player.Character;local root=character and character:FindFirstChild('HumanoidRootPart')
+ local hum=character and character:FindFirstChildOfClass('Humanoid');local head=npc and npc:FindFirstChild('Head')
+ if not root or not hum or hum.Health<=0 or not head or not npc:IsDescendantOf(workspace) then return false end
+ if (root.Position-head.Position).Magnitude>C.PromptDistance+2 then return false end
+ local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude
+ params.FilterDescendantsInstances={character,workspace:FindFirstChild('EldravynNPCs') or npc};params.IgnoreWater=true
+ local hit=workspace:Raycast(root.Position,head.Position-root.Position,params)
+ return hit==nil or hit.Instance:IsDescendantOf(npc)
+end
+function D.send(player,session,page,notice)
+ local menu=Actions.menu(player,session.NPC,page)
+ session.Page=page;session.Options=menu.Options;session.Token=Http:GenerateGUID(false);session.Expires=os.clock()+C.SessionSeconds;session.NPC:SetAttribute('NPCSpeakingUntil',session.Expires)
+ local role=C.Roles[session.NPC:GetAttribute('NPCRole')]
+ local choices={};for _,v in menu.Options do table.insert(choices,{Label=v.Label,Enabled=v.Enabled})end
+ D.View:FireClient(player,{Token=session.Token,Name=role.Name,Title=role.Title,Text=menu.Text,Notice=notice,Options=choices})
+end
+function D.close(player)
+ D.Sessions[player]=nil;if D.View then D.View:FireClient(player,{Close=true})end
+end
+function D.open(player,npc)
+ local now=os.clock();if now<(D.Limits[player] or 0) then return false end;D.Limits[player]=now+0.3
+ local previous=D.Sessions[player];if previous and previous.Busy then return false end
+ if Actions.NPCs[npc:GetAttribute('EldravynNPCId')]~=npc or not D.near(player,npc) then return false end
+ if not Data.get(player) then
+  D.View:FireClient(player,{Close=true,Notice='Perfil indisponível. Aguarde ou reconecte; nenhuma compra foi realizada.'});return false
+ end
+ local s={NPC=npc,Busy=true};D.Sessions[player]=s
+ local ok,err=pcall(function()Data.event(player,'Talk:'..npc:GetAttribute('NPCRole'),'Interaction');D.send(player,s,'Root')end)
+ s.Busy=false;if not ok then warn('[NPC] Interação falhou: '..tostring(err));D.close(player)end
+ return ok
+end
+function D.handle(player,payload)
+ local now=os.clock();if now<(D.Limits[player] or 0) then return false end;D.Limits[player]=now+0.2
+ local s=D.Sessions[player]
+ if not s or s.Busy or type(payload)~='table' or type(payload.Token)~='string' or #payload.Token>80 or payload.Token~=s.Token then return false end
+ if not require(Shared.Rules).integer(payload.Choice,1,#s.Options) then return false end
+ if now>s.Expires or not D.near(player,s.NPC) then D.close(player);return false end
+ local option=s.Options[payload.Choice];if not option.Enabled then return false end
+ -- Invalidate before any yielding persistence or marketplace calls.
+ s.Busy=true;s.Token=nil
+ local ok,err=pcall(function()
+  local command=option.Command
+  if command=='Close' then D.close(player)
+  elseif command=='Page' then s.Pending=nil;D.send(player,s,option.Value)
+  elseif command=='Mark' then
+   local target=Actions.Locations[option.Value]
+   if target then D.View:FireClient(player,{Marker={Name=target.Name,Position=target.Position,Seconds=45}})end
+   D.send(player,s,s.Page,'Destino marcado por 45 segundos.')
+  elseif command=='Confirm' then
+   local pending=s.Pending;s.Pending=nil;local state=Data.get(player)
+   if not pending or not state or state.Revision~=s.Revision then D.send(player,s,'Root','Os dados mudaram. Consulte os custos e confirme novamente.');return end
+   local accepted,message=Actions.execute(player,s.NPC,pending)
+   D.send(player,s,'Root',message or (if accepted then 'Operação concluída.' else 'Operação indisponível.'))
+  else
+   local state=Data.get(player);if not state then D.close(player);return end
+   s.Pending=option;s.Revision=state.Revision;s.Options={{Label='Confirmar',Command='Confirm',Enabled=true},{Label='Cancelar / voltar',Command='Page',Value=s.Page,Enabled=true},{Label='Encerrar',Command='Close',Enabled=true}}
+   s.Token=Http:GenerateGUID(false);s.Expires=now+C.SessionSeconds
+   D.View:FireClient(player,{Token=s.Token,Name=C.Roles[s.NPC:GetAttribute('NPCRole')].Name,Title='Confirmação',Text=option.Label..'\nConfirme esta operação. Custos e requisitos serão verificados novamente pelo servidor.',Options={{Label='Confirmar',Enabled=true},{Label='Cancelar / voltar',Enabled=true},{Label='Encerrar',Enabled=true}}})
+  end
+ end)
+ s.Busy=false
+ if not ok then warn('[NPC] Operação interrompida: '..tostring(err));D.close(player)end
+ return ok
+end
+function D.start(view,action)
+ D.View=view;action.OnServerEvent:Connect(D.handle)
+ Players.PlayerRemoving:Connect(function(p)D.Sessions[p]=nil;D.Limits[p]=nil end)
+end
+return D
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="13">
+        <Properties>
+          <string name="Name">NPCActionService</string>
+          <string name="Source"><![CDATA[local Shared=game.ReplicatedStorage.EldravynNPC
+local C=require(Shared.Registry)
+local R=require(Shared.Rules)
+local Data=require(script.Parent.NPCDataService)
+local Purchase=require(script.Parent.PurchaseService)
+local A={Locations={},NPCs={},DungeonAdapter=nil}
+local function sorted(t)local keys={};for key in t do table.insert(keys,key)end;table.sort(keys);return keys end
+local function objective(event)
+ local kind,id=event:match('^([^:]+):(.+)$')
+ if kind=='Talk' then return 'Conversar com '..(C.Roles[id] and C.Roles[id].Title or id)
+ elseif kind=='Visit' then return 'Visitar '..id
+ elseif kind=='Combat' then return 'Derrotar '..(if id=='Bandit' then 'bandidos' else id)..' (combate futuro)'end
+ return 'Objetivo de exploração'
+end
+local function money(s)return 'Moedas: '..s.Gold..' | Banco: '..s.NPC.Bank end
+function A.menu(player,npc,page)
+ local s=Data.get(player);if not s then return {Text='Perfil indisponível. Nenhuma operação será realizada.',Options={}} end
+ local role=npc:GetAttribute('NPCRole');local words=C.Dialogue[role] or C.Dialogue.Ambient
+ local result={Text=words.Greeting..'\n'..money(s),Options={}}
+ local function text(v)result.Text=v..'\n'..money(s)end
+ local function option(label,command,value,extra,enabled)
+  table.insert(result.Options,{Label=label,Command=command,Value=value,Extra=extra,Enabled=enabled~=false})
+ end
+ local function menu(label,target)option(label,'Page',target)end
+ local function doAction(label,command,value,extra,enabled)option(label,command,value,extra,enabled)end
+ page=page or 'Root'
+ if page=='Lore' then
+  local lines=C.Dialogue.AmbientLines[role]
+  text(words.Lore..(if lines then '\n'..table.concat(lines,'\n') else ''))
+ elseif page=='History' and role=='GuildMaster' then
+  local rows={'Rank: '..(if s.Rank=='' then 'não registrado' else s.Rank)}
+  for _,h in s.NPC.History do table.insert(rows,h.Text..' • '..os.date('!%d/%m/%Y',h.At)) end;text(table.concat(rows,'\n'))
+ elseif page=='Ranks' and role=='GuildMaster' then
+  local rows={};for _,rank in C.Ranks do local q=C.RankRequirements[rank];table.insert(rows,rank..': '..q.XP..' XP, '..q.Quests..' contratos • '..q.Benefit)end
+  text('Atual: '..s.Rank..' | XP: '..s.XP..' | contratos: '..s.NPC.Completed..'\n'..table.concat(rows,'\n'))
+  doAction('Solicitar próxima promoção','Promote')
+ elseif page:sub(1,7)=='Quests:' and role=='Reception' then
+  local rank=page:sub(8);text('Contratos de rank '..rank)
+  for _,id in sorted(C.Quests) do local q=C.Quests[id]
+   if q.Rank==rank and not q.Ticket and (not q.SecretRegion or s.NPC.Discovered[q.SecretRegion]) then menu(q.Name,'Quest:'..id)end
+  end
+ elseif page:sub(1,6)=='Quest:' and (role=='Reception' or role=='Dungeon') then
+  local id=page:sub(7);local q=C.Quests[id]
+  if not q or q.Ticket and role=='Dungeon' and C.Dungeon.Tickets[q.Ticket].Dungeon~=npc:GetAttribute('DungeonId') then text('Contrato indisponível.')
+  elseif q.SecretRegion and not s.NPC.Discovered[q.SecretRegion] then text('Contrato ainda não descoberto.')
+  else
+   local state=s.NPC.Quests[id];local rows={q.Name,q.Description,'Rank '..q.Rank..' | '..q.Gold..' moedas | '..q.XP..' XP'}
+   for i,o in q.Objectives do table.insert(rows,objective(o.Event)..' • '..(state and state.Counts[i] or 0)..'/'..o.Need)end
+   if q.Ticket then table.insert(rows,'Recompensa: 1 ticket '..C.Dungeon.Tickets[q.Ticket].Name..'. Repetição após 24h.')end
+   if q.FutureCombat then table.insert(rows,'Combate futuro: só eventos de adaptador autorizado no servidor podem avançar.')end
+   if state and state.LastClaim then table.insert(rows,'Última entrega: '..os.date('!%d/%m %H:%M UTC',state.LastClaim))end
+   text(table.concat(rows,'\n'));doAction('Aceitar contrato','Accept',id)
+   if state and state.Status=='Active' then doAction('Abandonar contrato','Abandon',id);doAction('Entregar contrato','Claim',id)end
+  end
+ elseif page=='Shop' and C.Shops[role] then
+  text('Catálogo • '..C.Roles[role].Title..'\nCompras ficam registradas; consumíveis não produzem efeitos nesta etapa.')
+  for _,id in C.Shops[role] do local item=C.Items[id]
+   menu(item.Name..' • '..item.Price..' moedas • '..item.Rarity,'Item:'..id)
+  end
+ elseif page:sub(1,5)=='Item:' and C.Shops[role] then
+  local id=page:sub(6);local item=C.Items[id]
+  if item and table.find(C.Shops[role],id) then
+   text(item.Name..' • '..item.Rarity..'\nRank '..item.MinRank..' | propriedade: '..(s.Inventory[id] or 0)..'\n'..(item.Note or 'Registro de propriedade; sem equipar ou atacar.'))
+   doAction('Comprar por '..item.Price..' moedas','Buy',id,role)
+   doAction('Vender por '..item.Sell..' moedas','Sell',id,role)
+  else text('Item indisponível.')end
+ elseif page=='Upgrades' and role=='Blacksmith' then
+  text('Melhorias registradas, sem alterar dano ou defesa nesta etapa.')
+  for _,id in sorted(C.Items) do local cost=R.upgradeCost(s,C,id)
+   if cost then doAction(C.Items[id].Name..' +'..cost.Level..' → +'..(cost.Level+1)..' • '..cost.Gold..' moedas + '..cost.Ore..' minérios','Upgrade',id)
+   elseif (s.NPC.Upgrades[id] or 0)>=C.Upgrade.Max then doAction(C.Items[id].Name..' +'..s.NPC.Upgrades[id]..' • nível máximo','Upgrade',id,nil,false)end
+  end
+ elseif page=='Bank' and role=='Bank' then
+  text('Depósitos e saques são persistidos na mesma transação.')
+  for _,amount in {10,50,100,500} do
+   doAction('Depositar '..amount..' moedas','Deposit',amount,nil,s.Gold>=amount)
+   doAction('Sacar '..amount..' moedas','Withdraw',amount,nil,s.NPC.Bank>=amount)
+  end
+  if s.Gold>0 then doAction('Depositar saldo: '..s.Gold,'Deposit',s.Gold)end
+  if s.NPC.Bank>0 then doAction('Sacar saldo: '..s.NPC.Bank,'Withdraw',s.NPC.Bank)end
+ elseif page=='Classes' and role=='Classes' then
+  text('Classe atual: '..(if s.Class=='' then 'não escolhida' else s.Class)..'\nCréditos de troca: '..s.NPC.ClassCredits)
+  for _,id in {'Guerreiro','Espadachim','Mago'} do
+   doAction(id..': '..C.Classes[id].Text,'Choose',id,nil,s.Class=='' or s.NPC.ClassCredits>0)
+  end
+  doAction('Comprar crédito de troca • 100 Robux','ClassPurchase',nil,nil,Purchase.available('NPCClassChange'))
+  if not Purchase.available('NPCClassChange') then result.Text..='\nCompra desativada: configure o produto oficial de 100 Robux e persistência.'end
+  for _,id in sorted(C.Advanced) do local e=C.Advanced[id]
+   doAction(e.Base..' → '..id..' • Rank '..e.Rank..' + '..(if e.Secret and not s.NPC.Discovered.Vespera then 'contrato secreto ainda não descoberto' else C.Quests[e.Quest].Name),'Evolve',id,nil,s.Class==e.Base and R.rank(s,C,e.Rank) and R.completed(s,e.Quest))
+  end
+ elseif page=='Magic' and role=='Magic' then
+  text('Escolas de magia • registros de estudo, sem conjuração.')
+  for _,id in sorted(C.Spells) do local m=C.Spells[id]
+   doAction(m.Name..' ('..m.School..') • '..m.Text..' Rank '..m.Rank..(if m.Quest then ' + '..C.Quests[m.Quest].Name else '')..(if m.Price then ' • '..m.Price..' moedas' else '')..(if s.NPC.Magic[id] then ' • estudo registrado' else ''),'Magic',id,nil,m.RegistrationEnabled and not s.NPC.Magic[id] and R.rank(s,C,m.Rank) and R.completed(s,m.Quest))
+  end
+ elseif page=='Directions' and role=='Guide' then
+  text('Escolha um destino existente. A marcação dura 45 segundos.')
+  for _,id in sorted(A.Locations) do menu(A.Locations[id].Name,'Direction:'..id)end
+ elseif page:sub(1,10)=='Direction:' and role=='Guide' then
+  local id=page:sub(11);if A.Locations[id] then text(A.Locations[id].Name);option('Marcar destino','Mark',id)end
+ elseif page:sub(1,7)=='Ticket:' and role=='Dungeon' then
+  local key=page:sub(8);local t=C.Dungeon.Tickets[key];local d=t and C.Dungeon.Dungeons[t.Dungeon]
+  if not t or t.Dungeon~=npc:GetAttribute('DungeonId') then text('Ticket indisponível.')
+  else
+   text(t.Name..'\nRank '..t.Rank..' | possui '..(s.NPC.Tickets[key] or 0)..' ticket(s)\n'..d.RewardPreview)
+   menu('Missão para obter este ticket','Quest:'..t.Quest)
+   doAction('Comprar ticket por '..t.Price..' moedas','TicketBuy',key)
+   local enabled=A.DungeonAdapter~=nil and d.EntryEnabled and d.InteriorReady and d.PlaceId>0
+   doAction('Solicitar entrada neste andar','Enter',key,nil,enabled)
+   if not enabled then result.Text..='\nEntrada indisponível: interior/destino ainda não integrado. Tickets não serão consumidos.'end
+  end
+ elseif page=='Root' then
+  if role=='GuildMaster' then doAction('Registrar aventureiro • rank F','Register',nil,nil,s.Rank=='');menu('Rank, requisitos e benefícios','Ranks');menu('Histórico de progressão','History')
+  elseif role=='Reception' then for _,rank in C.Ranks do menu('Missões de rank '..rank,'Quests:'..rank)end
+  elseif C.Shops[role] then menu('Comprar e vender','Shop')
+  elseif role=='Blacksmith' then menu('Aprimorar equipamento','Upgrades')
+  elseif role=='Bank' then menu('Saldo, depósito e saque','Bank')
+  elseif role=='Classes' then menu('Escolha, evolução e troca de classe','Classes')
+  elseif role=='Magic' then menu('Escolas e registros de estudo','Magic')
+  elseif role=='Guide' then menu('Serviços e regiões','Directions')
+  elseif role=='Dungeon' then
+   local id=npc:GetAttribute('DungeonId');local d=C.Dungeon.Dungeons[id];text(d.Name..' • '..d.Floors..' andares\n'..words.Greeting)
+   for floor=1,d.Floors do menu('Andar '..floor..' • ticket e contrato','Ticket:'..id..':'..floor)end
+  elseif role=='Inn' then doAction('Hospedagem e ponto de retorno • '..C.InnPrice..' moedas','Inn')
+  elseif role=='Healer' then
+   local hum=player.Character and player.Character:FindFirstChildOfClass('Humanoid')
+   local compatible=hum and hum.Health>0 and hum.Health<hum.MaxHealth
+   doAction('Curar • '..C.HealPrice..' moedas','Heal',nil,nil,compatible==true)
+   if not compatible then result.Text..='\nCura indisponível: personagem sem ferimentos ou vida incompatível.'end
+  elseif role=='Tutorial' then
+   local lessons={'Fale comigo para começar.','Visite Maelis na guilda.','Consulte a recepcionista.','Peça uma indicação à guia.','Tutorial concluído; contratos e exploração estão disponíveis.'}
+   result.Text..='\n'..lessons[math.clamp(s.NPC.Tutorial.Step+1,1,#lessons)]..'\n'..words.Lore
+   doAction('Pular tutorial','Tutorial','Skip');doAction('Revisar tutorial','Tutorial','Review')
+  elseif role=='Races' then
+   local race=s.Identity.Race;local catalog=require(game.ReplicatedStorage.MedievalRPG.Config.IdentityConfig)
+   result.Text..='\nRaça atual: '..(catalog.Races[race] and catalog.Races[race].Name or 'ainda não registrada')..'\nEvolução: '..(if s.Identity.Evolution=='' then 'nenhuma' else s.Identity.Evolution)
+   for _,id in catalog.RaceOrder do local r=catalog.Races[id];result.Text..='\n'..r.Name..': '..r.Identity..' → '..r.Evolution end
+   result.Text..='\nAlteração de raça e fusão indisponíveis nesta etapa.'
+  elseif role=='Skills' then
+   result.Text..='\n'..words.Lore..'\nPlanejado: técnicas por classe, domínio por uso e desafios específicos. Níveis/custos aguardam definição; nenhuma técnica pode ser comprada agora.'
+  elseif role=='Fusions' then
+   result.Text..='\n'..words.Lore..'\nPlanejado: combinações autorizadas de habilidades ou linhagens, missões e materiais específicos. Catálogo, resultados e custos desta integração aguardam definição; nenhuma combinação está ativa.' end
+  menu('Conversar sobre a região','Lore')
+ else text('Esta opção não pertence ao NPC.')end
+ if page~='Root' then menu('Voltar','Root')end
+ option('Encerrar conversa','Close')
+ return result
+end
+function A.execute(player,npc,option)
+ local cmd,v,extra=option.Command,option.Value,option.Extra
+ if cmd=='ClassPurchase' then return Purchase.prompt(player,'NPCClassChange') end
+ if cmd=='Enter' then
+  local t=C.Dungeon.Tickets[v];local d=t and C.Dungeon.Dungeons[t.Dungeon]
+  if not d or not A.DungeonAdapter or not d.EntryEnabled or not d.InteriorReady or d.PlaceId<=0 then return false,'Destino indisponível; nenhum ticket consumido.'end
+  local valid,ready=pcall(A.DungeonAdapter.ValidateDestination,d,t.Floor)
+  if not valid or not ready then return false,'Destino não validado; nenhum ticket consumido.'end
+  local ok,msg=Data.change(player,function(s)return R.admit(s,C,v,os.time())end)
+  if not ok then return ok,msg end
+  local id=Data.get(player).NPC.Admission.Id
+  local started,result=pcall(A.DungeonAdapter.Enter,player,d,t.Floor,id)
+  if not started or not result then return Data.change(player,function(s)return R.refundAdmission(s,C,id)end)end
+  return true,'Admissão registrada; o adaptador deve confirmar a chegada no servidor.'
+ end
+ local hum=player.Character and player.Character:FindFirstChildOfClass('Humanoid')
+ local ok,message=Data.change(player,function(s)
+  local now=os.time()
+  if cmd=='Register' then return R.register(s,C,now)
+  elseif cmd=='Promote' then return R.promote(s,C,now)
+  elseif cmd=='Accept' then return R.accept(s,C,v,now)
+  elseif cmd=='Abandon' then return R.abandon(s,C,v)
+  elseif cmd=='Claim' then return R.claim(s,C,v,now)
+  elseif cmd=='Buy' then return R.buy(s,C,v,extra)
+  elseif cmd=='Sell' then return R.sell(s,C,v,extra)
+  elseif cmd=='Deposit' or cmd=='Withdraw' then return R.bank(s,C,cmd,v)
+  elseif cmd=='Upgrade' then return R.upgrade(s,C,v)
+  elseif cmd=='TicketBuy' then return R.ticket(s,C,v)
+  elseif cmd=='Choose' then return R.choose(s,C,v,now)
+  elseif cmd=='Evolve' then return R.evolve(s,C,v,now)
+  elseif cmd=='Magic' then return R.magic(s,C,v)
+  elseif cmd=='Tutorial' then return R.tutorial(s,C,v)
+  elseif cmd=='Inn' then return R.inn(s,C,npc:GetAttribute('EldravynNPCId'),npc:GetAttribute('City'),now)
+  elseif cmd=='Heal' then
+   if not hum or hum.Parent~=player.Character or hum.Health<=0 or hum.Health>=hum.MaxHealth or s.Gold<C.HealPrice or s.NPC.PendingHeal then return false,'Vida incompatível, cura desnecessária ou moedas insuficientes.'end
+   s.Gold-=C.HealPrice;s.NPC.PendingHeal=C.HealPrice;return true,'Serviço de cura registrado.'
+  end
+  return false,'Operação inválida.'
+ end)
+ if ok and cmd=='Heal' then
+  local healed=hum and hum.Parent==player.Character and hum.Health>0
+  if healed then hum.Health=hum.MaxHealth end
+  local settled=Data.change(player,function(s)
+   if not s.NPC.PendingHeal then return false end
+   if not healed then s.Gold+=s.NPC.PendingHeal end;s.NPC.PendingHeal=nil;return true
+  end)
+  if not settled then return false,'Confirmação pendente; o serviço será conciliado na próxima conexão.'end
+ end
+ return ok,message
+end
+return A
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="14">
+        <Properties>
+          <string name="Name">NPCDataService</string>
+          <string name="Source"><![CDATA[-- Single existing DataStore and session owner; no second economy/profile writer.
+local Shared=game.ReplicatedStorage.EldravynNPC
+local C=require(Shared.Registry)
+local Legacy=require(game.ReplicatedStorage.MedievalRPG.Config.ContentConfig)
+-- Register ownership-only catalogue extension in an older Studio copy, without rewriting its scripts.
+Legacy.Items.TravelRelic=Legacy.Items.TravelRelic or {Name=C.Items.TravelRelic.Name,Price=250,Kind='Material',Rarity='Rare'}
+local Data=require(script.Parent.DataService)
+local Rules=require(Shared.Rules)
+local Service={Persistent=Data.Persistent}
+Service.get=Data.get;Service.load=Data.load;Service.remove=Data.remove;Service.start=Data.start
+function Service.change(player,fn)
+ return Data.transaction(player,function(s)
+  local ok,message=fn(s)
+  if ok then s.Revision+=1 end
+  return ok,message
+ end)
+end
+function Service.event(player,event,source)
+ local current=Data.get(player);if not current then return false end
+ -- Avoid a DataStore write when no objective, discovery or tutorial step changes.
+ local Http=game:GetService('HttpService');local probe=Http:JSONDecode(Http:JSONEncode(current))
+ if not Rules.event(probe,C,event,source) then return false end
+ return Service.change(player,function(s)return Rules.event(s,C,event,source),'Progresso registrado.'end)
+end
+return Service
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="15">
+        <Properties>
+          <string name="Name">NPCService</string>
+          <string name="Source"><![CDATA[local Players=game:GetService('Players')
+local Shared=game.ReplicatedStorage:WaitForChild('EldravynNPC')
+local C=require(Shared.Registry)
+local Data=require(script.Parent.NPCDataService)
+local Actions=require(script.Parent.NPCActionService)
+local Dialogue=require(script.Parent.DialogueService)
+local Purchase=require(script.Parent.PurchaseService)
+local Placement=require(script.Parent.Placement)
+local Service={Started=false}
+local function remote(parent,name)
+ local value=parent:FindFirstChild(name)
+ if not value then value=Instance.new('RemoteEvent');value.Name=name;value.Parent=parent end
+ assert(value:IsA('RemoteEvent'));return value
+end
+function Service.start()
+ if Service.Started then return end
+ local world=workspace:FindFirstChild('GeneratedWorld');local folder=workspace:FindFirstChild('EldravynNPCs')
+ assert(world and folder,'Instale os NPCs no mapa antes de iniciar.')
+ if world:GetAttribute('TerrainPending')==true then warn('[NPC] Terrain pendente. Use PrepareStudio em Edit antes de testar. Nenhum terreno será gerado no runtime.');return end
+ Service.Started=true
+ local remotes=Shared:FindFirstChild('RemoteEvents') or Instance.new('Folder');remotes.Name='RemoteEvents';remotes.Parent=Shared
+ local view,action=remote(remotes,'View'),remote(remotes,'Action');Dialogue.start(view,action)
+ for _,npc in folder:GetDescendants()do
+  local id=npc:GetAttribute('EldravynNPCId')
+  if npc:IsA('Model') and id then
+   assert(not Actions.NPCs[id],'NPC duplicado: '..id);Actions.NPCs[id]=npc
+   local root=npc:FindFirstChild('HumanoidRootPart');local prompt=npc:FindFirstChild('NPCInteraction',true)
+   local entry=require(Shared.PlacementConfig).NPCs[id]
+   local frame=entry and Placement.frame(world,entry,folder,true)
+   if root and prompt and frame then
+    npc:PivotTo(frame*CFrame.new(0,3,0));prompt.Enabled=true
+    prompt.Triggered:Connect(function(player)Dialogue.open(player,npc)end)
+    if not npc:GetAttribute('AmbientNPC') then Actions.Locations[id]={Name=C.Roles[npc:GetAttribute('NPCRole')].Title..' • '..npc:GetAttribute('City'),Position=frame.Position}end
+   else
+    if prompt then prompt.Enabled=false end
+    warn('[NPC] Posição não validada; interação desativada: '..id)
+   end
+  end
+ end
+ local regions={}
+ for id,entry in require(Shared.PlacementConfig).Regions do
+  local anchor=Placement.resolve(world,entry.Anchor)
+  if anchor and anchor:IsA('BasePart') then
+   local record={Name=entry.Name,Position=anchor.Position,Radius=entry.Radius}
+   regions[id]=record;Actions.Locations[id]=record
+  end
+ end
+ Purchase.registerProduct('NPCClassChange',C.ClassChangeProduct,require(Shared.Rules).classReceipt)
+ Purchase.OnGrant=function(p)Dialogue.close(p);view:FireClient(p,{Notice='Crédito oficial registrado. Converse novamente com o mestre de classes.'})end
+ Purchase.start();Data.start()
+ require(script.Parent.AmbientService).start(Actions.NPCs,folder)
+ local function onCharacter(player,character)
+  local root=character:WaitForChild('HumanoidRootPart',10);if not root then return end
+  local state=Data.get(player);local id=state and state.NPC.ReturnNPC;local npc=id and Actions.NPCs[id]
+  if not npc or not npc.PrimaryPart then return end
+  -- Return beside the inn only if a fresh floor/clearance query succeeds.
+  local position=npc.PrimaryPart.Position+npc.PrimaryPart.CFrame.LookVector*5-Vector3.new(0,3,0)
+  local safe=Placement.safe(position,{folder,character},position.Y)
+  if safe then root.CFrame=CFrame.new(safe+Vector3.new(0,3,0))end
+ end
+ local function joined(player)
+  local ok,message=Data.load(player)
+  if player.Parent~=Players then return end
+  if not ok then view:FireClient(player,{Notice=message});return end
+  local state=Data.get(player)
+  if state and state.NPC.PendingHeal then
+   Data.change(player,function(s)s.Gold=math.min(C.MaxGold,s.Gold+s.NPC.PendingHeal);s.NPC.PendingHeal=nil;return true end)
+  end
+  player.CharacterAdded:Connect(function(character)onCharacter(player,character)end)
+  if player.Character then onCharacter(player,player.Character)end
+  view:FireClient(player,{Notice=if Data.Persistent then 'Perfil NPC carregado.' else 'Prévia Studio: progresso temporário, sem persistência ou compras Robux.'})
+ end
+ Players.PlayerAdded:Connect(joined);Players.PlayerRemoving:Connect(Data.remove)
+ for _,player in Players:GetPlayers()do task.spawn(joined,player)end
+ -- A single low-frequency scheduler. Only meaningful progress writes to the profile.
+ task.spawn(function()
+  local visits={}
+  while Service.Started do
+   task.wait(2)
+   for _,player in Players:GetPlayers()do
+    local character=player.Character;local root=character and character:FindFirstChild('HumanoidRootPart')
+    local hum=character and character:FindFirstChildOfClass('Humanoid')
+    if root and hum and hum.Health>0 and Data.get(player) then
+     local previous=visits[player] or {};local current={}
+     for id,region in regions do
+      if (root.Position-region.Position).Magnitude<region.Radius then
+       current[id]=true;if previous[id] then Data.event(player,'Visit:'..id,'Exploration')end
+      end
+     end
+     visits[player]=current
+    end
+    local session=Dialogue.Sessions[player]
+    if session and not session.Busy and (os.clock()>session.Expires or not Dialogue.near(player,session.NPC)) then Dialogue.close(player)end
+   end
+   for player in visits do if player.Parent~=Players then visits[player]=nil end end
+  end
+ end)
+ print('[NPC] Etapa 2 iniciada. Combate, conjuração, fusões e interiores de dungeon permanecem fora desta etapa.')
+end
+return Service
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="16">
+        <Properties>
+          <string name="Name">Placement</string>
+          <string name="Source"><![CDATA[-- Read-only map queries. Never writes Terrain, moves buildings or guesses interiors.
+local P={}
+function P.resolve(world,path)
+ local node=world;for segment in path:gmatch('[^/]+')do node=node and node:FindFirstChild(segment)end;return node
+end
+function P.safe(position,ignore,expectedY)
+ local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances=ignore;params.IgnoreWater=false;params.RespectCanCollide=true
+ local hit=workspace:Raycast(position+Vector3.new(0,12,0),Vector3.new(0,-40,0),params)
+ if not hit or hit.Material==Enum.Material.Water or (hit.Normal and hit.Normal.Y<0.85) or math.abs(hit.Position.Y-expectedY)>6 then return nil end
+ local feet=hit.Position+Vector3.new(0,0.12,0)
+ local box=OverlapParams.new();box.FilterType=Enum.RaycastFilterType.Exclude;local ignored=table.clone(ignore);table.insert(ignored,workspace.Terrain);box.FilterDescendantsInstances=ignored;box.RespectCanCollide=true
+ for _,part in workspace:GetPartBoundsInBox(CFrame.new(feet+Vector3.new(0,3.7,0)),Vector3.new(4.8,7,4.8),box)do
+  if part.CanCollide then return nil end
+ end
+ return feet
+end
+function P.frame(world,entry,npcs,strict)
+ local anchor=P.resolve(world,entry.Anchor)
+ if not anchor or not anchor:IsA('BasePart') then return nil,'Âncora ausente: '..entry.Anchor end
+ local offset=Vector3.new(table.unpack(entry.Offset));local position=anchor.CFrame:PointToWorldSpace(offset)
+ if strict then
+  local safe=P.safe(position,{npcs},position.Y);if not safe then return nil,'Piso/obstáculo incompatível: '..entry.Id end;position=safe
+ end
+ local look=anchor.CFrame.LookVector
+ return CFrame.lookAt(position,position+Vector3.new(look.X,0,look.Z))
+end
+return P
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="17">
+        <Properties>
+          <string name="Name">PurchaseService</string>
+          <string name="Source"><![CDATA[-- Único ProcessReceipt da Experience. Ambos os Places usam o mesmo perfil/ledger.
+local Market=game:GetService('MarketplaceService')
+local Players=game:GetService('Players')
+local Shared=game.ReplicatedStorage.MedievalRPG
+local Config=require(Shared.Config.IdentityConfig)
+local Rules=require(Shared.Core.IdentityRules)
+local Data=require(script.Parent.DataService)
+local Purchase={OnGrant=nil,OnPending=nil}
+local extensions={}
+function Purchase.registerProduct(key,product,grant)
+ assert(not extensions[key] and not Config.Products[key] and type(grant)=='function','Produto duplicado/inválido')
+ for _,p in Config.Products do assert(product.Id==0 or p.Id~=product.Id,'ID oficial já usado') end
+ for _,e in extensions do assert(product.Id==0 or e.Product.Id~=product.Id,'ID oficial já registrado') end
+ extensions[key]={Product=product,Grant=grant}
+end
+local function product(key)return extensions[key] and extensions[key].Product or Config.Products[key]end
+function Purchase.available(key)
+ local p=product(key)
+ return p~=nil and p.Id>0 and Data.Persistent and (extensions[key]~=nil or key=='RacialRetry' or next(Config.Fusion.Recipes)~=nil)
+end
+function Purchase.prompt(player,key)
+ local profile=Data.get(player);local p=product(key)
+ if not profile or not Purchase.available(key) then return false,'Compra desativada: produto real e catálogo devem estar configurados.' end
+ if key=='RacialRetry' then
+  Rules.refresh(profile,Config,os.time())
+  if profile.Identity.Racial.Status~='Failed' or os.time()>=profile.Identity.Racial.ReadyAt or profile.Identity.RetryCredits>0 then return false,'Nova tentativa paga não é necessária.' end
+ end
+ local receiptCount=0;for _ in profile.Identity.Receipts do receiptCount+=1 end
+ if receiptCount>=1024 then return false,'Novas compras pausadas; o histórico precisa de manutenção segura.' end
+ local ok,info=pcall(function() return Market:GetProductInfoAsync(p.Id,Enum.InfoType.Product) end)
+ if not ok or not info.IsForSale or info.PriceInRobux~=p.Robux then return false,'Produto/preço oficial não corresponde à configuração. Nenhuma compra aberta.' end
+ local prompted=pcall(function() Market:PromptProductPurchase(player,p.Id) end)
+ return prompted,if prompted then 'Confirme somente na janela oficial Roblox.' else 'Não foi possível abrir a compra.'
+end
+function Purchase.process(receipt)
+ local pending=Enum.ProductPurchaseDecision.NotProcessedYet
+ if type(receipt)~='table' or type(receipt.PurchaseId)~='string' or #receipt.PurchaseId<1 or #receipt.PurchaseId>200 then return pending end
+ local known=false
+ for _,p in Config.Products do if p.Id>0 and p.Id==receipt.ProductId then known=true end end
+ local extension
+ for _,e in extensions do if e.Product.Id>0 and e.Product.Id==receipt.ProductId then known=true;extension=e end end
+ if not known then return pending end
+ local player=Players:GetPlayerByUserId(receipt.PlayerId)
+ if not player then return pending end
+ local granted
+ if extension then
+    if not Data.Persistent then return pending end
+    granted=Data.changeIdentity(player,function(state)
+        if state.Identity.Receipts[receipt.PurchaseId] then return true end
+        return extension.Grant(state,receipt.PurchaseId)
+    end)
+ else granted=Data.receipt(player,receipt.PurchaseId,receipt.ProductId) end
+ if not granted then
+    if Purchase.OnPending then Purchase.OnPending(player) end
+    return pending
+ end
+ if Purchase.OnGrant then Purchase.OnGrant(player) end
+ return Enum.ProductPurchaseDecision.PurchaseGranted
+end
+function Purchase.start()
+ Rules.validate(Config)
+ Market.ProcessReceipt=Purchase.process
+end
+return Purchase
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="18">
+        <Properties>
+          <string name="Name">QuestService</string>
+          <string name="Source"><![CDATA[-- Only trusted server code can invoke this adapter; no RemoteEvent exposes it.
+local Data=require(script.Parent.NPCDataService)
+local C=require(game.ReplicatedStorage.EldravynNPC.Registry)
+local R=require(game.ReplicatedStorage.EldravynNPC.Rules)
+local Q={CombatEnabled=false}
+function Q.combatEvent(player,event,eventId)
+ if not Q.CombatEnabled or type(event)~='string' or event:sub(1,7)~='Combat:' or type(eventId)~='string' or #eventId<1 or #eventId>100 then return false end
+ local known=false;for _,q in C.Quests do for _,o in q.Objectives do if o.Event==event then known=true end end end
+ if not known then return false end
+ return Data.change(player,function(s)
+  local ledger=s.NPC.CombatEvents or {};if ledger[eventId] then return false end
+  local count=0;for _ in ledger do count+=1 end;if count>=1024 then return false,'Adaptador exige rotação segura do histórico.'end
+  if not R.event(s,C,event,'CombatAdapter') then return false end
+  ledger[eventId]=true;s.NPC.CombatEvents=ledger;return true,'Evento de combate registrado.'
+ end)
+end
+return Q
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Folder" referent="19">
+      <Properties>
+        <string name="Name">Shared</string>
+      </Properties>
+      <Item class="ModuleScript" referent="20">
+        <Properties>
+          <string name="Name">DialogueConfig</string>
+          <string name="Source"><![CDATA[return {
+ GuildMaster={Greeting='A guilda reconhece jornadas honestas. Posso registrar sua entrada ou avaliar uma promoção.',Lore='Nossos registros preservam cada promoção; nenhum rank é vendido.'},
+ Reception={Greeting='Os contratos de exploração estão abertos. Aceite um antes de visitar seus objetivos.',Lore='Cada recompensa é entregue uma vez por conclusão. Contratos de tickets podem ser repetidos após 24 horas.'},
+ Dungeon={Greeting='Cada andar exige seu próprio ticket. Obtenha-o por contrato ou por moedas.',Lore='As duas dungeons possuem 10 e 20 andares. O acesso permanece fechado enquanto não houver destino e integração confirmados.'},
+ Blacksmith={Greeting='Trago as ferramentas; você traz minério e moedas. Confira o custo antes de melhorar uma peça.',Lore='A melhoria fica registrada na propriedade. Não adiciona ataques ou cálculo de dano nesta etapa.'},
+ Weapons={Greeting='Escolha uma arma para registrar como sua. O preço está no catálogo.',Lore='As armas são propriedades persistentes; ataques serão integrados posteriormente.'},
+ Armor={Greeting='Uma boa couraça começa com um trabalho cuidadoso.',Lore='Raridade e melhorias ficam registradas. O cálculo de defesa pertence a outra etapa.'},
+ General={Greeting='Provisões e minério para a jornada. Confira seu saldo antes de comprar.',Lore='Poções ficam armazenadas; não simulamos efeitos de sistemas futuros.'},
+ Classes={Greeting='Sua vocação começa com uma escolha. Conheça as três classes iniciais.',Lore='As evoluções exigem rank e contratos. Trocas pagas só concedem crédito após recibo oficial.'},
+ Magic={Greeting='Aprender as escolas vem antes de conjurar. Posso registrar estudos autorizados.',Lore='Luz, fogo e outras escolas aguardam suas técnicas. Não há conjuração nesta etapa.'},
+ Skills={Greeting='Disciplina precede domínio. As técnicas terão requisitos próprios.',Lore='A evolução de habilidades está planejada; não existe árvore de habilidades ativa nesta etapa.'},
+ Races={Greeting='Cada povo guarda uma história. Posso consultar sua linhagem já registrada.',Lore='Humanos, elfos, elfos negros, demônios e anjos possuem identidades próprias. Não sorteio nem altero raças.'},
+ Fusions={Greeting='Unir legados exige conhecimento que ainda está sendo estudado.',Lore='Fusões de raças e habilidades estão indisponíveis. Nenhum recurso será cobrado por elas.'},
+ Inn={Greeting='A lareira está acesa. Uma hospedagem registra esta cidade como local de descanso.',Lore='Seu ponto de retorno usa um destino existente e seguro, validado no servidor.'},
+ Healer={Greeting='Posso tratar feridas quando houver um sistema de vida compatível.',Lore='Sem personagem vivo ou sem necessidade de cura, não há cobrança.'},
+ Bank={Greeting='Seu dinheiro pode descansar no cofre. Confira os valores antes de confirmar.',Lore='Depósitos e saques movem moedas no mesmo registro persistente.'},
+ Guide={Greeting='O continente é grande. Posso marcar um serviço ou região que realmente existe.',Lore='Siga as estradas para as cidades e procure os marcos das clareiras nas florestas.'},
+ Tutorial={Greeting='Bem-vindo a Eldravyn. Vamos conhecer movimento, interação e a guilda.',Lore='PC: WASD e espaço; celular: direcional e salto. Use E ou toque no botão próximo de um NPC. Moedas pagam serviços; ranks abrem contratos.'},
+ TravelShop={Greeting='Minha caravana trouxe peças escolhidas para esta temporada.',Lore='O catálogo é configurável e estável; não existem eventos aleatórios de venda nesta etapa.'},
+ Ambient={Greeting='Que sua viagem seja tranquila. Esta cidade vive do trabalho de muita gente.',Lore='As muralhas protegem nossos mercados. Procure a guia para encontrar serviços.'},
+ AmbientLines={Guard={'Os portões devem permanecer livres.','As torres vigiam as estradas, não os viajantes.'},Resident={'As casas têm nomes; sempre encontramos o caminho de volta.','Ouça os sinos ao entardecer.'},Traveler={'A ponte levou minha caravana até aqui.','As florestas merecem respeito.'},Artisan={'Uma boa peça precisa de paciência.','A madeira das vigas conta a idade desta oficina.'},Employee={'O comerciante atende logo adiante.','Conferimos cada pedido antes da entrega.'},Adventurer={'Todo rank S começou como F.','A recepcionista conhece os contratos de exploração.'},Farmer={'O vento traz notícias antes das caravanas.','A cidade também depende do campo.'}}}
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="21">
+        <Properties>
+          <string name="Name">DungeonTicketConfig</string>
+          <string name="Source"><![CDATA[-- Every floor has a distinct ticket and contract. No destination is invented.
+local C={Order={'MalgorthDepths','FallenSanctum'},Dungeons={
+ MalgorthDepths={Name='Abismo de Malgorth',Floors=10,Rank='F',PlaceId=0,EntryEnabled=false,InteriorReady=false,RewardPreview='Recompensas serão validadas pela futura integração da dungeon.'},
+ FallenSanctum={Name='Santuário do Reino Caído',Floors=20,Rank='E',PlaceId=0,EntryEnabled=false,InteriorReady=false,RewardPreview='Recompensas serão validadas pela futura integração da dungeon.'}},Tickets={}}
+for _,id in C.Order do
+ local d=C.Dungeons[id]
+ for floor=1,d.Floors do
+  local key=id..':'..floor
+  local rank=if floor>15 then 'B' elseif floor>10 then 'C' elseif floor>5 then 'D' else d.Rank
+  C.Tickets[key]={Dungeon=id,Floor=floor,Name=d.Name..' • andar '..floor,Price=40+floor*15,Rank=rank,Quest='Ticket:'..key}
+ end
+end
+return C
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="22">
+        <Properties>
+          <string name="Name">NPCConfig</string>
+          <string name="Source"><![CDATA[-- Stage 2 is opt-in. No combat, racial roll or general inventory is started.
+local C={Version=1,MaxGold=1000000000,MaxStack=99,PromptDistance=12,SessionSeconds=90,
+ ClassChangeProduct={Id=0,Robux=100},InnPrice=15,HealPrice=10,
+ Ranks={'F','E','D','C','B','A','S'},
+ RankRequirements={F={XP=0,Quests=0,Benefit='Registro e missões iniciais'},E={XP=100,Quests=2,Benefit='Novos contratos e estudos de classe'},D={XP=260,Quests=4,Benefit='Contratos das fronteiras'},C={XP=600,Quests=8,Benefit='Autorizações intermediárias de dungeon'},B={XP=1200,Quests=12,Benefit='Contratos veteranos'},A={XP=2400,Quests=18,Benefit='Contratos de elite'},S={XP=4800,Quests=28,Benefit='Reconhecimento máximo da guilda'}},
+ Classes={Guerreiro={Text='Resistência e proteção; técnicas serão integradas depois.'},Espadachim={Text='Disciplina com lâminas; ataques pertencem à etapa de combate.'},Mago={Text='Estudo arcano; conjuração será integrada depois.'},Arqueiro={Legacy=true,Text='Classe anterior preservada; seleção inicial destaca as três classes principais.'}},
+ Advanced={Tanque={Base='Guerreiro',Rank='E',Quest='CityTour'},['Valquíria']={Base='Guerreiro',Rank='D',Quest='ForestSurvey'},Samurai={Base='Espadachim',Rank='E',Quest='CityTour'},Assassino={Base='Espadachim',Rank='D',Quest='ShadowDiscovery'},Invocador={Base='Mago',Rank='E',Quest='RuneStudy'},Necromante={Base='Mago',Rank='D',Quest='ShadowDiscovery',Secret=true}},
+ Spells={LuzGuia={Name='Luz-guia',School='Luz',Rank='E',Quest='RuneStudy',Price=20,RegistrationEnabled=true,Text='Registro de estudo disponível; conjuração em atualização futura.'},Chama={Name='Chama',School='Fogo',Rank='D',RegistrationEnabled=false,Text='Catálogo futuro; desbloqueio e conjuração indisponíveis.'}},
+ Roles={},Definitions={},AmbientRoles={'Guard','Resident','Traveler','Artisan','Employee','Adventurer','Farmer'}}
+local roles={
+ GuildMaster={'Maelis','Mestre da Guilda','GuildHall'},Reception={'Iria','Recepcionista da Guilda','GuildHall'},
+ Blacksmith={'Borin','Ferreiro','Blacksmith'},Weapons={'Aren','Comerciante de Armas','WeaponShop'},Armor={'Helga','Comerciante de Armaduras','Workshop'},General={'Nilo','Comerciante Geral','Market'},
+ Classes={'Kael','Mestre de Classes','TrainingHall'},Magic={'Seren','Mestre de Magia','MagicShop'},Skills={'Darian','Mentor de Habilidades','TrainingHall'},Races={'Liora','Especialista em Raças','Temple'},Fusions={'Orin','Especialista em Fusões','Workshop'},
+ Inn={'Mira','Estalajadeira','Tavern'},Healer={'Elian','Curandeiro','Temple'},Bank={'Cedric','Banqueiro','Market'},Guide={'Nara','Guia da Cidade','Stable'},Tutorial={'Theo','Guia de Novos Aventureiros','Spawn'},TravelShop={'Veyra','Mercadora Viajante','Market'},
+ Dungeon={'Selwyn','Administrador de Dungeon','Dungeon'},
+ Guard={'Sentinela','Guarda','Castle'},Resident={'Morador','Morador','SmallHouse'},Traveler={'Viajante','Viajante','Stable'},Artisan={'Artesão','Artesão','Workshop'},Employee={'Assistente','Funcionário de loja','Market'},Adventurer={'Aventureiro','Aventureiro','TrainingHall'},Farmer={'Camponês','Camponês','Barn'}}
+for id,r in roles do C.Roles[id]={Name=r[1],Title=r[2],Template=r[3]} end
+for _,role in {'GuildMaster','Reception','Blacksmith','Weapons','Armor','General','Classes','Magic','Skills','Races','Fusions','Inn','Healer','Bank','Guide','Tutorial','TravelShop'} do
+ table.insert(C.Definitions,{Id='Valoria_'..role,Role=role,City='Valoria'})
+end
+for _,city in {'Arkheim','Eldoria','Durakh','Asterion'} do
+ for _,role in {'Guide','General','Inn'} do table.insert(C.Definitions,{Id=city..'_'..role,Role=role,City=city}) end
+end
+for _,city in {'Valoria','Arkheim','Eldoria','Durakh','Asterion'} do
+ for i,role in C.AmbientRoles do table.insert(C.Definitions,{Id=city..'_Ambient_'..role,Role=role,City=city,Ambient=true,Variant=i}) end
+end
+for _,id in {'MalgorthDepths','FallenSanctum'} do table.insert(C.Definitions,{Id=id..'_Administrator',Role='Dungeon',City=id,Dungeon=id}) end
+return C
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="23">
+        <Properties>
+          <string name="Name">PlacementConfig</string>
+          <string name="Source"><![CDATA[-- Generated from the existing XML by scripts/npc_placements.py; no map generation.
+return {["NPCs"]={["Valoria_GuildMaster"]={["Id"]="Valoria_GuildMaster",["Anchor"]="Cities/Valoria/Valoria_1/Foundation",["Offset"]={-10,0.9199999999999972,-25.0},["Position"]={25.0,44.12,2545.0},["Yaw"]=1.5707963267948966,["Location"]="Guilda dos Aventureiros • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Reception"]={["Id"]="Valoria_Reception",["Anchor"]="Cities/Valoria/Valoria_1/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={25.0,44.12,2525.0},["Yaw"]=1.5707963267948966,["Location"]="Guilda dos Aventureiros • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Blacksmith"]={["Id"]="Valoria_Blacksmith",["Anchor"]="Cities/Valoria/Valoria_3/Foundation",["Offset"]={-18,0.9199999999999972,-25.0},["Position"]={175.5067684,44.12,1707.2737572},["Yaw"]=0.768921264224879,["Location"]="Ferreiro • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Weapons"]={["Id"]="Valoria_Weapons",["Anchor"]="Cities/Valoria/Valoria_4/Foundation",["Offset"]={10,0.9199999999999972,-24.0},["Position"]={-200.41861075999998,44.12,1315.8359976},["Yaw"]=-2.3507021804700186,["Location"]="Armas • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Armor"]={["Id"]="Valoria_Armor",["Anchor"]="Cities/Valoria/Valoria_20/Foundation",["Offset"]={10,0.9199999999999972,-24.0},["Position"]={-264.7578734,44.12,1302.7608083},["Yaw"]=-2.2413702129651982,["Location"]="Oficina • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_General"]={["Id"]="Valoria_General",["Anchor"]="Cities/Valoria/Valoria_7/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={-114.78053969999999,44.12,1395.35572875},["Yaw"]=-2.374459557710717,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Classes"]={["Id"]="Valoria_Classes",["Anchor"]="Cities/Valoria/Valoria_8/Foundation",["Offset"]={-10,0.9199999999999972,-24.0},["Position"]={-169.06474939999998,44.12,1368.4207282},["Yaw"]=-2.185455736921065,["Location"]="Campo de Treino • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Magic"]={["Id"]="Valoria_Magic",["Anchor"]="Cities/Valoria/Valoria_5/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={185.64338099999998,44.12,1302.3196148999998},["Yaw"]=2.3507021804700186,["Location"]="Magias • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Skills"]={["Id"]="Valoria_Skills",["Anchor"]="Cities/Valoria/Valoria_8/Foundation",["Offset"]={10,0.9199999999999972,-24.0},["Position"]={-180.5983554,44.12,1384.7601262},["Yaw"]=-2.185455736921065,["Location"]="Campo de Treino • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Races"]={["Id"]="Valoria_Races",["Anchor"]="Cities/Valoria/Valoria_9/Foundation",["Offset"]={-10,0.9199999999999972,-25.0},["Position"]={-176.582296,44.12,1619.5311559},["Yaw"]=-0.9288187146084507,["Location"]="Templo • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Fusions"]={["Id"]="Valoria_Fusions",["Anchor"]="Cities/Valoria/Valoria_20/Foundation",["Offset"]={-18,0.9199999999999972,-24.0},["Position"]={-247.3576738,44.12,1280.8237841},["Yaw"]=-2.2413702129651982,["Location"]="Oficina • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Inn"]={["Id"]="Valoria_Inn",["Anchor"]="Cities/Valoria/Valoria_2/Foundation",["Offset"]={-10,0.9199999999999972,-24.0},["Position"]={115.4746139,44.12,1394.63582528},["Yaw"]=2.374459557710717,["Location"]="Taverna • Hospedaria • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Healer"]={["Id"]="Valoria_Healer",["Anchor"]="Cities/Valoria/Valoria_9/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={-164.606686,44.12,1635.5494191},["Yaw"]=-0.9288187146084507,["Location"]="Templo • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Bank"]={["Id"]="Valoria_Bank",["Anchor"]="Cities/Valoria/Valoria_7/Foundation",["Offset"]={-18,0.9199999999999972,-25.0},["Position"]={-94.62324253999999,44.12,1375.9216511500001},["Yaw"]=-2.374459557710717,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Guide"]={["Id"]="Valoria_Guide",["Anchor"]="Cities/Valoria/Valoria_12/Foundation",["Offset"]={-10,0.9199999999999972,-24.0},["Position"]={-107.74479636000001,44.12,1314.8323156},["Yaw"]=-2.5679105464612797,["Location"]="Estábulo • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Tutorial"]={["Id"]="Valoria_Tutorial",["Anchor"]="Spawns/ValoriaSpawn",["Offset"]={16,-0.5,8},["Position"]={16.0,44.5,1508.0},["Yaw"]=0.0,["Location"]="Exterior do spawn ValoriaSpawn",["FutureBuilding"]=false},["Valoria_TravelShop"]={["Id"]="Valoria_TravelShop",["Anchor"]="Cities/Valoria/Valoria_7/Foundation",["Offset"]={26,0.9199999999999972,-25.0},["Position"]={-126.29899522,44.12,1406.46091595},["Yaw"]=-2.374459557710717,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_Guide"]={["Id"]="Arkheim_Guide",["Anchor"]="Cities/Arkheim/Arkheim_11/Foundation",["Offset"]={-10,0.9199999999999972,-25.0},["Position"]={112.196931,48.12,-1093.669282},["Yaw"]=0.6010003159296513,["Location"]="Estábulo • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_General"]={["Id"]="Arkheim_General",["Anchor"]="Cities/Arkheim/Arkheim_12/Foundation",["Offset"]={10,0.9199999999999972,-24.0},["Position"]={-122.8576452,48.12,-1371.6540268},["Yaw"]=-2.3013992496167868,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_Inn"]={["Id"]="Arkheim_Inn",["Anchor"]="Cities/Arkheim/Arkheim_7/Foundation",["Offset"]={-10,0.9199999999999972,-25.0},["Position"]={114.78053969999999,48.12,-1379.64427125},["Yaw"]=2.374459557710717,["Location"]="Taverna • Hospedaria • exterior, lateral da fachada",["FutureBuilding"]=false},["Eldoria_Guide"]={["Id"]="Eldoria_Guide",["Anchor"]="Cities/Eldoria/Eldoria_7/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={1610.2195203,48.12,-329.64427125000003},["Yaw"]=-2.374459557710717,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Eldoria_General"]={["Id"]="Eldoria_General",["Anchor"]="Cities/Eldoria/Eldoria_7/Foundation",["Offset"]={-18,0.9199999999999972,-25.0},["Position"]={1630.37681746,48.12,-349.07834885},["Yaw"]=-2.374459557710717,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Eldoria_Inn"]={["Id"]="Eldoria_Inn",["Anchor"]="Cities/Eldoria/Eldoria_8/Foundation",["Offset"]={-10,0.9199999999999972,-24.0},["Position"]={1832.4754193,48.12,-338.51221888},["Yaw"]=2.4475198683453745,["Location"]="Taverna • Hospedaria • exterior, lateral da fachada",["FutureBuilding"]=false},["Durakh_Guide"]={["Id"]="Durakh_Guide",["Anchor"]="Cities/Durakh/Durakh_8/Foundation",["Offset"]={10,0.9199999999999972,-24.0},["Position"]={-1823.90288328,52.12,-346.05460646},["Yaw"]=-2.520580151762402,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Durakh_General"]={["Id"]="Durakh_General",["Anchor"]="Cities/Durakh/Durakh_8/Foundation",["Offset"]={-18,0.9199999999999972,-24.0},["Position"]={-1801.13077,52.12,-362.3466565},["Yaw"]=-2.520580151762402,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Durakh_Inn"]={["Id"]="Durakh_Inn",["Anchor"]="Cities/Durakh/Durakh_6/Foundation",["Offset"]={-10,0.9199999999999972,-24.0},["Position"]={-1609.5254461000002,52.12,-330.36417472},["Yaw"]=2.374459557710717,["Location"]="Taverna • Hospedaria • exterior, lateral da fachada",["FutureBuilding"]=false},["Asterion_Guide"]={["Id"]="Asterion_Guide",["Anchor"]="Cities/Asterion/Asterion_12/Foundation",["Offset"]={10,0.9199999999999972,-24.0},["Position"]={1609.5254461000002,64.12,1694.63582528},["Yaw"]=-2.374459557710717,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Asterion_General"]={["Id"]="Asterion_General",["Anchor"]="Cities/Asterion/Asterion_12/Foundation",["Offset"]={-18,0.9199999999999972,-24.0},["Position"]={1629.68274326,64.12,1675.2017476800002},["Yaw"]=-2.374459557710717,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Asterion_Inn"]={["Id"]="Asterion_Inn",["Anchor"]="Cities/Asterion/Asterion_6/Foundation",["Offset"]={-10,0.9199999999999972,-24.0},["Position"]={1832.4754193,64.12,1686.4878611200002},["Yaw"]=2.4475198683453745,["Location"]="Taverna • Hospedaria • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Ambient_Guard"]={["Id"]="Valoria_Ambient_Guard",["Anchor"]="Cities/Valoria/Valoria_13/Foundation",["Offset"]={-10,0.9199999999999972,-30.0},["Position"]={46.4885545,44.12,1702.9847495},["Yaw"]=0.2731819638144619,["Location"]="Castelo Real • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Ambient_Resident"]={["Id"]="Valoria_Ambient_Resident",["Anchor"]="Cities/Valoria/Valoria_16/Foundation",["Offset"]={-10,0.9199999999999972,-23.5},["Position"]={-199.97712589,44.12,1236.67624435},["Yaw"]=-2.461832812155844,["Location"]="Casa do Carvalho • 016 • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Ambient_Traveler"]={["Id"]="Valoria_Ambient_Traveler",["Anchor"]="Cities/Valoria/Valoria_12/Foundation",["Offset"]={10,0.9199999999999972,-24.0},["Position"]={-124.54296236000002,44.12,1325.6868828},["Yaw"]=-2.5679105464612797,["Location"]="Estábulo • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Ambient_Artisan"]={["Id"]="Valoria_Ambient_Artisan",["Anchor"]="Cities/Valoria/Valoria_25/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={199.0342165,44.12,1237.8428299},["Yaw"]=2.461832812155844,["Location"]="Oficina • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Ambient_Employee"]={["Id"]="Valoria_Ambient_Employee",["Anchor"]="Cities/Valoria/Valoria_19/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={-148.34480649999998,44.12,1453.9694335},["Yaw"]=-1.9360978107879891,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Ambient_Adventurer"]={["Id"]="Valoria_Ambient_Adventurer",["Anchor"]="Cities/Valoria/Valoria_8/Foundation",["Offset"]={-26,0.9199999999999972,-24.0},["Position"]={-159.8378646,44.12,1355.3492098},["Yaw"]=-2.185455736921065,["Location"]="Campo de Treino • exterior, lateral da fachada",["FutureBuilding"]=false},["Valoria_Ambient_Farmer"]={["Id"]="Valoria_Ambient_Farmer",["Anchor"]="Cities/Valoria/Valoria_10/Foundation",["Offset"]={-10,0.9199999999999972,-24.0},["Position"]={-129.2578068,44.12,1670.8461324},["Yaw"]=-0.6010003159296513,["Location"]="Celeiro • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_Ambient_Guard"]={["Id"]="Arkheim_Ambient_Guard",["Anchor"]="Cities/Arkheim/Arkheim_1/Foundation",["Offset"]={-10,0.9199999999999972,-30.0},["Position"]={46.4885545,48.12,-1072.0152505},["Yaw"]=0.2731819638144619,["Location"]="Castelo Real • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_Ambient_Resident"]={["Id"]="Arkheim_Ambient_Resident",["Anchor"]="Cities/Arkheim/Arkheim_21/Foundation",["Offset"]={-10,0.9199999999999972,-24.0},["Position"]={215.21729676,48.12,-1525.3627686},["Yaw"]=2.461832812155844,["Location"]="Casa da Fonte • 021 • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_Ambient_Traveler"]={["Id"]="Arkheim_Ambient_Traveler",["Anchor"]="Cities/Arkheim/Arkheim_11/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={128.692339,48.12,-1104.978638},["Yaw"]=0.6010003159296513,["Location"]="Estábulo • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_Ambient_Artisan"]={["Id"]="Arkheim_Ambient_Artisan",["Anchor"]="Cities/Arkheim/Arkheim_25/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={251.54569425,48.12,-1487.287059},["Yaw"]=2.2413702129651982,["Location"]="Oficina • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_Ambient_Employee"]={["Id"]="Arkheim_Ambient_Employee",["Anchor"]="Cities/Arkheim/Arkheim_19/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={-69.82469375,48.12,-1413.7426977},["Yaw"]=-2.7397610327812085,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_Ambient_Adventurer"]={["Id"]="Arkheim_Ambient_Adventurer",["Anchor"]="Cities/Arkheim/Arkheim_3/Foundation",["Offset"]={-10,0.9199999999999972,-25.0},["Position"]={181.256058,48.12,-1073.2891260000001},["Yaw"]=0.768921264224879,["Location"]="Campo de Treino • exterior, lateral da fachada",["FutureBuilding"]=false},["Arkheim_Ambient_Farmer"]={["Id"]="Arkheim_Ambient_Farmer",["Anchor"]="Cities/Arkheim/Arkheim_19/Foundation",["Offset"]={-18,0.9199999999999972,-25.0},["Position"]={-44.05500015,48.12,-1424.6936301399999},["Yaw"]=-2.7397610327812085,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Eldoria_Ambient_Guard"]={["Id"]="Eldoria_Ambient_Guard",["Anchor"]="Cities/Eldoria/Eldoria_19/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={1576.6551935,48.12,-271.0306365},["Yaw"]=-1.9360978107879891,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Eldoria_Ambient_Resident"]={["Id"]="Eldoria_Ambient_Resident",["Anchor"]="Cities/Eldoria/Eldoria_16/Foundation",["Offset"]={-10,0.9199999999999972,-23.5},["Position"]={1616.98389946,48.12,-410.58759855},["Yaw"]=-2.5679105464612797,["Location"]="Casa do Carvalho • 016 • exterior, lateral da fachada",["FutureBuilding"]=false},["Eldoria_Ambient_Traveler"]={["Id"]="Eldoria_Ambient_Traveler",["Anchor"]="Cities/Eldoria/Eldoria_19/Foundation",["Offset"]={-18,0.9199999999999972,-25.0},["Position"]={1586.6576587,48.12,-297.1830873},["Yaw"]=-1.9360978107879891,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Eldoria_Ambient_Artisan"]={["Id"]="Eldoria_Ambient_Artisan",["Anchor"]="Cities/Eldoria/Eldoria_20/Foundation",["Offset"]={10,0.9199999999999972,-24.0},["Position"]={1509.78271324,48.12,-475.36276860000004},["Yaw"]=-2.461832812155844,["Location"]="Oficina • exterior, lateral da fachada",["FutureBuilding"]=false},["Eldoria_Ambient_Employee"]={["Id"]="Eldoria_Ambient_Employee",["Anchor"]="Cities/Eldoria/Eldoria_19/Foundation",["Offset"]={26,0.9199999999999972,-25.0},["Position"]={1570.9394991,48.12,-256.0863789},["Yaw"]=-1.9360978107879891,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Eldoria_Ambient_Adventurer"]={["Id"]="Eldoria_Ambient_Adventurer",["Anchor"]="Cities/Eldoria/Eldoria_11/Foundation",["Offset"]={-10,0.9199999999999972,-25.0},["Position"]={1889.606666,48.12,-89.4506149},["Yaw"]=0.9288187146084507,["Location"]="Campo de Treino • exterior, lateral da fachada",["FutureBuilding"]=false},["Eldoria_Ambient_Farmer"]={["Id"]="Eldoria_Ambient_Farmer",["Anchor"]="Cities/Eldoria/Eldoria_19/Foundation",["Offset"]={-10,0.9199999999999972,-31.0},["Position"]={1589.4039080999999,48.12,-287.5675731},["Yaw"]=-1.9360978107879891,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Durakh_Ambient_Guard"]={["Id"]="Durakh_Ambient_Guard",["Anchor"]="Cities/Durakh/Durakh_14/Foundation",["Offset"]={10,0.9199999999999972,-24.0},["Position"]={-1829.7903876799999,52.12,-411.85552243999996},["Yaw"]=-2.677183296630411,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Durakh_Ambient_Resident"]={["Id"]="Durakh_Ambient_Resident",["Anchor"]="Cities/Durakh/Durakh_16/Foundation",["Offset"]={-10,0.9199999999999972,-23.5},["Position"]={-1915.16881095,52.12,-495.49228191},["Yaw"]=-2.498576588810855,["Location"]="Casa do Carvalho • 016 • exterior, lateral da fachada",["FutureBuilding"]=false},["Durakh_Ambient_Traveler"]={["Id"]="Durakh_Ambient_Traveler",["Anchor"]="Cities/Durakh/Durakh_14/Foundation",["Offset"]={-18,0.9199999999999972,-24.0},["Position"]={-1804.75597296,52.12,-424.39657628},["Yaw"]=-2.677183296630411,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Durakh_Ambient_Artisan"]={["Id"]="Durakh_Ambient_Artisan",["Anchor"]="Cities/Durakh/Durakh_15/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={-1464.6821773000001,52.12,-23.566053385},["Yaw"]=0.8818505202399097,["Location"]="Oficina • exterior, lateral da fachada",["FutureBuilding"]=false},["Durakh_Ambient_Employee"]={["Id"]="Durakh_Ambient_Employee",["Anchor"]="Cities/Durakh/Durakh_14/Foundation",["Offset"]={26,0.9199999999999972,-24.0},["Position"]={-1844.09576752,52.12,-404.68920596},["Yaw"]=-2.677183296630411,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Durakh_Ambient_Adventurer"]={["Id"]="Durakh_Ambient_Adventurer",["Anchor"]="Cities/Durakh/Durakh_14/Foundation",["Offset"]={-10,0.9199999999999972,-30.0},["Position"]={-1809.2212941999999,52.12,-415.4489006},["Yaw"]=-2.677183296630411,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Durakh_Ambient_Farmer"]={["Id"]="Durakh_Ambient_Farmer",["Anchor"]="Cities/Durakh/Durakh_14/Foundation",["Offset"]={18,0.9199999999999972,-30.0},["Position"]={-1834.25570892,52.12,-402.90784676},["Yaw"]=-2.677183296630411,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Asterion_Ambient_Guard"]={["Id"]="Asterion_Ambient_Guard",["Anchor"]="Cities/Asterion/Asterion_1/Foundation",["Offset"]={-10,0.9199999999999972,-30.0},["Position"]={1771.4886245,64.12,2002.9847495},["Yaw"]=0.2731819638144619,["Location"]="Castelo Real • exterior, lateral da fachada",["FutureBuilding"]=false},["Asterion_Ambient_Resident"]={["Id"]="Asterion_Ambient_Resident",["Anchor"]="Cities/Asterion/Asterion_26/Foundation",["Offset"]={-10,0.9199999999999972,-23.5},["Position"]={1521.3175885,64.12,1867.99790848},["Yaw"]=-1.2020006851218812,["Location"]="Casa da Lua Clara • 026 • exterior, lateral da fachada",["FutureBuilding"]=false},["Asterion_Ambient_Traveler"]={["Id"]="Asterion_Ambient_Traveler",["Anchor"]="Cities/Asterion/Asterion_19/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={1600.999826,64.12,1626.5267910999999},["Yaw"]=-2.5679105464612797,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["Asterion_Ambient_Artisan"]={["Id"]="Asterion_Ambient_Artisan",["Anchor"]="Cities/Asterion/Asterion_25/Foundation",["Offset"]={10,0.9199999999999972,-25.0},["Position"]={1820.1661709,64.12,1546.0622380000002},["Yaw"]=2.746147426161197,["Location"]="Oficina • exterior, lateral da fachada",["FutureBuilding"]=false},["Asterion_Ambient_Employee"]={["Id"]="Asterion_Ambient_Employee",["Anchor"]="Cities/Asterion/Asterion_19/Foundation",["Offset"]={-18,0.9199999999999972,-25.0},["Position"]={1624.5172584,64.12,1611.33039702},["Yaw"]=-2.5679105464612797,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=false},["Asterion_Ambient_Adventurer"]={["Id"]="Asterion_Ambient_Adventurer",["Anchor"]="Cities/Asterion/Asterion_13/Foundation",["Offset"]={-10,0.9199999999999972,-25.0},["Position"]={1839.341934,64.12,1620.0141405},["Yaw"]=2.6225468834463066,["Location"]="Campo de Treino • exterior, lateral da fachada",["FutureBuilding"]=false},["Asterion_Ambient_Farmer"]={["Id"]="Asterion_Ambient_Farmer",["Anchor"]="Cities/Asterion/Asterion_19/Foundation",["Offset"]={26,0.9199999999999972,-25.0},["Position"]={1587.5612932,64.12,1635.2104448599998},["Yaw"]=-2.5679105464612797,["Location"]="Mercado • exterior, lateral da fachada",["FutureBuilding"]=true},["MalgorthDepths_Administrator"]={["Id"]="MalgorthDepths_Administrator",["Anchor"]="DungeonEntrance/MalgorthGate/Forecourt",["Offset"]={-16,1.12,-16},["Position"]={-16.0,49.12,-2566.0},["Yaw"]=0.0,["Location"]="Pátio existente da entrada MalgorthGate",["FutureBuilding"]=false},["FallenSanctum_Administrator"]={["Id"]="FallenSanctum_Administrator",["Anchor"]="DungeonEntrance/FallenSanctumGate/Forecourt",["Offset"]={-16,1.12,-16},["Position"]={-1366.0,65.12,-2536.0},["Yaw"]=0.0,["Location"]="Pátio existente da entrada FallenSanctumGate",["FutureBuilding"]=false}},["Regions"]={["Valoria"]={["Anchor"]="IntegrationPoints/Valoria_Services",["Name"]="Valoria",["Radius"]=100},["Arkheim"]={["Anchor"]="IntegrationPoints/Arkheim_Services",["Name"]="Arkheim",["Radius"]=100},["Eldoria"]={["Anchor"]="IntegrationPoints/Eldoria_Services",["Name"]="Eldoria",["Radius"]=100},["Durakh"]={["Anchor"]="IntegrationPoints/Durakh_Services",["Name"]="Durakh",["Radius"]=100},["Asterion"]={["Anchor"]="IntegrationPoints/Asterion_Services",["Name"]="Asterion",["Radius"]=100},["Sylvarin"]={["Anchor"]="IntegrationPoints/Sylvarin_Clearing",["Name"]="Sylvarin",["Radius"]=28.0},["Nocthar"]={["Anchor"]="IntegrationPoints/Nocthar_Clearing",["Name"]="Nocthar",["Radius"]=28.0},["Vespera"]={["Anchor"]="IntegrationPoints/Vespera_Clearing",["Name"]="Vespera",["Radius"]=28.0},["MalgorthDepths"]={["Anchor"]="IntegrationPoints/MalgorthDepths_Approach",["Name"]="MalgorthDepths",["Radius"]=28.0},["FallenSanctum"]={["Anchor"]="IntegrationPoints/FallenSanctum_Approach",["Name"]="FallenSanctum",["Radius"]=28.0}}}
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="24">
+        <Properties>
+          <string name="Name">QuestConfig</string>
+          <string name="Source"><![CDATA[return {
+ FirstContact={Name='Conhecer a guilda',Rank='F',Gold=70,XP=60,Objectives={{Event='Talk:Guide',Need=1},{Event='Talk:Blacksmith',Need=1}},Description='Converse com a guia e com o ferreiro.'},
+ CityTour={Name='Estradas do continente',Rank='F',Gold=110,XP=80,Objectives={{Event='Visit:Eldoria',Need=1},{Event='Visit:Durakh',Need=1}},Description='Visite as cidades de Eldoria e Durakh.'},
+ ForestSurvey={Name='Entre as grandes copas',Rank='E',Gold=140,XP=120,Objectives={{Event='Visit:Sylvarin',Need=1},{Event='Visit:Nocthar',Need=1},{Event='Visit:Vespera',Need=1}},Description='Explore as três grandes florestas.'},
+ RuneStudy={Name='Primeiras inscrições',Rank='F',Gold=80,XP=70,Objectives={{Event='Talk:Magic',Need=1},{Event='Talk:Races',Need=1}},Description='Consulte o mestre arcano e a especialista em raças.'},
+ ShadowDiscovery={Name='O arquivo oculto',Rank='D',Gold=150,XP=120,SecretRegion='Vespera',Objectives={{Event='Visit:Vespera',Need=1},{Event='Talk:Magic',Need=1}},Description='Descubra Véspera para encontrar o contrato secreto.'},
+ FutureHunt={Name='Ameaças da estrada',Rank='F',Gold=100,XP=100,FutureCombat=true,Objectives={{Event='Combat:Bandit',Need=3}},Description='Contrato cadastrado. Aguarda eventos de um sistema de combate autorizado no servidor.'}}
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="25">
+        <Properties>
+          <string name="Name">Registry</string>
+          <string name="Source"><![CDATA[local C=table.clone(require(script.Parent.NPCConfig))
+local shop=require(script.Parent.ShopConfig)
+C.Items=shop.Items;C.Shops=shop.Shops;C.Upgrade=shop.Upgrade
+C.Dungeon=require(script.Parent.DungeonTicketConfig)
+C.Quests=table.clone(require(script.Parent.QuestConfig))
+local regions={'Valoria','Eldoria','Durakh','Arkheim','Asterion','Sylvarin','Nocthar','Vespera'}
+for key,t in C.Dungeon.Tickets do
+ C.Quests[t.Quest]={Name='Autorização: '..t.Name,Rank=t.Rank,Gold=0,XP=12,Ticket=key,Cooldown=86400,
+  Objectives={{Event='Visit:'..regions[(t.Floor-1)%#regions+1],Need=1},{Event='Talk:Guide',Need=1}},
+  Description='Visite a região indicada e converse com uma guia. Uma autorização específica por conclusão.'}
+end
+C.Dialogue=require(script.Parent.DialogueConfig)
+return C
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="26">
+        <Properties>
+          <string name="Name">Rules</string>
+          <string name="Source"><![CDATA[-- Pure authoritative NPC transactions. Never call this module with client prices/events.
+local R={}
+function R.integer(v,min,max)return type(v)=='number' and v==v and v%1==0 and v>=min and v<=max end
+local function copy(v)if type(v)~='table' then return v end;local n={};for k,x in v do n[k]=copy(x)end;return n end
+function R.restore(s,raw,C)
+ local n=raw and raw.NPC
+ if n~=nil then
+  assert(type(n)=='table' and n.Version==1,'Extensão NPC incompatível; perfil preservado')
+  for _,key in {'Bank','Completed','ClassCredits','AdmissionSeq'} do assert(R.integer(n[key],0,C.MaxGold),'Dado NPC inválido: '..key)end
+  for _,key in {'Quests','Tickets','Upgrades','Magic','Tutorial','History','Discovered','Consumption'} do assert(type(n[key])=='table','Tabela NPC inválida: '..key)end
+  s.NPC=copy(n)
+ else s.NPC={Version=1,Bank=0,Completed=0,ClassCredits=0,AdmissionSeq=0,Quests={},Tickets={},Upgrades={},Magic={},Tutorial={Step=0,Skipped=false},History={},Discovered={},Consumption={}} end
+ assert(R.integer(s.NPC.Tutorial.Step,0,4) and type(s.NPC.Tutorial.Skipped)=='boolean','Tutorial inválido')
+ assert(s.NPC.PendingHeal==nil or s.NPC.PendingHeal==C.HealPrice,'Cura pendente inválida')
+ for id,value in s.NPC.Magic do assert(C.Spells[id] and value==true,'Registro de magia inválido')end
+ for key,value in s.NPC.Tickets do assert(C.Dungeon.Tickets[key] and R.integer(value,0,C.MaxStack),'Ticket persistido inválido')end
+ for key,value in s.NPC.Upgrades do assert(C.Items[key] and R.integer(value,0,C.Upgrade.Max),'Melhoria persistida inválida')end
+ for key,q in s.NPC.Quests do
+  assert(C.Quests[key] and type(q)=='table' and type(q.Counts)=='table' and (q.Status=='Active' or q.Status=='Claimed'),'Missão NPC inválida')
+  for i,o in C.Quests[key].Objectives do assert(R.integer(q.Counts[i],0,o.Need),'Contagem inválida')end
+  assert(q.LastClaim==nil or R.integer(q.LastClaim,0,100000000000),'Data de missão inválida')
+ end
+ if raw then
+  if table.find(C.Ranks,raw.Rank) then s.Rank=raw.Rank end
+  if C.Classes[raw.Class] or C.Advanced[raw.Class] then s.Class=raw.Class end
+  -- NPC class evolution uses its own completed-contract proof, not combat challenges.
+  for id,e in C.Advanced do
+   local q=s.NPC.Quests[e.Quest]
+   if raw.Identity and raw.Identity.Classes and raw.Identity.Classes[id]==true and q and q.Status=='Claimed' and R.rank(s,C,e.Rank) then s.Identity.Classes[id]=true end
+  end
+  s.Identity.CurrentClass=s.Class
+ end
+ return s
+end
+function R.rank(s,C,needed)return (table.find(C.Ranks,s.Rank) or 0)>=(table.find(C.Ranks,needed) or 99)end
+function R.completed(s,id)local q=s.NPC.Quests[id];return q~=nil and q.Status=='Claimed' end
+local function history(s,text,now)
+ table.insert(s.NPC.History,{Text=text,At=now});if #s.NPC.History>32 then table.remove(s.NPC.History,1)end
+end
+function R.register(s,C,now)
+ if s.Rank~='' then return false,'Registro já existente.' end
+ s.Rank='F';history(s,'Registro no rank F',now);return true,'Registro concluído: rank F.'
+end
+function R.promote(s,C,now)
+ local index=table.find(C.Ranks,s.Rank)
+ if not index or index==#C.Ranks then return false,'Registro necessário ou rank máximo atingido.' end
+ local rank=C.Ranks[index+1];local req=C.RankRequirements[rank]
+ if s.XP<req.XP or s.NPC.Completed<req.Quests then return false,'Requisitos de promoção ainda não cumpridos.' end
+ s.Rank=rank;history(s,'Promoção para '..rank,now);return true,'Promovido ao rank '..rank..'.'
+end
+function R.accept(s,C,id,now)
+ local q=C.Quests[id];local old=s.NPC.Quests[id]
+ if not q or not R.rank(s,C,q.Rank) then return false,'Missão ou rank indisponível.' end
+ if q.SecretRegion and not s.NPC.Discovered[q.SecretRegion] then return false,'Contrato ainda não descoberto.' end
+ if old and (old.Status=='Active' or not q.Cooldown or now<(old.LastClaim or 0)+q.Cooldown) then return false,'Contrato ativo, concluído ou em espera.' end
+ local counts={};for _ in q.Objectives do table.insert(counts,0)end
+ s.NPC.Quests[id]={Status='Active',Counts=counts,LastClaim=old and old.LastClaim};return true,'Missão aceita. Os objetivos começam agora.'
+end
+function R.abandon(s,_,id)
+ local q=s.NPC.Quests[id]
+ if not q or q.Status~='Active' then return false,'Missão não está ativa.' end
+ -- Keep the previous claim timestamp for repeatable ticket contracts.
+ if q.LastClaim then q.Status='Claimed' else s.NPC.Quests[id]=nil end
+ return true,'Missão abandonada.'
+end
+function R.event(s,C,event,source)
+ if type(event)~='string' then return false end
+ if string.sub(event,1,7)=='Combat:' and source~='CombatAdapter' then return false end
+ local changed=false
+ local region=string.match(event,'^Visit:(.+)$')
+ if region and not s.NPC.Discovered[region] then s.NPC.Discovered[region]=true;changed=true end
+ for id,state in s.NPC.Quests do
+  local q=C.Quests[id]
+  if q and state.Status=='Active' then for i,o in q.Objectives do
+   if o.Event==event and state.Counts[i]<o.Need then state.Counts[i]+=1;changed=true end
+  end end
+ end
+ local t=s.NPC.Tutorial
+ local target=({[0]='Talk:Tutorial',[1]='Talk:GuildMaster',[2]='Talk:Reception',[3]='Talk:Guide'})[t.Step]
+ if not t.Skipped and event==target then t.Step+=1;changed=true end
+ return changed
+end
+function R.claim(s,C,id,now)
+ local q,state=C.Quests[id],s.NPC.Quests[id]
+ if not q or not state or state.Status~='Active' then return false,'Contrato não está ativo ou recompensa já entregue.' end
+ for i,o in q.Objectives do if state.Counts[i]<o.Need then return false,'Objetivos pendentes.' end end
+ if q.Ticket and (s.NPC.Tickets[q.Ticket] or 0)>=C.MaxStack then return false,'Limite de tickets; nenhuma recompensa consumida.' end
+ if s.Gold+q.Gold>C.MaxGold or s.XP+q.XP>C.MaxGold or s.NPC.Completed>=C.MaxGold then return false,'Limite de saldo; recompensa preservada.' end
+ state.Status='Claimed';state.LastClaim=now;s.Gold+=q.Gold;s.XP+=q.XP;s.NPC.Completed+=1
+ if q.Ticket then s.NPC.Tickets[q.Ticket]=(s.NPC.Tickets[q.Ticket] or 0)+1 end
+ return true,'Contrato concluído; recompensa registrada.'
+end
+function R.buy(s,C,id,role)
+ local item=C.Items[id]
+ if not item or not table.find(C.Shops[role] or {},id) then return false,'Item não vendido por este NPC.' end
+ if not R.rank(s,C,item.MinRank) then return false,'Rank insuficiente.' end
+ local count=s.Inventory[id] or 0;local limit=if item.Kind=='Weapon' or item.Kind=='Armor' then 1 else C.MaxStack
+ if count>=limit or s.Gold<item.Price then return false,'Saldo insuficiente ou limite de propriedade atingido.' end
+ s.Gold-=item.Price;s.Inventory[id]=count+1;return true,'Compra registrada. Nenhum ataque ou efeito foi ativado.'
+end
+function R.sell(s,C,id,role)
+ local item=C.Items[id]
+ if not item or not table.find(C.Shops[role] or {},id) or not item.Sell or (s.Inventory[id] or 0)<1 then return false,'Item indisponível para venda.' end
+ if s.Equipment==id or s.Armor==id then return false,'Item equipado no sistema anterior; venda bloqueada.' end
+ if (s.NPC.Upgrades[id] or 0)>0 then return false,'Peça aprimorada preservada; venda indisponível.' end
+ if s.Gold+item.Sell>C.MaxGold then return false,'Saldo máximo atingido.' end
+ s.Inventory[id]-=1;if s.Inventory[id]==0 then s.Inventory[id]=nil end;s.Gold+=item.Sell;return true,'Venda registrada.'
+end
+function R.bank(s,C,direction,amount)
+ if not R.integer(amount,1,C.MaxGold) then return false,'Valor inválido.' end
+ if direction=='Deposit' and s.Gold>=amount and s.NPC.Bank+amount<=C.MaxGold then s.Gold-=amount;s.NPC.Bank+=amount
+ elseif direction=='Withdraw' and s.NPC.Bank>=amount and s.Gold+amount<=C.MaxGold then s.NPC.Bank-=amount;s.Gold+=amount
+ else return false,'Saldo insuficiente ou limite excedido.' end
+ return true,'Operação bancária registrada.'
+end
+function R.upgradeCost(s,C,id)
+ local item=C.Items[id];local level=s.NPC.Upgrades[id] or 0
+ if not item or (item.Kind~='Weapon' and item.Kind~='Armor') or (s.Inventory[id] or 0)<1 or level>=C.Upgrade.Max then return nil end
+ return {Level=level,Gold=(level+1)*C.Upgrade.GoldPerLevel,Ore=(level+1)*C.Upgrade.OrePerLevel}
+end
+function R.upgrade(s,C,id)
+ local cost=R.upgradeCost(s,C,id)
+ if not cost or s.Gold<cost.Gold or (s.Inventory.Ore or 0)<cost.Ore then return false,'Peça, nível ou recursos insuficientes.' end
+ s.Gold-=cost.Gold;s.Inventory.Ore-=cost.Ore;if s.Inventory.Ore==0 then s.Inventory.Ore=nil end
+ s.NPC.Upgrades[id]=cost.Level+1;return true,'Aprimoramento +'..(cost.Level+1)..' registrado; cálculo de combate não é ativado.'
+end
+function R.ticket(s,C,key)
+ local t=C.Dungeon.Tickets[key]
+ if not t or not R.rank(s,C,t.Rank) then return false,'Ticket ou rank inválido.' end
+ if s.Gold<t.Price or (s.NPC.Tickets[key] or 0)>=C.MaxStack then return false,'Saldo insuficiente ou limite de tickets.' end
+ s.Gold-=t.Price;s.NPC.Tickets[key]=(s.NPC.Tickets[key] or 0)+1;return true,'Ticket específico comprado.'
+end
+function R.admit(s,C,key,now)
+ local t=C.Dungeon.Tickets[key];local d=t and C.Dungeon.Dungeons[t.Dungeon]
+ if not d or not d.EntryEnabled or not d.InteriorReady or not R.integer(d.PlaceId,1,9007199254740991) then return false,'Interior/destino não habilitado; nenhum ticket consumido.' end
+ if not R.rank(s,C,t.Rank) or (s.NPC.Tickets[key] or 0)<1 or s.NPC.Admission and s.NPC.Admission.Status=='Pending' then return false,'Rank, ticket ou entrada pendente inválidos.' end
+ s.NPC.Tickets[key]-=1;s.NPC.AdmissionSeq+=1
+ s.NPC.Admission={Id=s.NPC.AdmissionSeq,Ticket=key,At=now,Status='Pending'}
+ s.NPC.Consumption[key]=(s.NPC.Consumption[key] or 0)+1
+ return true,'Ticket consumido e admissão registrada.'
+end
+function R.confirmArrival(s,C,id,key,placeId)
+ local a=s.NPC.Admission;local t=C.Dungeon.Tickets[key];local d=t and C.Dungeon.Dungeons[t.Dungeon]
+ if not a or a.Id~=id or a.Ticket~=key or a.Status~='Pending' or not d or not d.EntryEnabled or not d.InteriorReady or not R.integer(placeId,1,9007199254740991) or d.PlaceId~=placeId then return false,'Admissão/destino não autorizado.' end
+ a.Status='Arrived';return true,'Chegada confirmada pelo adaptador do servidor.'
+end
+function R.refundAdmission(s,C,id)
+ local a=s.NPC.Admission
+ if not a or a.Id~=id or a.Status~='Pending' then return false,'Admissão já finalizada.' end
+ if (s.NPC.Tickets[a.Ticket] or 0)>=C.MaxStack then return false,'Limite impede devolução automática; admissão preservada.' end
+ s.NPC.Tickets[a.Ticket]=(s.NPC.Tickets[a.Ticket] or 0)+1;a.Status='Refunded'
+ return true,'Teleporte não iniciado; ticket devolvido uma única vez.'
+end
+function R.choose(s,C,id,now)
+ if not C.Classes[id] or C.Classes[id].Legacy then return false,'Classe inicial inválida.' end
+ if s.Class~='' then
+  if s.Class==id or s.NPC.ClassCredits<1 then return false,'Classe já escolhida. Uma troca exige crédito oficial.' end
+  s.NPC.ClassCredits-=1
+ end
+ s.Class=id;s.Identity.CurrentClass=id;s.Identity.Classes[id]=true;history(s,'Classe escolhida: '..id,now)
+ return true,'Classe registrada; habilidades não foram ativadas.'
+end
+function R.evolve(s,C,id,now)
+ local e=C.Advanced[id]
+ if not e or s.Class~=e.Base or not R.rank(s,C,e.Rank) or not R.completed(s,e.Quest) then return false,'Evolução exige classe, rank e missão específicos.' end
+ s.Class=id;s.Identity.CurrentClass=id;s.Identity.Classes[id]=true;history(s,'Evolução de classe: '..id,now);return true,'Evolução de classe registrada.'
+end
+function R.magic(s,C,id)
+ local m=C.Spells[id]
+ if not m or not m.RegistrationEnabled then return false,'Estudo indisponível nesta atualização.' end
+ if s.NPC.Magic[id] or not R.rank(s,C,m.Rank) or not R.completed(s,m.Quest) or s.Gold<m.Price then return false,'Registro existente ou requisitos pendentes.' end
+ s.Gold-=m.Price;s.NPC.Magic[id]=true;return true,'Estudo registrado. Conjuração permanece indisponível.'
+end
+function R.classReceipt(s,receipt)
+ if s.Identity.Receipts[receipt] then return true,'Recibo já registrado.' end
+ local count=0;for _ in s.Identity.Receipts do count+=1 end
+ if count>=1024 or s.NPC.ClassCredits>=1000000 then return false,'Histórico requer manutenção; recibo permanece pendente.' end
+ s.Identity.Receipts[receipt]=true;s.NPC.ClassCredits+=1;return true,'Crédito de troca recebido.'
+end
+function R.inn(s,C,npcId,city,now)
+ if s.Gold<C.InnPrice then return false,'Moedas insuficientes.' end
+ s.Gold-=C.InnPrice;s.NPC.ReturnNPC=npcId;s.NPC.RestAt=now;s.Spawn=city;return true,'Hospedagem registrada; retorno definido nesta estalagem.'
+end
+function R.tutorial(s,_,mode)
+ if mode=='Skip' then s.NPC.Tutorial.Skipped=true
+ elseif mode=='Review' then s.NPC.Tutorial.Skipped=false;s.NPC.Tutorial.Step=0
+ else return false,'Opção inválida.' end
+ return true,'Tutorial atualizado.'
+end
+return R
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="27">
+        <Properties>
+          <string name="Name">ShopConfig</string>
+          <string name="Source"><![CDATA[-- Item ownership reuses the existing profile.Inventory; no Tools or equip actions.
+return {Items={
+ Longsword={Name='Espada longa',Price=120,Sell=48,Kind='Weapon',Rarity='Comum',MinRank='F'},
+ Katana={Name='Katana',Price=140,Sell=56,Kind='Weapon',Rarity='Comum',MinRank='F'},
+ Staff={Name='Cajado',Price=120,Sell=48,Kind='Weapon',Rarity='Comum',MinRank='F'},
+ Bow={Name='Arco',Price=140,Sell=56,Kind='Weapon',Rarity='Comum',MinRank='F'},
+ Armor={Name='Couraça',Price=150,Sell=60,Kind='Armor',Rarity='Incomum',MinRank='F'},
+ Potion={Name='Poção selada',Price=20,Sell=8,Kind='Consumable',Rarity='Comum',MinRank='F',Note='Armazenada; nenhum efeito de consumo nesta etapa.'},
+ Ore={Name='Minério de Durakh',Price=12,Sell=4,Kind='Material',Rarity='Comum',MinRank='F'},
+ TravelRelic={Name='Relíquia da Caravana',Price=250,Sell=80,Kind='Material',Rarity='Rara',MinRank='E',Note='Objeto de coleção; sem efeitos.'}},
+ Shops={Weapons={'Longsword','Katana','Staff','Bow'},Armor={'Armor'},General={'Potion','Ore'},TravelShop={'TravelRelic','Bow','Ore'}},
+ Upgrade={Max=5,GoldPerLevel=30,OrePerLevel=2}}
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+</roblox>

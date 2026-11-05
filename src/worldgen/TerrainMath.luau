@@ -185,7 +185,7 @@ function TerrainMath.baseHeight(c, x, z)
     end
     for _, city in c.Cities do
         local distance = math.sqrt((x-city.X)^2 + (z-city.Z)^2)
-        local blend = smooth((distance-city.Radius)/c.CityBlend)
+        local blend = smooth((distance-city.Radius)/(city.BoundaryBlend or c.CityBlend))
         h = city.Height + (h-city.Height)*blend
     end
     return h
@@ -197,7 +197,7 @@ function TerrainMath.signature(c)
     if c.River then for _,key in {"Z","Meander","Frequency","HalfWidth","BankWidth","WaterY","BedY"} do table.insert(tokens,tostring(c.River[key])) end end
     if c.Lake then for _,key in {'X','Z','Radius','Bank','WaterY','BedY'} do table.insert(tokens,tostring(c.Lake[key])) end end
     if c.Guild then for _,key in {'X','Z','Height'} do table.insert(tokens,tostring(c.Guild[key])) end end
-    for _,city in c.Cities do for _,key in {"Id","X","Z","Radius","Height","Theme"} do table.insert(tokens,tostring(city[key])) end end
+    for _,city in c.Cities do for _,key in {"Id","X","Z","Radius","Height","Theme","BoundaryBlend"} do table.insert(tokens,tostring(city[key])) end end
     for _,forest in c.Forests do for _,key in {"Id","X","Z","Radius","Theme"} do table.insert(tokens,tostring(forest[key])) end end
     for _,road in c.Roads or {} do
         table.insert(tokens,road.Id)
@@ -246,7 +246,7 @@ function TerrainMath.height(c,x,z)
     end
     for _,city in c.Cities do
         local d=math.sqrt((x-city.X)^2+(z-city.Z)^2)
-        local blend=smooth((d-city.Radius)/c.CityBlend)
+        local blend=smooth((d-city.Radius)/(city.BoundaryBlend or c.CityBlend))
         h=city.Height+(h-city.Height)*blend
     end
     if c.Guild then

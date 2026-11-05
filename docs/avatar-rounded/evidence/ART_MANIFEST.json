@@ -1,0 +1,53 @@
+{
+  "art_revision": "rounded-1",
+  "renderer": "Blender 4.3.2, offline",
+  "roblox_studio": false,
+  "models": 80,
+  "preview_count": 14,
+  "files": {
+    "scripts/avatar_geometry.py": {
+      "bytes": 22548,
+      "sha256": "5891a3969dd1c9a327781f5420e9d44049327425246843ad6a5628314192f774"
+    },
+    "scripts/build_avatar_assets.py": {
+      "bytes": 12224,
+      "sha256": "7dab4524c8e01eef40e2c40198bf33902703fb57c8b97cf32dd7d6ada6a4793a"
+    },
+    "build/avatar-rounded-scene.json": {
+      "bytes": 77685007,
+      "sha256": "c1c5ca6652727b55637eef6dac594c28a9c082a2e711a373d526873084daf688"
+    },
+    "assets/avatars-rounded/source/Eldravyn_Dungeons.fbx": {
+      "bytes": 4464668,
+      "sha256": "dcd336c9793531e36a41ec765ac44c900ccb8b5665e30854113bd4ae70bf6ceb"
+    },
+    "assets/avatars-rounded/source/Eldravyn_North.fbx": {
+      "bytes": 5695020,
+      "sha256": "e69e70f4ed7878bd79cf37d86cdc3653f27e37b379cc1597b086f29b5b2452b4"
+    },
+    "assets/avatars-rounded/source/Eldravyn_South.fbx": {
+      "bytes": 5693964,
+      "sha256": "b3ee3b4dc459ca57e63fcb0b96185233aeac115f68c6887e5f83298e5fd240a4"
+    },
+    "assets/avatars-rounded/source/Eldravyn_Valoria.fbx": {
+      "bytes": 7009644,
+      "sha256": "3aeb37e07903b2189c259e8101f80587e70fceb9b4cc749362eba90f1bb6956e"
+    },
+    "docs/avatar-rounded/previews/antes-depois.png": {
+      "bytes": 1860378,
+      "sha256": "aa4c25b11b3fce34e58046fbcaf70b22348411235197bf45db727df481da68c1"
+    },
+    "docs/avatar-rounded/previews/guarda.png": {
+      "bytes": 859492,
+      "sha256": "4759fba32d82f1f992a89fc7f0fec9a1e0c11105e56269a49798b7aabf476890"
+    },
+    "docs/avatar-rounded/previews/inimigos.png": {
+      "bytes": 2666613,
+      "sha256": "df4fed45e03f9b5d12c016554756e74d00e7d713ea101ac8da068460d6e54356"
+    },
+    "docs/avatar-rounded/previews/npcs.png": {
+      "bytes": 1835298,
+      "sha256": "0a66fd893d8dd8a53ff5938dc4468b34478f775da0e35fb025490ba12f3af888"
+    }
+  }
+}

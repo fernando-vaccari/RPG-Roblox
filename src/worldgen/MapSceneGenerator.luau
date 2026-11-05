@@ -88,7 +88,7 @@ function Scene.completeTerrain(config)
     if camera then
         local city=c.Cities[1]
         local focus=Vector3.new(city.X,city.Height+24,city.Z)
-        camera.CFrame=CFrame.lookAt(focus+Vector3.new(100,100,190),focus)
+        camera.CFrame=CFrame.lookAt(focus+Vector3.new(city.Radius*0.95,city.Radius*0.75,city.Radius*1.3),focus)
         camera.Focus=CFrame.new(focus)
     end
     return Scene.validate(c)

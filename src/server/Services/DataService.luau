@@ -11,6 +11,8 @@ local Adventure=require(Shared.Core.AdventureRules)
 local AdventureConfig=require(Shared.Config.AdventureConfig)
 local Expeditions=require(Shared.Core.DungeonRules)
 local DungeonConfig=require(Shared.Config.DungeonConfig)
+local npcStage=workspace:GetAttribute('EldravynNPCStage2')==true
+local function clone(t) return Http:JSONDecode(Http:JSONEncode(t)) end
 Identity.validate(IdentityConfig)
 local function prepare(raw)
     assert(raw==nil or type(raw)=='table','Perfil inválido; defaults não serão gravados')
@@ -18,12 +20,25 @@ local function prepare(raw)
     Identity.restore(state,type(raw)=='table' and raw.Identity or nil,IdentityConfig)
     Adventure.restore(state,type(raw)=='table' and raw.Adventure or nil,AdventureConfig)
     Expeditions.restore(state,type(raw)=='table' and raw.Expedition or nil,DungeonConfig)
+    -- Preserve the NPC extension even when the legacy Place owns the profile.
+    if raw and raw.NPC~=nil then
+        assert(type(raw.NPC)=='table' and raw.NPC.Version==1,'Extensão NPC inválida; preservar perfil')
+        state.NPC=clone(raw.NPC)
+        if table.find(Catalog.Ranks,raw.Rank) then state.Rank=raw.Rank end
+        if IdentityConfig.Advanced[raw.Class] then state.Class=raw.Class end
+        for _,item in Catalog.Items do if item.Class==raw.Class then state.Class=raw.Class end end
+    end
+    if npcStage then
+        local npc=game.ReplicatedStorage:WaitForChild('EldravynNPC')
+        require(npc.Rules).restore(state,raw,require(npc.Registry))
+        -- Buying ownership does not equip armor in the NPC-only stage.
+        state.Armor=if raw and raw.Armor=='Armor' and state.Inventory.Armor then 'Armor' else ''
+    end
     return state
 end
 local studioPreview=game:GetService('RunService'):IsStudio() and workspace:GetAttribute('StudioSessionPreview')==true
 local Data={Sessions={},Persistent=Config.EnableDataStore and not studioPreview}
 local store=if Data.Persistent then DSS:GetDataStore('MedievalRPG_v1') else nil
-local function clone(t) return Http:JSONDecode(Http:JSONEncode(t)) end
 function Data.load(player,reuseToken)
     local previous=Data.Sessions[player]
     if previous and (previous.Saving or previous.Loading) then return false,'Perfil ocupado; aguarde a operação atual.' end
@@ -41,7 +56,7 @@ function Data.load(player,reuseToken)
                 local lock=old.Session
                 if lock and lock.Token~=slot.Token and type(lock.Expires)=='number' and lock.Expires>os.time() then return nil end
                 local profile=prepare(old.Data)
-                if profile.Identity.Race=='' then
+                if profile.Identity.Race=='' and not npcStage then
                     if not candidate then candidate=math.random(1,100) end
                     Identity.assign(profile,IdentityConfig,candidate)
                 end

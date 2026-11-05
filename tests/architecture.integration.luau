@@ -19,6 +19,9 @@ do
    if part:IsA('BasePart')then
     assert(part.Anchored and part.Size.X>0 and part.Size.Y>0 and part.Size.Z>0)
     local p=frame:PointToObjectSpace(part.Position)
+    if part.Name=='TimberRail' or part.Name=='RearRail' then
+     assert(math.abs(p.Z)+part.Size.Z/2>spec.Depth/2+0.6,'Timber must protrude beyond the plaster, avoiding coplanar flicker')
+    end
     if part.CanCollide~=false and math.abs(p.Z+spec.Depth/2)<0.8 and p.Y-part.Size.Y/2<8 and p.Y+part.Size.Y/2>2 then
      assert(math.abs(p.X)-part.Size.X/2>=3.5,lot.Id..' doorway blocked by '..part.Name)
     end

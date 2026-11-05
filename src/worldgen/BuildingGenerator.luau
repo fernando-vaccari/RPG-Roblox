@@ -4,8 +4,92 @@ local Catalog=require(game.ReplicatedStorage.MedievalRPG.Config.ContentConfig)
 local Interiors=require(game.ReplicatedStorage.MedievalRPG.Core.InteriorPlan)
 local B={}
 local function rgb(t)return Color3.fromRGB(table.unpack(t))end
+local function facadeSign(model,frame,spec,kind,index,role,balcony)
+ local text=if kind=='SmallHouse' or kind=='MediumHouse' or kind=='LargeHouse' then Plan.residenceName(index)
+  elseif kind=='Tavern' then 'Taverna • Hospedaria' else Catalog.Labels[kind] or kind
+ -- Mount balcony signs on its outer face, where rails cannot cover the lettering.
+ local sign=G.sign(model,text,frame*CFrame.new(0,12,-spec.Depth/2-(if balcony then 4.5 else 1.1)),math.min(20,spec.Width-2))
+ sign.Name='FacadeSign';sign:SetAttribute('IntegrationRole',role);sign:SetAttribute('BuildingLabel',text)
+ model:SetAttribute('DisplayName',text)
+ local ui=sign:FindFirstChildOfClass('SurfaceGui')
+ ui.LightInfluence=0;ui.MaxDistance=140
+ return sign
+end
+-- Exterior grammar for dense residential wards: sealed gables, pitched tile roofs,
+-- timber frames, front windows and individually named signs, without extra lights.
+local function residence(parent,lot,city,index,spec)
+ local theme=spec.Theme;local w,d,h=spec.Width,spec.Depth,spec.Height
+ local cf=CFrame.new(lot.X,lot.H,lot.Z)*CFrame.Angles(0,lot.Yaw,0)
+ local m=G.model(parent,lot.Id)
+ m:SetAttribute('Template',lot.Kind);m:SetAttribute('ArchitecturalTheme',theme.Id)
+ m:SetAttribute('Variant',spec.Variant);m:SetAttribute('District',spec.District)
+ m:SetAttribute('ExplorableInterior',false);m:SetAttribute('Residential',true)
+ local stone,wood,roof,glass=rgb(theme.Stone),rgb(theme.Wood),rgb(theme.Roof),rgb(theme.Glass)
+ local tint=(spec.Variant-1.5)*5
+ local plaster=Color3.fromRGB(math.clamp(theme.Plaster[1]+tint,0,255),math.clamp(theme.Plaster[2]+tint,0,255),math.clamp(theme.Plaster[3]+tint,0,255))
+ local function p(name,size,x,y,z,color,material,detail,rotation)
+  return (if detail then G.detail else G.part)(m,name,size,cf*CFrame.new(x,y,z)*(rotation or CFrame.new()),color or plaster,material or Enum.Material.Limestone)
+ end
+ p('Foundation',Vector3.new(w+1.6,1.6,d+1.6),0,-0.6,0,stone,Enum.Material.Cobblestone)
+ p('Floor',Vector3.new(w,0.6,d),0,0.3,0,wood,Enum.Material.WoodPlanks)
+ p('Back',Vector3.new(w,h,0.8),0,h/2,d/2)
+ for _,side in {-1,1}do
+  p('SideWall',Vector3.new(0.8,h,d),side*w/2,h/2,0)
+  p('DoorSide',Vector3.new((w-8)/2,h,0.8),side*(w+8)/4,h/2,-d/2)
+  p('DoorJamb',Vector3.new(0.6,10,1.3),side*4.3,5,-d/2,wood,Enum.Material.Wood)
+  for _,z in {-d/2,d/2}do p('TimberCorner',Vector3.new(0.8,h+0.8,0.8),side*w/2,h/2,z,wood,Enum.Material.Wood,true)end
+  p('TimberRail',Vector3.new((w-9)/2,0.6,1),side*(w+9)/4,h-1,-d/2,wood,Enum.Material.Wood,true)
+  p('WindowFrame',Vector3.new(5,6,0.5),side*w*0.32,6.5,-d/2-0.5,wood,Enum.Material.Wood,true)
+  p('WindowGlass',Vector3.new(4,5,0.3),side*w*0.32,6.5,-d/2-0.8,glass,Enum.Material.Glass,true)
+  p('WindowMullion',Vector3.new(0.3,5,0.3),side*w*0.32,6.5,-d/2-1,wood,Enum.Material.Wood,true)
+  p('WindowTransom',Vector3.new(4,0.3,0.3),side*w*0.32,7,-d/2-1,wood,Enum.Material.Wood,true)
+ end
+ p('DoorLintel',Vector3.new(8,h-10,0.8),0,10+(h-10)/2,-d/2)
+ p('RearWindowFrame',Vector3.new(5,6,0.5),0,h*0.55,d/2+0.4,wood,Enum.Material.Wood,true)
+ p('RearWindowGlass',Vector3.new(3.8,4.8,0.3),0,h*0.55,d/2+0.7,glass,Enum.Material.Glass,true)
+ local windowSide=if spec.Variant%2==0 then 1 else -1
+ p('SideWindowFrame',Vector3.new(0.5,6,5),windowSide*(w/2+0.4),h*0.55,0,wood,Enum.Material.Wood,true)
+ p('SideWindowGlass',Vector3.new(0.3,4.8,3.8),windowSide*(w/2+0.7),h*0.55,0,glass,Enum.Material.Glass,true)
+ p('Doorstep',Vector3.new(8,0.5,2.5),0,0.25,-d/2-1.3,stone,Enum.Material.Cobblestone)
+ local rise=spec.Rise+2;local half=w/2+1.5;local slope=math.atan2(rise,half)
+ for _,side in {-1,1}do
+  p('PitchedRoof',Vector3.new(math.sqrt(half*half+rise*rise),0.8,d+4),side*half/2,h+rise/2,0,roof,Enum.Material.Slate,false,CFrame.Angles(0,0,-side*slope))
+  p('Eave',Vector3.new(0.7,0.8,d+4.5),side*half,h,0,wood,Enum.Material.Wood,true)
+  for _,z in {-d/2,d/2}do
+   local g=Instance.new('WedgePart');g.Name='GableInfill';g.Size=Vector3.new(0.8,rise,w/2)
+   g.CFrame=cf*CFrame.new(side*w/4,h+rise/2,z)*CFrame.Angles(0,-side*math.pi/2,0)
+   g.Anchored=true;g.Color=plaster;g.Material=Enum.Material.Limestone
+   g.CanTouch=false;g.CanCollide=false;g.CanQuery=false;g.Parent=m
+  end
+ end
+ p('RidgeCap',Vector3.new(0.8,0.7,d+4.5),0,h+rise,0,roof,Enum.Material.Slate,true)
+ p('Chimney',Vector3.new(2.7,9,3),w*0.27,h+4.5,d*0.22,stone,Enum.Material.Brick)
+ p('ChimneyCap',Vector3.new(3.4,0.7,3.6),w*0.27,h+9,d*0.22,stone,Enum.Material.Slate,true)
+ for _,side in {-1,1}do
+  local brace=G.beam(m,cf:PointToWorldSpace(Vector3.new(side*(w/2-0.7),h-2,-d/2-0.5)),cf:PointToWorldSpace(Vector3.new(side*5,14,-d/2-0.5)),0.55,wood,Enum.Material.Wood)
+  brace.Name='FacadeBrace';brace.CanCollide=false;brace.CanQuery=false;brace.CastShadow=false
+ end
+ if spec.Variant==3 then
+  local x,y,z=-w*0.25,h+rise*0.55,-3
+  p('Dormer',Vector3.new(5,3,4),x,y+1.5,z,plaster,Enum.Material.Limestone,true)
+  for _,side in {-1,1}do
+   p('DormerRoof',Vector3.new(3.5,0.6,5),x+side*1.3,y+3.8,z,roof,Enum.Material.Slate,true,CFrame.Angles(0,0,-side*0.5))
+  end
+  p('DormerGlass',Vector3.new(2.7,2,0.3),x,y+1.5,z-2.2,glass,Enum.Material.Glass,true)
+ end
+ if spec.Variant%2==0 then
+  p('WindowPlanter',Vector3.new(5,1.2,1.8),-w*0.32,3.6,-d/2-1,wood,Enum.Material.WoodPlanks,true)
+  p('PlanterFlowers',Vector3.new(4.6,0.8,1.5),-w*0.32,4.5,-d/2-1,Color3.fromRGB(181,126,143),Enum.Material.Grass,true)
+ else
+  p('UpperWindowFrame',Vector3.new(5,4.5,0.5),0,h-4,-d/2-0.5,wood,Enum.Material.Wood,true)
+  p('UpperWindowGlass',Vector3.new(4,3.5,0.4),0,h-4,-d/2-0.8,glass,Enum.Material.Glass,true)
+ end
+ facadeSign(m,cf,spec,lot.Kind,index,'Citizen')
+ return m,cf:PointToWorldSpace(Vector3.new(0,0,-d/2-8)),'Citizen'
+end
 function B.build(parent,lot,city,index)
  local spec=Plan.build(lot.Kind,city,index,lot)
+ if lot.Residential then return residence(parent,lot,city,index,spec)end
  local kind,theme=lot.Kind,spec.Theme
  local m=G.model(parent,lot.Id)
  m:SetAttribute('Template',kind);m:SetAttribute('ArchitecturalTheme',theme.Id)
@@ -36,8 +120,8 @@ function B.build(parent,lot,city,index)
   end
   if side==1 then for _,y in {4,h-1}do
    -- Split front beams preserve the full doorway; back beams span the rear.
-   for _,x in {-1,1}do part('TimberRail',Vector3.new((w-9)/2,0.55,0.8),x*(w+9)/4,y,-d/2-0.1,wood,Enum.Material.Wood,true)end
-   part('RearRail',Vector3.new(w,0.55,0.8),0,y,d/2+0.1,wood,Enum.Material.Wood,true)
+   for _,x in {-1,1}do part('TimberRail',Vector3.new((w-9)/2,0.55,0.8),x*(w+9)/4,y,-d/2-0.35,wood,Enum.Material.Wood,true)end
+   part('RearRail',Vector3.new(w,0.55,0.8),0,y,d/2+0.35,wood,Enum.Material.Wood,true)
   end end
  end
  part('DoorLintel',Vector3.new(8,h-10,1),0,10+(h-10)/2,-d/2,wood,Enum.Material.Wood)
@@ -154,7 +238,7 @@ function B.build(parent,lot,city,index)
    if not item.Collide then p.CanCollide=false;p.CanQuery=false;p.CastShadow=false end
   end
  end
- local sign=G.sign(m,Catalog.Labels[kind] or kind,cf*CFrame.new(0,12,-d/2-1),math.min(20,w));sign:SetAttribute('IntegrationRole',role)
+ facadeSign(m,cf,spec,kind,index,role,kind=='Tavern' or kind=='LargeHouse' or kind=='GuildHall')
  if spec.Interior then
   part('LanternBracket',Vector3.new(0.4,0.4,2),4.9,8,-d/2-0.7,metal,Enum.Material.Metal,true)
   part('LanternGlow',Vector3.new(0.9,1.4,0.9),4.9,7,-d/2-1.3,glass,Enum.Material.Neon,true)

@@ -1,5 +1,17 @@
 # Continente — progresso da Tarefa 01
 
+## Revisão monumental — 30/10/2026
+
+Pedido atual: cidades, muralhas e florestas gigantes, casas detalhadas e placas nas fachadas, seguindo a referência de anime isekai. Autorizada ampliação além de 4.000 × 4.000 studs. Branch `codex/eldravyn-monumental-20261029`.
+
+Etapas de implementação concluídas em código: geografia ampliada para 6.144 × 6.144; planejamento de 1.054 lotes (334 na capital, 180 em cada outra cidade), preservando os 130 IDs originais; 1.440 árvores LOW; arquitetura com placas e variações, muralhas de 80–104 studs e dois anéis em Valoria. Os novos lotes residenciais não criam NPCs extras no runtime legado. Vilarejo utiliza a mesma gramática de casas e placas.
+
+Revisão concluída no ambiente disponível: corrigidos portões próximos que bloqueavam a estrada de Eldoria, placa da taverna atrás da sacada e madeira coplanar com reboco. Suíte geral passou (81 Luau, 46 fluxos MOCK e sete MAPA); integração de mapa repetida após o último ajuste. Artefato final com 92.702 BaseParts/97.846 instâncias de cenário e 40 Sources conferidos. Imagens offline revisadas; nenhuma validação do Studio/Defender foi feita. [Detalhes e continuidade](docs/MONUMENTAL_MAP.md).
+
+A versão anterior em `delivery-map/task-01/` permanece preservada. Entrega nova somente `.rbxlx`, sem ZIP, em `delivery-map/monumental/`. O histórico abaixo descreve a tarefa anterior e não os totais da revisão monumental.
+
+---
+
 **28/10/2026 — uso da entrega não recomendado:** o usuário confirmou `Trojan:Script/Ulthar.A!ml` também no ZIP do continente, que contém apenas um `.rbxlx`. O registro `webfile` não aponta membro interno. A investigação estática não determinou a causa nem confirmou falso positivo. Arquivos/hashes preservados e links de uso retirados do README da entrega. Detalhes em [docs/MAP_DEFENDER_ALERT.md](docs/MAP_DEFENDER_ALERT.md). Não houve mudança de geometria/código ou novo empacotamento nesta investigação.
 
 Atualização: 27/10/2026. Branch: `codex/eldravyn-map-20261027`. Base preservada: `17b4f8e` (0.6.1 + investigação Defender). Último commit de código desta etapa: `3f7e4fa`; o commit de documentação/artefato da entrega aparece a seguir no log Git.

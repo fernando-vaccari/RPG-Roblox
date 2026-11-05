@@ -1,5 +1,7 @@
 # Progresso
 
+**Etapa vigente: NPCs (30/10/2026).** Implementação na branch `codex/eldravyn-npcs-20261030`: [entrega e instalação](delivery-npcs/stage-02/README.md), [serviços e limites](docs/npc-stage2/README.md), [progresso](PROGRESSO_NPCS.md). Mapa anterior preservado; Studio/Defender reais pendentes. As etapas abaixo são histórico.
+
 > Estado atual: Eldravyn 0.6.1. Consulte [PROGRESSO.md](PROGRESSO.md) e [COMO_JOGAR_NO_STUDIO.md](COMO_JOGAR_NO_STUDIO.md). As seções anteriores são histórico quando divergirem da versão atual.
 
 

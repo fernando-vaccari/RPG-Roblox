@@ -1,0 +1,74 @@
+{
+  "EldravynNPCVisualUpgradeV2/Authoring/NPCRigAdapter": {
+    "class": "ModuleScript",
+    "sha256": "27243757af5431342e10db4c545760bc2516bb6b8dc81c3fe5a0801a2c95de6a"
+  },
+  "EldravynNPCVisualUpgradeV2/Authoring/NPCVisualFactory": {
+    "class": "ModuleScript",
+    "sha256": "62dc8b260c3467b2c8928b0eea700ec6616272313957e6ecd4dec8b389d71894"
+  },
+  "EldravynNPCVisualUpgradeV2/Baselines/AmbientService": {
+    "class": "ModuleScript",
+    "sha256": "0507f645737d093dd4fbdf7604f62ca182854484aaeec34bae7bc52ef4c897d9"
+  },
+  "EldravynNPCVisualUpgradeV2/Baselines/NPCInteractionClient": {
+    "class": "ModuleScript",
+    "sha256": "4ba2f3cb1186dfad483eb7c5a4e3bbf6431642bf9d2e61e6f0a82ea64c1d197e"
+  },
+  "EldravynNPCVisualUpgradeV2/Baselines/NPCService": {
+    "class": "ModuleScript",
+    "sha256": "ee15041e3e60abc41dc661c2ca31562711f81ecec93bdcf6bfdce4f854162fc7"
+  },
+  "EldravynNPCVisualUpgradeV2/NPCVisualUpgrade": {
+    "class": "ModuleScript",
+    "sha256": "9799d70008943c1677fdea22923eef088569d9fc7b8dc3cd5022ca07a65019a6"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Client/NPCAnimationController": {
+    "class": "ModuleScript",
+    "sha256": "1511ba19c12bb3a08e8e5a5cc5a51013738cdfd518f02c2ab1fde2749c9698fc"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Client/NPCAttentionController": {
+    "class": "ModuleScript",
+    "sha256": "dbc1d8f7e86367ebf859fc4bb3ffacbed53cd21bc4542837ca1c99ab3055d59a"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Client/NPCPerformanceManager": {
+    "class": "ModuleScript",
+    "sha256": "cb0367ece4215d018664166e7e242031bd46c0b82931ca008dd4958413562657"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Replacements/AmbientService": {
+    "class": "ModuleScript",
+    "sha256": "e7632518fe8b245de7aed4432222c1a5610912e3b91f168471b0c9ec3b825a8a"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Replacements/NPCInteractionClient": {
+    "class": "LocalScript",
+    "sha256": "ba37f9ada0ef226cf77c1b7a922e3e1f273db73c113aef624734cc45c47d6557"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Replacements/NPCService": {
+    "class": "ModuleScript",
+    "sha256": "627be7cbf5d6de15e2c9d7e9aa802133b23c6c6abe5e88573b012c9338881ab2"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Server/NPCBehaviorController": {
+    "class": "ModuleScript",
+    "sha256": "679927657bb1dd9e44fa7ba3960875234cc8be6c27880983c48e1e2f3754cf3c"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Server/NPCPositionAdapter": {
+    "class": "ModuleScript",
+    "sha256": "d97b8bfb3dba0e4afac8013edc6716428f911139b0b8eea3db515147570e4701"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Shared/NPCAppearanceConfig": {
+    "class": "ModuleScript",
+    "sha256": "4bc6bbde74db4873fa404a97c686f91caf8132a548a8e73e79980261a893f27c"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Shared/NPCMotion": {
+    "class": "ModuleScript",
+    "sha256": "8bb04ddb666b62c45f0754d5103b56a58291409c891cc9db4584517e18394802"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Shared/NPCVisualConfig": {
+    "class": "ModuleScript",
+    "sha256": "d45be673c9b683be2b0f1b5d13e31c7ac366e9c979679f46af394bed0a9df1d8"
+  },
+  "EldravynNPCVisualUpgradeV2/Runtime/Shared/NPCVisualPolicy": {
+    "class": "ModuleScript",
+    "sha256": "9ef030fed65d1a017b64102bf8f9c08452e0ee938ab34fbcc7734df2e0f2a1c4"
+  }
+}

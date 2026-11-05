@@ -1,4 +1,54 @@
-# Próxima tarefa — continente
+# Continuidade vigente — avatares arredondados
+
+Branch `codex/eldravyn-rounded-avatars-20261104`, base `ceea116`. Pedido atual: personagens mais arredondados no estilo Roblox. Leia `PROGRESSO_AVATARES_ARREDONDADOS.md` e `docs/avatar-rounded/README.md`.
+
+Geometria nova em `assets/avatars-rounded/source`, pacote separado em `delivery-npcs/avatar-rounded`. A biblioteca anterior permanece intacta. Use `EldravynRoundedAvatarUpgrade`; o catálogo/FBX identificam `rounded-1` para impedir misturas. Se Avatar anterior estiver aplicado, use o rollback do pacote anterior antes da nova instalação. Não regenerar continente ou modificar gameplay.
+
+Os builders atuais geram a revisão arredondada. Próxima validação externa: importação/publicação dos FBX na conta do dono, materiais/poses/rigs, diálogo/serviços, inimigos, salvar/reabrir/rollback e FPS no Studio/Windows 11. Prévia e FBX roundtrip são Blender offline; não alegar testes Roblox/Defender sem executá-los.
+
+---
+
+# Histórico — Avatar Style
+
+Branch `codex/eldravyn-avatar-style-20261104`, base `9a6564c`. Pedido atual: estilo de avatar Roblox conforme referência e inimigos temáticos; o visual V2 de peças primitivas foi rejeitado. Leia `PROGRESSO_AVATARES.md`, `docs/avatar-style/README.md` e `TESTS.md`.
+
+Foram entregues malhas/UVs/PBR originais de 66 NPCs e 14 inimigos em quatro FBX, integrador com registro e rollback Stage 2/V2 e adaptador visual da IA existente. A integração exige importação/publicação real pelo Studio na conta do dono; não inventar IDs nem ativar fallback visual genérico. A validação em Roblox Studio, física, asset permissions, FPS e Defender permanece pendente. Renders/reimportação Blender não substituem esse teste.
+
+Para reproduzir, use os builders Avatar, preservando os artefatos antigos e o mapa. Não executar `build_npc_stage2.py` nem `build_npc_v2.py` para empacotar esta revisão: o escopo atual permite somente o hook visual em EnemyService além dos novos módulos. Não iniciar combate automaticamente na etapa NPC, reescrever dados/economia ou regenerar o continente.
+
+---
+
+# Histórico — NPC Overhaul V2
+
+Branch `codex/eldravyn-npc-overhaul-v2-20261031`, base `0f21f59`. Leia `PROGRESSO_NPC_V2.md`, `docs/npc-v2/README.md` e `docs/npc-v2/TESTS.md`. O pedido vigente é visual/animação/comportamento dos NPCs existentes; mapa e gameplay permanecem preservados. Não retomar reconstrução, combate ou progressão.
+
+Pacote separado em `delivery-npcs/visual-v2/`. Use `python3 scripts/build_npc_v2.py` para reconstruí-lo; **não execute `build_npc_stage2.py`** para atualizar essa entrega. A suíte geral inclui o V2. O próximo bloqueio de aceitação é validação manual no Roblox Studio Windows 11, especialmente importação, salvar/reabrir/rollback, física das patrulhas, interação multiplayer, aparência contínua e FPS/memória. Os renders são prévias offline da geometria real, não capturas do Studio. Não afirmar validação de engine ou antivírus sem execução real.
+
+---
+
+# Histórico — NPCs, etapa 2
+
+Continue em `codex/eldravyn-npcs-20261030`. Leia `PROGRESSO_NPCS.md` e `docs/npc-stage2/README.md`. Pedido vigente: SOMENTE NPCs; não retomar combate/continente/fusões. A cópia local de 383 MB não foi fornecida. Foram criados instalador `.rbxmx` e Place aditivo com 66 NPCs sobre o monumental de 71 MB; original intacto.
+
+A próxima validação indispensável é abrir uma cópia no Roblox Studio Windows 11: instalação, piso/R15, menus PC/celular, dois jogadores, DataStore real em Experience privada de teste, cura e retorno. Use `docs/npc-stage2/TESTS.md`. Nunca alegar testes do Studio/Defender sem realizá-los; nenhuma compra/teleporte real está ativado. Não sobrescrever entregas anteriores nem publicar no Roblox sem instrução do usuário.
+
+O builder NPC é `python3 scripts/build_npc_stage2.py`; não regenerar continente para alterar NPCs. A suíte `python3 scripts/check.py` inclui regras/integradores antigos e NPCs; dados usam o MESMO `MedievalRPG_v1`, com extensão NPC e sessão exclusiva. Scripts auxiliares ficam fora do `.rbxlx` e do `.rbxmx` (apenas Sources Luau nesses formatos).
+
+---
+
+# Próxima tarefa — revisão monumental de 30/10/2026
+
+Continue em `codex/eldravyn-monumental-20261029`, sem recomeçar o projeto. Leia [docs/MONUMENTAL_MAP.md](docs/MONUMENTAL_MAP.md) e [PROGRESSO_MAPA.md](PROGRESSO_MAPA.md). O usuário autorizou exceder 4.000 studs: a revisão implementada tem 6.144 × 6.144, 1.054 lotes, 1.440 árvores LOW, placas frontais, 28 portões e muralhas de 80–104 studs.
+
+Código e artefato: `delivery-map/monumental/Eldravyn-Monumental.rbxlx`, 92.702 BaseParts; geradores incluídos, Terrain nativo pendente. Execute PrepareStudio uma vez no editor, salve/reabra e teste os portões/escadas/placas/ruas/florestas. Registre aparência, FPS/memória e Output no Windows 11; esse teste real não ocorreu aqui. As quatro imagens são prévias geométricas offline do Blender, não capturas do Studio.
+
+Verificações concluídas: suíte geral, integração de mapa após correções finais, Sources/XML/SHA e renderização offline. Corrigidos conflito de estrada/torre em Eldoria, placa atrás da varanda e madeira coplanar. O mapa anterior permanece byte a byte igual. Use os comandos de reprodução do guia; **não execute package_map.py para sobrescrever task-01**.
+
+O alerta Defender anterior continua indeterminado. Não alegar liberação de antivírus, não desativar a proteção e não produzir variantes para escapar da detecção. Havendo novo bloqueio, encaminhar amostra/hash à Microsoft. Não publicar o jogo ou ativar produtos.
+
+---
+
+# Histórico — continente anterior
 
 **Prioridade atual:** nova detecção do Defender também no ZIP do mapa. Leia docs/MAP_DEFENDER_ALERT.md. Não produzir outro arquivo/formato ou alterar código apenas para mudar a detecção; preservar amostra/hash e encaminhar à Microsoft. Sem veredicto, não recomendar uso do artefato. Nenhum antivírus foi executado no Linux.
 

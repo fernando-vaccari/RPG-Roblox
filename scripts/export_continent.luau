@@ -67,6 +67,16 @@ do
         for _,key in keys do table.insert(parts,quote(key)..':'..json(v[key]))end
         return '{'..table.concat(parts,',')..'}'
     end
-    print('ELDRAVYN_SCENE_JSON:'..json({Scene=node(scene),Lighting=node(game.Lighting),Report=report,
+    -- Review-only surface sampling. This is NOT serialized native Roblox Terrain.
+    local surface={Step=32,OriginX=-config.WorldSize/2,OriginZ=-config.WorldSize/2,Rows={},WaterRows={}}
+    for z=-config.WorldSize/2,config.WorldSize/2,32 do
+        local row,waterRow={},{}
+        for x=-config.WorldSize/2,config.WorldSize/2,32 do
+            local h,water=terrain.column(config,x,z)
+            table.insert(row,h);table.insert(waterRow,water or false)
+        end
+        table.insert(surface.Rows,row);table.insert(surface.WaterRows,waterRow)
+    end
+    print('ELDRAVYN_SCENE_JSON:'..json({Scene=node(scene),Lighting=node(game.Lighting),Report=report,TerrainPreview=surface,
         WorkspaceAttributes=workspace._attrs,StudioExecuted=false,TerrainBaked=false}))
 end

@@ -1,0 +1,34 @@
+{
+  "blender_version": "4.3.2",
+  "roblox_studio": false,
+  "groups": [
+    {
+      "group": "Valoria",
+      "meshes": 360,
+      "triangles": 183356,
+      "bounds_error_max": 6.389617920099511e-06,
+      "uv_and_atlas": true
+    },
+    {
+      "group": "North",
+      "meshes": 300,
+      "triangles": 147520,
+      "bounds_error_max": 5.3977966310014835e-06,
+      "uv_and_atlas": true
+    },
+    {
+      "group": "South",
+      "meshes": 300,
+      "triangles": 147520,
+      "bounds_error_max": 5.3977966310014835e-06,
+      "uv_and_atlas": true
+    },
+    {
+      "group": "Dungeons",
+      "meshes": 202,
+      "triangles": 117938,
+      "bounds_error_max": 5.684481743983838e-06,
+      "uv_and_atlas": true
+    }
+  ]
+}

@@ -26,7 +26,9 @@ function Mock.new(enums,classes)
         return make(V.new(),{cy*cz,-cy*sz,sy,cx*sz+sx*sy*cz,cx*cz-sx*sy*sz,-sx*cy,sx*sz-cx*sy*cz,sx*cz+cx*sy*sz,cx*cy})
     end
     function CF.lookAt(a,b)
-        local d=b-a;return CF.new(a)*CF.Angles(0,math.atan2(-d.X,-d.Z),0)
+        local d=b-a
+        local horizontal=math.sqrt(d.X*d.X+d.Z*d.Z)
+        return CF.new(a)*CF.Angles(0,math.atan2(-d.X,-d.Z),0)*CF.Angles(math.atan2(d.Y,horizontal),0,0)
     end
     cm.__mul=function(a,b)
         local r={}
@@ -88,6 +90,22 @@ function Mock.new(enums,classes)
     function methods:FindFirstChildOfClass(n)for _,c in self._children do if c.ClassName==n then return c end end end
     function methods:FindFirstAncestorOfClass(n)local p=self.Parent;while p do if p:IsA(n)then return p end;p=p.Parent end end
     function methods:IsDescendantOf(p)local n=self.Parent;while n do if n==p then return true end;n=n.Parent end;return false end
+    function methods:Clone()
+        local mapping={}
+        local function copyNode(old)
+            local n=env.Instance.new(old.ClassName);mapping[old]=n
+            for key,value in old._props do if key~='Parent' and not (type(value)=='table' and value.Handlers) then n[key]=value end end
+            for key,value in old._attrs do n:SetAttribute(key,value)end
+            for _,c in old:GetChildren()do copyNode(c).Parent=n end
+            return n
+        end
+        local result=copyNode(self)
+        for old,n in mapping do
+            for key,value in old._props do if mapping[value] and key~='Parent' then n[key]=mapping[value]end end
+            if env.OnClone then env.OnClone(old,n)end
+        end
+        return result
+    end
     function methods:Destroy()for _,c in self:GetChildren()do c:Destroy()end;self.Parent=nil end
     function methods:SetNetworkOwner(_)assert(not self.Anchored,'SetNetworkOwner em Part ancorado')end
     function methods:GetService(n)return self:WaitForChild(n)end
@@ -113,7 +131,7 @@ function Mock.new(enums,classes)
             end end
         end
     end
-    function methods:GetPartBoundsInBox()return if env.OccupiedParts then {self} else {} end
+    function methods:GetPartBoundsInBox()return if env.BoxParts then env.BoxParts elseif env.OccupiedParts then {self} else {} end
     function methods:TakeDamage(amount)
         local before=self.Health;self.Health=math.max(0,self.Health-amount)
         self.HealthChanged:Fire(self.Health)
@@ -188,6 +206,7 @@ function Mock.new(enums,classes)
     env.game=engine('DataModel','game')
     for _,pair in {{'Workspace','Workspace'},{'ReplicatedStorage','ReplicatedStorage'},{'ServerStorage','ServerStorage'},{'ServerScriptService','ServerScriptService'},{'RunService','RunService'},{'HttpService','HttpService'},{'Players','Players'},{'DataStoreService','DataStoreService'},{'Lighting','Lighting'},{'TweenService','TweenService'},{'Debris','Debris'},{'MarketplaceService','MarketplaceService'},{'PathfindingService','PathfindingService'},{'UserInputService','UserInputService'},{'TeleportService','TeleportService'},{'ProximityPromptService','ProximityPromptService'}}do engine(pair[1],pair[2],env.game)end
     env.workspace=env.game.Workspace;engine('Terrain','Terrain',env.workspace)
+    if classes.StarterPlayer then local starter=engine('StarterPlayer','StarterPlayer',env.game);engine('StarterPlayerScripts','StarterPlayerScripts',starter)end
     env.createPlayer=function(id)local p=engine('Player','Player'..id,env.game.Players);p.UserId=id;p.DisplayName='Player'..id;engine('PlayerGui','PlayerGui',p);engine('Backpack','Backpack',p);return p end
     env.Color3={fromRGB=function(r,g,b)return {R=r/255,G=g/255,B=b/255}end,new=function(r,g,b)return {R=r,G=g,B=b}end}
     env.Vector2={new=function(x,y)return V.new(x,y,0)end}

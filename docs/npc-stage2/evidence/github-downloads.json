@@ -1,0 +1,26 @@
+{
+  "commit": "fb9d206d4c977d4039858f6dbee64891fca8f1aa",
+  "verified_by": "HTTPS download + SHA-256",
+  "studio_executed": false,
+  "antivirus_executed": false,
+  "results": [
+    {
+      "file": "Eldravyn-Monumental-NPCs.rbxlx",
+      "url": "https://raw.githubusercontent.com/fernando-vaccari/RPG-Roblox/fb9d206d4c977d4039858f6dbee64891fca8f1aa/delivery-npcs/stage-02/Eldravyn-Monumental-NPCs.rbxlx",
+      "http_status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 74126115,
+      "sha256": "c2e74768a2df09e1e710c4cffdaae3036c81a52ff905f2a91f16fb2c37d99ad6",
+      "matches_local": true
+    },
+    {
+      "file": "Eldravyn-NPCs-Stage2.rbxmx",
+      "url": "https://raw.githubusercontent.com/fernando-vaccari/RPG-Roblox/fb9d206d4c977d4039858f6dbee64891fca8f1aa/delivery-npcs/stage-02/Eldravyn-NPCs-Stage2.rbxmx",
+      "http_status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 120087,
+      "sha256": "7d15f442b3efa605ec974b7d106869d5219ea1c4bd1c42ef639ac29483d5df51",
+      "matches_local": true
+    }
+  ]
+}

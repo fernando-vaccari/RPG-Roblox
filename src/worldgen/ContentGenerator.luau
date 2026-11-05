@@ -33,6 +33,7 @@ function C.enemyMarker(parent,id,pos,kind)
     return G.marker(parent,id,pos,{EnemyId=id,EnemyKind=kind})
 end
 function C.tree(parent,t)
+    if t.Monumental then return Scenery.monumentalTree(parent,t) end
     local cf=CFrame.new(t.X,t.H,t.Z);local scale=t.Scale or 1
     local variant=(t.Variant or 0)%5;local ancient=variant==4
     local dark=t.Forest=='Vespera';local old=t.Forest=='Nocthar'
@@ -79,7 +80,7 @@ function C.cities(root,c,plan,checkpoint)
                 visible=table.clone(lot);visible.Kind=lot.VisualKind
             end
             local _,pos,role=Buildings.build(parent,visible,city.Id,index)
-            if not sceneOnly(root) then
+            if not sceneOnly(root) and not lot.Residential then
                 local npc=C.npc(root.NPCs,lot.Id..'_NPC',pos,role,city.Id)
                 npc:PivotTo(CFrame.lookAt(npc.PrimaryPart.Position,Vector3.new(city.X,npc.PrimaryPart.Position.Y,city.Z)))
             end
@@ -88,7 +89,9 @@ function C.cities(root,c,plan,checkpoint)
         local radius
         for _,config in c.Cities do if config.Id==city.Id then radius=config.Radius-6 end end
         -- Muralha com vãos reservados às rotas. Nada fecha uma estrada.
-        if city.Id=='Arkheim' or city.Id=='Valoria' or city.Id=='Durakh' then
+        if sceneOnly(root) and c.MonumentalMap then
+            require(script.Parent.CityLandmarkGenerator).fortifications(parent,city,c)
+        elseif city.Id=='Arkheim' or city.Id=='Valoria' or city.Id=='Durakh' then
             for i=1,64 do
                 local a=i/64*math.pi*2
                 local x,z=city.X+math.sin(a)*radius,city.Z+math.cos(a)*radius

@@ -3,3 +3,4 @@ build/
 __pycache__/
 *.rbxl
 *.rbxlx
+!delivery-npcs/stage-02/Eldravyn-Monumental-NPCs.rbxlx

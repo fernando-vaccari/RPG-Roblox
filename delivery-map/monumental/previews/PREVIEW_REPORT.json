@@ -1,0 +1,88 @@
+{
+  "source_sha256": "675546e53481225376f17c5a93af3ab3f2d3c62d8a397630bedb0354699d74e2",
+  "rendered_native_parts": 91621,
+  "hidden_parts_skipped": 1081,
+  "polygons": 1167534,
+  "omitted_nonmesh_instances": {
+    "SurfaceGui": 1078,
+    "TextLabel": 1078,
+    "PointLight": 16
+  },
+  "terrain_source": "TerrainMath sampled design heights, not native voxel serialization",
+  "terrain_sample_step": 32,
+  "renderer": "Blender Workbench",
+  "studio_executed": false,
+  "gameplay_or_performance_validated": false,
+  "limitations": [
+    "Studio material/light/atmosphere rendering is not reproduced",
+    "SurfaceGui text uses actual label values but approximate Blender font/fit",
+    "Partial transparency approximated as opaque",
+    "Ball/cylinder surfaces tessellated for preview",
+    "Sampled water omits shoreline cells crossing dry land"
+  ],
+  "views": [
+    "capital",
+    "forest",
+    "continent",
+    "houses"
+  ],
+  "camera_positions_roblox": {
+    "capital": [
+      [
+        1024.8,
+        870.1999999999999,
+        2743.2
+      ],
+      [
+        0,
+        73,
+        1500
+      ],
+      43
+    ],
+    "forest": [
+      [
+        -1039.2,
+        282,
+        2083.6800000000003
+      ],
+      [
+        -1500,
+        95,
+        1500
+      ],
+      40
+    ],
+    "continent": [
+      [
+        5529.6,
+        7372.799999999999,
+        5529.6
+      ],
+      [
+        0,
+        35,
+        0
+      ],
+      43
+    ],
+    "houses": [
+      [
+        46.88377760726665,
+        70.2,
+        1395.181531220532
+      ],
+      [
+        120.76890996839033,
+        56.2,
+        1374.7367955661089
+      ],
+      45
+    ]
+  },
+  "world_width_studs": 6144,
+  "approximated_surfacegui_text_objects": 8,
+  "house_view_model": "Valoria_2",
+  "place_sha256": "4a890a3c9f215bc2ee88691004c797cd6f0f13f85c4df52a231e728606cca461",
+  "reviewed_offline": true
+}
