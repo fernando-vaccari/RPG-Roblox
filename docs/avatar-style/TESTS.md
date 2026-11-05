@@ -18,10 +18,11 @@ Os resultados abaixo foram executados neste ambiente Linux. Não são validaçã
 | Pacote | XML e referências, Sources correspondentes ao repositório, dois LocalScripts desabilitados; leitura/regravação Rojo preserva Sources/classes. Sem IDs de mesh fictícios ou meshes vazios apresentados como personagens prontos. |
 | Preservação de arquivos | 49 Sources protegidos idênticos à V2; exceção documentada é somente o hook em EnemyService. SHA-256 do Place Stage 2 inteiro e do pacote V2 anterior preservados. |
 | Revisão visual | 14 renders de meshes/UV/texturas reais; conferidos formato de avatar, rosto UV sem painel elevado, cabelo, heráldica, personagens e criaturas. Renders offline não validam o resultado no Studio. |
+| Download GitHub | Onze arquivos publicados no commit `a162d29f040428cdc237c08b151918a18682bbf0` baixados por HTTP 200 e comparados byte a byte/SHA-256 com os arquivos locais. |
 
 Os IDs positivos dentro dos testes são **sintéticos de um host falso**, nunca baixados, publicados ou incluídos na entrega. Eles não comprovam existência ou permissão de qualquer asset. O integrador entregue exige os MeshParts e imagens realmente importados no Studio do usuário.
 
-Evidências: [suite geral](evidence/full-check.log), [integração Avatar](evidence/avatar-integration.log), [FBX](evidence/fbx-roundtrip.json), [XML/pacote](evidence/package.log), [manifesto/hash dos arquivos](../../delivery-npcs/avatar-style/MANIFEST.json).
+Evidências: [suite geral](evidence/full-check.log), [integração Avatar](evidence/avatar-integration.log), [FBX](evidence/fbx-roundtrip.json), [XML/pacote](evidence/package.log), [download GitHub](evidence/github-downloads.json), [manifesto/hash dos arquivos](../../delivery-npcs/avatar-style/MANIFEST.json).
 
 ## Reproduzir
 
