@@ -10,10 +10,11 @@ def luau(v):
     if isinstance(v,str):return json.dumps(v,ensure_ascii=False)
     if isinstance(v,list):return '{'+','.join(map(luau,v))+'}'
     return '{'+','.join('['+luau(k)+']='+luau(x) for k,x in v.items())+'}'
-def bundle(body,v2=False):
+def bundle(body,v2=False,avatar=False):
     api=json.loads((ROOT/'.tools/roblox-api.json').read_text())
     classes={c['Name']:{'Super':c['Superclass'],'NotCreatable':'NotCreatable' in c.get('Tags',[]),'Props':{m['Name']:True for m in c['Members'] if m['MemberType'] in ('Property','Callback')},'Events':{m['Name']:True for m in c['Members'] if m['MemberType']=='Event'}} for c in api['Classes']}
     needed={'DataModel','Workspace','ServerStorage','ServerScriptService','ReplicatedStorage','Players','Player','Terrain','RunService','HttpService','DataStoreService','Lighting','TweenService','Debris','MarketplaceService','PathfindingService','UserInputService','TeleportService','ProximityPromptService','PlayerGui','Backpack','StarterPlayer','StarterPlayerScripts','Folder','ModuleScript','Model','Part','SpawnLocation','Camera','Script','LocalScript','StringValue','ObjectValue'}
+    if avatar:needed.update({'MeshPart','SurfaceAppearance','CollectionService'})
     for path in (ROOT/'src').rglob('*.luau'):needed.update(re.findall(r"Instance\.new\(['\"](\w+)['\"]\)",path.read_text()))
     for k in list(needed):
         while k in classes:needed.add(k);k=classes[k]['Super']
@@ -31,6 +32,8 @@ def bundle(body,v2=False):
     mounts=[('src/shared','game.ReplicatedStorage.MedievalRPG'),('src/npc/shared','game.ReplicatedStorage.EldravynNPC'),('src/npc/server','game.ServerScriptService.EldravynNPC'),('src/npc/install','game.ServerStorage.NPCInstall'),('src/npc/client','game.ReplicatedStorage.TestNPCClient')]
     if v2:
         mounts += [('src/npc-v2/shared','game.ReplicatedStorage.EldravynNPCVisualV2'),('src/npc-v2/server','game.ServerScriptService.NPCV2Runtime'),('src/npc-v2/client','game.ReplicatedStorage.TestNPCV2Client'),('src/npc-v2/install','game.ServerStorage.NPCV2Install'),('src/npc-v2/baseline','game.ServerStorage.NPCV2Install.Baselines')]
+    if avatar:
+        mounts += [('src/avatar/install','game.ServerStorage.AvatarPackage'),('src/avatar/shared','game.ServerStorage.AvatarPackage.Shared'),('src/avatar/server','game.ServerStorage.AvatarPackage.EnemyRuntime'),('src/avatar/client','game.ServerStorage.AvatarPackage.Client'),('src/server/Services','game.ServerScriptService.MedievalServer.Services')]
     for base,mount in mounts:
         folder(mount)
         for path in sorted((ROOT/base).rglob('*.luau')):
@@ -40,14 +43,19 @@ def bundle(body,v2=False):
     paths['game.ServerScriptService.EldravynNPC.DataService']=ROOT/'src/server/Services/DataService.luau'
     paths['game.ServerScriptService.EldravynNPC.PurchaseService']=ROOT/'src/server/Services/PurchaseService.luau'
     paths['game.ServerScriptService.EldravynNPC.Placement']=ROOT/'src/npc/install/Placement.luau'
+    if avatar:
+        paths['game.ServerStorage.AvatarPackage.EnemyServiceTemplate']=ROOT/'src/server/Services/EnemyService.luau'
+        paths['game.ServerStorage.AvatarPackage.EnemyRuntime.ProxyRig']=ROOT/'src/npc/install/R15Factory.luau'
+        paths['game.ServerStorage.AvatarPackage.Client.NPCAnimationController']=ROOT/'src/npc-v2/client/NPCAnimationController.luau'
     for expr in paths:
         parent,name=expr.rsplit('.',1);lines.append(f'do local n=Instance.new("ModuleScript");n.Name="{name}";n.Source={luau(paths[expr].read_text())};n.Parent={parent} end')
     for expr,path in paths.items():lines.append(f'loaders[{expr}]=function(script)\n'+path.read_text()+'\nend')
     if v2:
         lines.insert(2,"local Extra=require('../tests/NPCV2Mock');Extra.install(env)")
+    if avatar:lines.insert(3,"local AvatarMock=require('../tests/AvatarMock');AvatarMock.install(env)")
     lines.append(body);return '\n'.join(lines)
-def run(body,name='npc-host',v2=False):
-    path=ROOT/'build'/f'{name}.luau';path.parent.mkdir(exist_ok=True);path.write_text(bundle(body,v2))
+def run(body,name='npc-host',v2=False,avatar=False):
+    path=ROOT/'build'/f'{name}.luau';path.parent.mkdir(exist_ok=True);path.write_text(bundle(body,v2,avatar))
     result=subprocess.run([str(BIN/('luau.exe' if os.name=='nt' else 'luau')),str(path)],cwd=ROOT,capture_output=True,text=True)
     (ROOT/'build'/f'{name}.log').write_text(result.stdout+result.stderr)
     if result.returncode:raise RuntimeError(result.stdout[-4000:]+result.stderr[-4000:])

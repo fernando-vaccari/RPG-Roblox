@@ -1,0 +1,95 @@
+{
+  "version": 3,
+  "NPCs": 66,
+  "EnemyTypes": 14,
+  "mesh_nodes": 1162,
+  "triangles_all_source_models": 596334,
+  "fbx_roundtrip": {
+    "blender_version": "4.3.2",
+    "roblox_studio": false,
+    "groups": [
+      {
+        "group": "Valoria",
+        "meshes": 360,
+        "triangles": 183356,
+        "bounds_error_max": 6.389617920099511e-06,
+        "uv_and_atlas": true
+      },
+      {
+        "group": "North",
+        "meshes": 300,
+        "triangles": 147520,
+        "bounds_error_max": 5.3977966310014835e-06,
+        "uv_and_atlas": true
+      },
+      {
+        "group": "South",
+        "meshes": 300,
+        "triangles": 147520,
+        "bounds_error_max": 5.3977966310014835e-06,
+        "uv_and_atlas": true
+      },
+      {
+        "group": "Dungeons",
+        "meshes": 202,
+        "triangles": 117938,
+        "bounds_error_max": 5.684481743983838e-06,
+        "uv_and_atlas": true
+      }
+    ]
+  },
+  "map_modified": false,
+  "old_place_sha256": "c2e74768a2df09e1e710c4cffdaae3036c81a52ff905f2a91f16fb2c37d99ad6",
+  "previous_v2_package_preserved": true,
+  "protected_sources_unchanged": 49,
+  "existing_gameplay_hook": "src/server/Services/EnemyService.luau",
+  "published_Roblox_assets": false,
+  "published_asset_ids": [],
+  "ready_to_apply_before_Studio_import": false,
+  "studio_executed": false,
+  "fps_measured": false,
+  "antivirus_executed": false,
+  "required_manual_step": "Import the four authored FBX files and textures through Roblox Studio on the owner account; register them before Apply.",
+  "files": [
+    {
+      "path": "delivery-npcs/avatar-style/Eldravyn-Avatar-Integration.rbxmx",
+      "bytes": 181806,
+      "sha256": "beeb1a4c12e90178ba7a1a802341f0d20d22da7f5474690b8722fd47a193579c"
+    },
+    {
+      "path": "assets/avatars/source/Eldravyn_Dungeons.fbx",
+      "bytes": 3269356,
+      "sha256": "75556623cb797a24f3d0a13cbfe223833834df7406b1b9571d9291e1f3cb0cf7"
+    },
+    {
+      "path": "assets/avatars/source/Eldravyn_North.fbx",
+      "bytes": 4047980,
+      "sha256": "0d694f619464bce1da510541b936d2180a797cd95d186780b2593527ad416c95"
+    },
+    {
+      "path": "assets/avatars/source/Eldravyn_South.fbx",
+      "bytes": 4047212,
+      "sha256": "af113bbb38cfb21d09a053c7955a786db19e4eb55d1146cf185eca614c73f3b5"
+    },
+    {
+      "path": "assets/avatars/source/Eldravyn_Valoria.fbx",
+      "bytes": 4892588,
+      "sha256": "3c0539565ebe2202f54a6d0661577ed282d60f37748f563031df407cc3235489"
+    },
+    {
+      "path": "assets/avatars/textures/Eldravyn_Color.png",
+      "bytes": 434842,
+      "sha256": "c4ed2638130deefdd0e757723e549650d5374e890b3893c367a0ed5b9912a636"
+    },
+    {
+      "path": "assets/avatars/textures/Eldravyn_Metalness.png",
+      "bytes": 3705,
+      "sha256": "7978e71a1a91c228283b2ad37fc311e690772121e53eac5a2b2703ee284969e5"
+    },
+    {
+      "path": "assets/avatars/textures/Eldravyn_Roughness.png",
+      "bytes": 5406,
+      "sha256": "7597aac0ee16100d394c870727a90876543f5d2b7e8eb37f000e288a31ffb28a"
+    }
+  ]
+}

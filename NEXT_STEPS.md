@@ -1,4 +1,14 @@
-# Continuidade vigente — NPC Overhaul V2
+# Continuidade vigente — Avatar Style
+
+Branch `codex/eldravyn-avatar-style-20261104`, base `9a6564c`. Pedido atual: estilo de avatar Roblox conforme referência e inimigos temáticos; o visual V2 de peças primitivas foi rejeitado. Leia `PROGRESSO_AVATARES.md`, `docs/avatar-style/README.md` e `TESTS.md`.
+
+Foram entregues malhas/UVs/PBR originais de 66 NPCs e 14 inimigos em quatro FBX, integrador com registro e rollback Stage 2/V2 e adaptador visual da IA existente. A integração exige importação/publicação real pelo Studio na conta do dono; não inventar IDs nem ativar fallback visual genérico. A validação em Roblox Studio, física, asset permissions, FPS e Defender permanece pendente. Renders/reimportação Blender não substituem esse teste.
+
+Para reproduzir, use os builders Avatar, preservando os artefatos antigos e o mapa. Não executar `build_npc_stage2.py` nem `build_npc_v2.py` para empacotar esta revisão: o escopo atual permite somente o hook visual em EnemyService além dos novos módulos. Não iniciar combate automaticamente na etapa NPC, reescrever dados/economia ou regenerar o continente.
+
+---
+
+# Histórico — NPC Overhaul V2
 
 Branch `codex/eldravyn-npc-overhaul-v2-20261031`, base `0f21f59`. Leia `PROGRESSO_NPC_V2.md`, `docs/npc-v2/README.md` e `docs/npc-v2/TESTS.md`. O pedido vigente é visual/animação/comportamento dos NPCs existentes; mapa e gameplay permanecem preservados. Não retomar reconstrução, combate ou progressão.
 

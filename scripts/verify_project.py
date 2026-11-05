@@ -6,7 +6,7 @@ import re
 import hashlib
 import json
 ROOT=Path(__file__).resolve().parents[1]
-expected={p.stem for p in (ROOT/'src').rglob('*.luau') if not {'npc','npc-v2'}.intersection(p.relative_to(ROOT/'src').parts) and not p.name.endswith(('.server.luau','.client.luau'))}
+expected={p.stem for p in (ROOT/'src').rglob('*.luau') if not {'npc','npc-v2','avatar'}.intersection(p.relative_to(ROOT/'src').parts) and not p.name.endswith(('.server.luau','.client.luau'))}
 manifest={'title':'Eldravyn: Rise of Shadows','scenes_baked':False,'prepare_command':'require(game.ServerStorage.MedievalWorldgen.WorldGenerator).PrepareStudio()','studio_tested':False,'places':[]}
 for name in ['ProjectMedievalRPG.rbxlx','ProjectMedievalRPG_Dungeon.rbxlx']:
     root=ET.parse(ROOT/'build'/name).getroot()
@@ -30,6 +30,7 @@ for name in ['ProjectMedievalRPG.rbxlx','ProjectMedievalRPG_Dungeon.rbxlx']:
             target=expression.strip().split('.')[-1]
             if re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*',target):
                 if module=='DataService' and expression.strip() in ('npc.Rules','npc.Registry'):continue # optional opt-in NPC package
+                if module=='EnemyService' and expression.strip()=='avatar.Factory':continue # optional imported avatar library
                 assert target in modules,(module,'dependência não encontrada',target)
                 graph[module].add(target)
     active,done=set(),set()

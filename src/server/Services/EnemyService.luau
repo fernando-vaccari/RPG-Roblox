@@ -32,7 +32,9 @@ local function spawnEnemy(s)
     local kind=s.Marker:GetAttribute('EnemyKind');local def=Catalog.Enemies[kind]
     if not def then return end
     local paint=Color3.fromRGB(table.unpack(def.Color))
-    local model,hum,root=Rig.create(s.Root,def.Name,s.Marker.Position,paint,true,kind)
+    local avatar=game:GetService('ServerStorage'):FindFirstChild('EldravynEnemyAvatarLibrary')
+    local factory=if avatar and avatar:GetAttribute('Ready')==true then require(avatar.Factory)else Rig
+    local model,hum,root=factory.create(s.Root,def.Name,s.Marker.Position,paint,true,kind)
     model:SetAttribute('EnemyKind',kind);model:SetAttribute('HealthMax',def.Health);model:SetAttribute('Health',def.Health)
     local health=def.Health;local heightOffset=3
     if def.Boss then

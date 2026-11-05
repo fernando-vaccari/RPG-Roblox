@@ -1,0 +1,62 @@
+{
+  "original_geometry": true,
+  "catalog_assets_copied": false,
+  "Roblox_asset_publication": false,
+  "renderer": "Blender 4.3.2, offline",
+  "model_count": 80,
+  "preview_count": 14,
+  "files": {
+    "scripts/avatar_geometry.py": {
+      "bytes": 19741,
+      "sha256": "b219bc7554f4fcf355ca9844db7d0bdb09f6c445f1b27e34061dc03fb0cb47f4"
+    },
+    "scripts/build_avatar_assets.py": {
+      "bytes": 11792,
+      "sha256": "b01b05e89287c96ac263d7063515b617d4bc1a31afe783a2b1b2ac09d3a278ab"
+    },
+    "build/avatar-scene.json": {
+      "bytes": 49731749,
+      "sha256": "d5c5f408d2f2a520dd98021ed3eb7a24357f787d4547cd211f8b5f97427df69e"
+    },
+    "assets/avatars/source/Eldravyn_Dungeons.fbx": {
+      "bytes": 3269356,
+      "sha256": "75556623cb797a24f3d0a13cbfe223833834df7406b1b9571d9291e1f3cb0cf7"
+    },
+    "assets/avatars/source/Eldravyn_North.fbx": {
+      "bytes": 4047980,
+      "sha256": "0d694f619464bce1da510541b936d2180a797cd95d186780b2593527ad416c95"
+    },
+    "assets/avatars/source/Eldravyn_South.fbx": {
+      "bytes": 4047212,
+      "sha256": "af113bbb38cfb21d09a053c7955a786db19e4eb55d1146cf185eca614c73f3b5"
+    },
+    "assets/avatars/source/Eldravyn_Valoria.fbx": {
+      "bytes": 4892588,
+      "sha256": "3c0539565ebe2202f54a6d0661577ed282d60f37748f563031df407cc3235489"
+    },
+    "assets/avatars/textures/Eldravyn_Color.png": {
+      "bytes": 434842,
+      "sha256": "c4ed2638130deefdd0e757723e549650d5374e890b3893c367a0ed5b9912a636"
+    },
+    "assets/avatars/textures/Eldravyn_Metalness.png": {
+      "bytes": 3705,
+      "sha256": "7978e71a1a91c228283b2ad37fc311e690772121e53eac5a2b2703ee284969e5"
+    },
+    "assets/avatars/textures/Eldravyn_Roughness.png": {
+      "bytes": 5406,
+      "sha256": "7597aac0ee16100d394c870727a90876543f5d2b7e8eb37f000e288a31ffb28a"
+    },
+    "docs/avatar-style/previews/guarda.png": {
+      "bytes": 870011,
+      "sha256": "df47fb634dcb81071103a23d397e5fabcbde78a5cbfc2ed94d249ab9d4d599e3"
+    },
+    "docs/avatar-style/previews/inimigos.png": {
+      "bytes": 2674103,
+      "sha256": "70c11418e0924713e8ad3e0d328330244eedb510074263e23c75e63c1cff8a8d"
+    },
+    "docs/avatar-style/previews/npcs.png": {
+      "bytes": 1828582,
+      "sha256": "b2650f7f4a38284d586fa0136b7cfbb7333727b206205778568e864660fbf0e6"
+    }
+  }
+}
