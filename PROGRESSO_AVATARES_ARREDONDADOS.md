@@ -9,4 +9,6 @@ Pedido: personagens mais arredondados no estilo de avatar Roblox. Base `ceea116`
 - Verificações aprovadas: cinco testes geométricos, FBX roundtrip, 140 compilações Luau e suíte de regressão; 11 cenários de importação/migração em cada base (Stage 2/V2). XML/Rojo/Sources e preservação dos arquivos anteriores conferidos. Logs em `docs/avatar-rounded/evidence/`. Studio/FPS/Defender continuam indisponíveis.
 - Prévia/comparação da geometria real no Blender em `docs/avatar-rounded/previews`; não são capturas do Studio. Guia e roteiro atualizados.
 
-Continuidade: finalizar registro dos resultados/publicação GitHub, depois validação manual no Studio do dono: importação/publicação dos quatro FBX, registro dos cinco marcadores, Apply, materiais, poses, interação, rollback e FPS. Não regenerar o mapa ou modificar regras do jogo. Não inventar IDs para substituir essa etapa.
+Publicado: código e artefatos no commit `b6d530ca6a973ac156dd60435df2f9e872075324`. Doze downloads GitHub conferidos por HTTP 200, igualdade de bytes e SHA-256; evidência em `docs/avatar-rounded/evidence/github-downloads.json`.
+
+Continuidade: implementação, arquivos e verificações disponíveis concluídos; próxima etapa é validação manual no Studio do dono: importação/publicação dos quatro FBX, registro dos cinco marcadores, Apply, materiais, poses, interação, rollback e FPS. Não regenerar o mapa ou modificar regras do jogo. Não inventar IDs para substituir essa etapa.

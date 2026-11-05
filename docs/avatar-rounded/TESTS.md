@@ -13,7 +13,7 @@ Escopo: arredondar as malhas existentes e distinguir esta revisão no registro/a
 - Hashes dos arquivos da entrega Avatar anterior, incluindo os quatro FBX/PNG/integrador, conferidos pelo builder. Place Stage 2, pacote V2, mapa e fontes protegidas também preservados.
 - Comparação visual anterior/arredondado com iluminação/câmera iguais. Corrigida a franja que penetrava na nova testa cilíndrica e deixava pontas isoladas; peitoral/relevos ajustados para acompanhar a curvatura.
 
-Evidências: [geometria](evidence/geometry.log), [suíte](evidence/full-check.log), [FBX](evidence/fbx-roundtrip.json), [pacote](evidence/package.log), [manifesto](../../delivery-npcs/avatar-rounded/MANIFEST.json).
+Evidências: [geometria](evidence/geometry.log), [suíte](evidence/full-check.log), [FBX](evidence/fbx-roundtrip.json), [pacote](evidence/package.log), [manifesto](../../delivery-npcs/avatar-rounded/MANIFEST.json), [12 downloads GitHub verificados por HTTP 200/bytes/SHA-256](evidence/github-downloads.json).
 
 ## Arquivos alterados
 
